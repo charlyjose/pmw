@@ -1,0 +1,8 @@
+*
+
+# Ignore all and make exceptions
+!app
+!prisma
+!poetry.lock
+!pyproject.toml
+

@@ -1,0 +1,16 @@
+black==22.12.0
+pytest
+pytest-cov
+pytest-mock
+pytest-pep8
+pytest-xdist
+flake8==5.0.4
+mccabe
+mypy==0.942 # https://github.com/samuelcolvin/pydantic/issues/3953
+autopep8
+twine
+build
+bandit
+poetry
+isort
+# pre-commit

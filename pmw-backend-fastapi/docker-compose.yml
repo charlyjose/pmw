@@ -1,0 +1,18 @@
+version: "3"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Enables hot reloading
+        - uvicorn_extras=--reload --use-colors --log-level debug
+    env_file:
+      - ".env"
+    ports:
+      - "8000:80"
+    volumes:
+      # mount the source code as a volume, so we can use hot reloading
+      - "./app:/app/app:ro"
+      - "./prisma:/app/prisma:ro"
