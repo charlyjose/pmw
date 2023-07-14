@@ -1,0 +1,422 @@
+{
+    "_features": [
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {}
+    ],
+    "options": {
+        "filterFromLeafRows": false,
+        "maxLeafRowFilterDepth": 100,
+        "globalFilterFn": "auto",
+        "groupedColumnMode": "reorder",
+        "paginateExpandedRows": true,
+        "enableRowSelection": true,
+        "enableMultiRowSelection": true,
+        "enableSubRowSelection": true,
+        "columnResizeMode": "onEnd",
+        "data": [
+            {
+                "id": "JOB-0",
+                "title": "Junior Software Engineer in Frontend (Contract) - 0",
+                "description": "This is an awesome company. **Do apply!**",
+                "salary": "£30,000",
+                "company": "Awesome Corp",
+                "placement": "hybrid",
+                "location": [
+                    "London",
+                    "Manchester",
+                    "Leeds"
+                ],
+                "label": "feature",
+                "deadline": "2023-07-18",
+                "link": "/student/jobs/0"
+            },
+            {
+                "id": "JOB-1",
+                "title": "Junior Software Engineer in Frontend (Contract) - 1",
+                "description": "This is an awesome company. **Do apply!**",
+                "salary": "£30,000",
+                "company": "Awesome Corp",
+                "placement": "hybrid",
+                "location": [
+                    "London",
+                    "Manchester",
+                    "Leeds"
+                ],
+                "label": "feature",
+                "deadline": "2023-07-18",
+                "link": "/student/jobs/1"
+            },
+            {
+                "id": "JOB-2",
+                "title": "Junior Software Engineer in Frontend (Contract) - 2",
+                "description": "This is an awesome company. **Do apply!**",
+                "salary": "£30,000",
+                "company": "Awesome Corp",
+                "placement": "hybrid",
+                "location": [
+                    "London",
+                    "Manchester",
+                    "Leeds"
+                ],
+                "label": "feature",
+                "deadline": "2023-07-18",
+                "link": "/student/jobs/2"
+            },
+            {
+                "id": "JOB-3",
+                "title": "Junior Software Engineer in Frontend (Contract) - 3",
+                "description": "This is an awesome company. **Do apply!**",
+                "salary": "£30,000",
+                "company": "Awesome Corp",
+                "placement": "hybrid",
+                "location": [
+                    "London",
+                    "Manchester",
+                    "Leeds"
+                ],
+                "label": "feature",
+                "deadline": "2023-07-18",
+                "link": "/student/jobs/3"
+            },
+            {
+                "id": "JOB-4",
+                "title": "Junior Software Engineer in Frontend (Contract) - 4",
+                "description": "This is an awesome company. **Do apply!**",
+                "salary": "£30,000",
+                "company": "Awesome Corp",
+                "placement": "hybrid",
+                "location": [
+                    "London",
+                    "Manchester",
+                    "Leeds"
+                ],
+                "label": "feature",
+                "deadline": "2023-07-18",
+                "link": "/student/jobs/4"
+            },
+            {
+                "id": "JOB-5",
+                "title": "Junior Software Engineer in Frontend (Contract) - 5",
+                "description": "This is an awesome company. **Do apply!**",
+                "salary": "£30,000",
+                "company": "Awesome Corp",
+                "placement": "hybrid",
+                "location": [
+                    "London",
+                    "Manchester",
+                    "Leeds"
+                ],
+                "label": "feature",
+                "deadline": "2023-07-18",
+                "link": "/student/jobs/5"
+            },
+            {
+                "id": "JOB-6",
+                "title": "Junior Software Engineer in Frontend (Contract) - 6",
+                "description": "This is an awesome company. **Do apply!**",
+                "salary": "£30,000",
+                "company": "Awesome Corp",
+                "placement": "hybrid",
+                "location": [
+                    "London",
+                    "Manchester",
+                    "Leeds"
+                ],
+                "label": "feature",
+                "deadline": "2023-07-18",
+                "link": "/student/jobs/6"
+            },
+            {
+                "id": "JOB-7",
+                "title": "Junior Software Engineer in Frontend (Contract) - 7",
+                "description": "This is an awesome company. **Do apply!**",
+                "salary": "£30,000",
+                "company": "Awesome Corp",
+                "placement": "hybrid",
+                "location": [
+                    "London",
+                    "Manchester",
+                    "Leeds"
+                ],
+                "label": "feature",
+                "deadline": "2023-07-18",
+                "link": "/student/jobs/7"
+            },
+            {
+                "id": "JOB-8",
+                "title": "Junior Software Engineer in Frontend (Contract) - 8",
+                "description": "This is an awesome company. **Do apply!**",
+                "salary": "£30,000",
+                "company": "Awesome Corp",
+                "placement": "hybrid",
+                "location": [
+                    "London",
+                    "Manchester",
+                    "Leeds"
+                ],
+                "label": "feature",
+                "deadline": "2023-07-18",
+                "link": "/student/jobs/8"
+            },
+            {
+                "id": "JOB-9",
+                "title": "Junior Software Engineer in Frontend (Contract) - 9",
+                "description": "This is an awesome company. **Do apply!**",
+                "salary": "£30,000",
+                "company": "Awesome Corp",
+                "placement": "hybrid",
+                "location": [
+                    "London",
+                    "Manchester",
+                    "Leeds"
+                ],
+                "label": "feature",
+                "deadline": "2023-07-18",
+                "link": "/student/jobs/9"
+            },
+            {
+                "id": "JOB-10",
+                "title": "Junior Software Engineer in Frontend (Contract) - 10",
+                "description": "This is an awesome company. **Do apply!**",
+                "salary": "£30,000",
+                "company": "Awesome Corp",
+                "placement": "hybrid",
+                "location": [
+                    "London",
+                    "Manchester",
+                    "Leeds"
+                ],
+                "label": "feature",
+                "deadline": "2023-07-18",
+                "link": "/student/jobs/10"
+            },
+            {
+                "id": "JOB-11",
+                "title": "Junior Software Engineer in Frontend (Contract) - 11",
+                "description": "This is an awesome company. **Do apply!**",
+                "salary": "£30,000",
+                "company": "Awesome Corp",
+                "placement": "hybrid",
+                "location": [
+                    "London",
+                    "Manchester",
+                    "Leeds"
+                ],
+                "label": "feature",
+                "deadline": "2023-07-18",
+                "link": "/student/jobs/11"
+            },
+            {
+                "id": "JOB-12",
+                "title": "Junior Software Engineer in Frontend (Contract) - 12",
+                "description": "This is an awesome company. **Do apply!**",
+                "salary": "£30,000",
+                "company": "Awesome Corp",
+                "placement": "hybrid",
+                "location": [
+                    "London",
+                    "Manchester",
+                    "Leeds"
+                ],
+                "label": "feature",
+                "deadline": "2023-07-18",
+                "link": "/student/jobs/12"
+            },
+            {
+                "id": "JOB-13",
+                "title": "Junior Software Engineer in Frontend (Contract) - 13",
+                "description": "This is an awesome company. **Do apply!**",
+                "salary": "£30,000",
+                "company": "Awesome Corp",
+                "placement": "hybrid",
+                "location": [
+                    "London",
+                    "Manchester",
+                    "Leeds"
+                ],
+                "label": "feature",
+                "deadline": "2023-07-18",
+                "link": "/student/jobs/13"
+            },
+            {
+                "id": "JOB-14",
+                "title": "Junior Software Engineer in Frontend (Contract) - 14",
+                "description": "This is an awesome company. **Do apply!**",
+                "salary": "£30,000",
+                "company": "Awesome Corp",
+                "placement": "hybrid",
+                "location": [
+                    "London",
+                    "Manchester",
+                    "Leeds"
+                ],
+                "label": "feature",
+                "deadline": "2023-07-18",
+                "link": "/student/jobs/14"
+            },
+            {
+                "id": "JOB-15",
+                "title": "Junior Software Engineer in Frontend (Contract) - 15",
+                "description": "This is an awesome company. **Do apply!**",
+                "salary": "£30,000",
+                "company": "Awesome Corp",
+                "placement": "hybrid",
+                "location": [
+                    "London",
+                    "Manchester",
+                    "Leeds"
+                ],
+                "label": "feature",
+                "deadline": "2023-07-18",
+                "link": "/student/jobs/15"
+            },
+            {
+                "id": "JOB-16",
+                "title": "Junior Software Engineer in Frontend (Contract) - 16",
+                "description": "This is an awesome company. **Do apply!**",
+                "salary": "£30,000",
+                "company": "Awesome Corp",
+                "placement": "hybrid",
+                "location": [
+                    "London",
+                    "Manchester",
+                    "Leeds"
+                ],
+                "label": "feature",
+                "deadline": "2023-07-18",
+                "link": "/student/jobs/16"
+            },
+            {
+                "id": "JOB-17",
+                "title": "Junior Software Engineer in Frontend (Contract) - 17",
+                "description": "This is an awesome company. **Do apply!**",
+                "salary": "£30,000",
+                "company": "Awesome Corp",
+                "placement": "hybrid",
+                "location": [
+                    "London",
+                    "Manchester",
+                    "Leeds"
+                ],
+                "label": "feature",
+                "deadline": "2023-07-18",
+                "link": "/student/jobs/17"
+            },
+            {
+                "id": "JOB-18",
+                "title": "Junior Software Engineer in Frontend (Contract) - 18",
+                "description": "This is an awesome company. **Do apply!**",
+                "salary": "£30,000",
+                "company": "Awesome Corp",
+                "placement": "hybrid",
+                "location": [
+                    "London",
+                    "Manchester",
+                    "Leeds"
+                ],
+                "label": "feature",
+                "deadline": "2023-07-18",
+                "link": "/student/jobs/18"
+            },
+            {
+                "id": "JOB-19",
+                "title": "Junior Software Engineer in Frontend (Contract) - 19",
+                "description": "This is an awesome company. **Do apply!**",
+                "salary": "£30,000",
+                "company": "Awesome Corp",
+                "placement": "hybrid",
+                "location": [
+                    "London",
+                    "Manchester",
+                    "Leeds"
+                ],
+                "label": "feature",
+                "deadline": "2023-07-18",
+                "link": "/student/jobs/19"
+            }
+        ],
+        "columns": [
+            {
+                "accessorKey": "id",
+                "enableSorting": false,
+                "enableHiding": false
+            },
+            {
+                "accessorKey": "title"
+            },
+            {
+                "accessorKey": "company"
+            },
+            {
+                "accessorKey": "location"
+            },
+            {
+                "accessorKey": "placement"
+            },
+            {
+                "accessorKey": "deadline"
+            }
+        ],
+        "state": {
+            "columnSizing": {},
+            "columnSizingInfo": {
+                "startOffset": null,
+                "startSize": null,
+                "deltaOffset": null,
+                "deltaPercentage": null,
+                "isResizingColumn": false,
+                "columnSizingStart": []
+            },
+            "rowSelection": {},
+            "expanded": {},
+            "grouping": [],
+            "sorting": [],
+            "columnFilters": [],
+            "columnPinning": {
+                "left": [],
+                "right": []
+            },
+            "columnOrder": [],
+            "columnVisibility": {},
+            "pagination": {
+                "pageIndex": 1,
+                "pageSize": 10
+            }
+        }
+    },
+    "initialState": {
+        "columnSizing": {},
+        "columnSizingInfo": {
+            "startOffset": null,
+            "startSize": null,
+            "deltaOffset": null,
+            "deltaPercentage": null,
+            "isResizingColumn": false,
+            "columnSizingStart": []
+        },
+        "rowSelection": {},
+        "expanded": {},
+        "grouping": [],
+        "sorting": [],
+        "columnFilters": [],
+        "columnPinning": {
+            "left": [],
+            "right": []
+        },
+        "columnOrder": [],
+        "columnVisibility": {},
+        "pagination": {
+            "pageIndex": 0,
+            "pageSize": 10
+        }
+    }
+}
