@@ -1,23 +1,27 @@
-from typing import List, Any
+from typing import Union
 
-from fastapi import APIRouter, Depends, Form
+from fastapi import APIRouter, Depends
 from fastapi import status as http_status
-from prisma.models import User
-from typing_extensions import Annotated
 
 import app.pnp_helpers.user as user_pnp_helpers
-from app.api.auth import ValidateUserRole
 from app.api.models import action_status
-from app.api.models.appointment import AppointmentForm, Appointment
-from app.api.models.auth import Role as UserRole
-from app.api.models.response import ResponseModelContent
-from app.api.models.user import CleanedUserData
-from app.prisma import prisma
-from app.utils.auth import pyJWTDecodedUserId
-from app.utils.reponse import createJSONResponse
+from app.api.models.appointment import AppointmentForm, AppointmentInDBBase, CleanedAppointment
 from app.api.models.response import JSONResponseModel
+from app.utils.auth import pyJWTDecodedUserId
+from app.utils.db.appointment import add_new_appointment_to_db, get_all_future_appointments_by_ownerId_from_db
+from app.utils.reponse import createJSONResponse
 
 router = APIRouter()
+
+
+# A helper function to prepare and add a new appointment to the database
+async def add_new_appointment(ownerId: str, appointment: dict) -> Union[dict, None]:
+    try:
+        appointment = AppointmentInDBBase(ownerId=ownerId, **appointment.dict()).dict()
+        appointment = await add_new_appointment_to_db(appointment)
+        return CleanedAppointment(**appointment.dict()).dict()
+    except Exception:
+        return None
 
 
 # Read appointment from submitted json data
@@ -26,67 +30,64 @@ async def read_appointment(appointmentForm: AppointmentForm):
     return appointmentForm
 
 
-# Create a new appointment
-@router.post("/appointments/", summary="Create new appointment", tags=["appointments"])
+# Create new appointment
+@router.post("/appointments", summary="Create new appointment", tags=["appointments"])
 async def create_new_appointment(
     user_id: str = Depends(pyJWTDecodedUserId()), appointmentForm: AppointmentForm = Depends(read_appointment)
 ) -> JSONResponseModel:
     if user_id:
-        # TODO: Add appointment to database
+        # Add appointment to database
+        cleaned_appointment = await add_new_appointment(user_id, appointmentForm)
+        if not cleaned_appointment:
+            json_response = {
+                "status_code": http_status.HTTP_400_BAD_REQUEST,
+                "error": action_status.UNKNOWN_ERROR,
+                "message": "Something went wrong",
+            }
+            return createJSONResponse(**json_response)
 
         # TODO: Send email to the ownwer and invitees (if any)
 
-        appointment = appointmentForm.dict()
         # Format the appointment data (convert date to string) for JSON response
-        appointment["date"] = appointment["date"].strftime("%Y-%m-%d")
+        cleaned_appointment["date"] = cleaned_appointment["date"].strftime("%Y-%m-%d")
 
-        message = "Appointment created"
-        return createJSONResponse(
-            status_code=http_status.HTTP_200_OK,
-            content=ResponseModelContent(error=action_status.NO_ERROR, message=message, data=appointment),
-        )
+        json_response = {
+            "status_code": http_status.HTTP_200_OK,
+            "error": action_status.NO_ERROR,
+            "message": "Appointment created",
+            "data": cleaned_appointment,
+        }
+        return createJSONResponse(**json_response)
 
     # User not found
-    return user_pnp_helpers.no_user_found()
+    return user_pnp_helpers.user_not_found()
 
 
-# Create own appointments
-@router.get("/appointments/me", summary="Get own appointments", tags=["appointments"])
-async def get_all_my_appointments(user_id: str = Depends(pyJWTDecodedUserId())) -> JSONResponseModel:
+# Get own all future appointments
+@router.get("/appointments/me/future", summary="Get own all appointments", tags=["appointments"])
+async def get_all_my_future_appointments(user_id: str = Depends(pyJWTDecodedUserId())) -> JSONResponseModel:
     if user_id:
-        appointment_form = AppointmentForm(
-            agenda="CV Review",
-            mode="Offline",
-            team="CSD",
-            invitees=["test@user.com"],
-            description="Review My CV",
-            date="2021-10-09",
-            time="10:30",
-            duration="30",
-        )
-
-        appointments: List[Appointment] = [
-            Appointment(
-                id="1", appointment_form=appointment_form, confirmed=False, notified_invitees=True, confirmation_status="PENDING"
-            ).dict(),
-            Appointment(
-                id="2", appointment_form=appointment_form, confirmed=True, notified_invitees=True, confirmation_status="CONFIRMED"
-            ).dict(),
-        ]
+        # Get all future appointments from the database
+        appointments = await get_all_future_appointments_by_ownerId_from_db(user_id)
 
         print(appointments)
 
-        all_appointments = {"appointments": []}
+        # Format the appointment data (convert date to string) for JSON response
+        future_appointments = {"appointments": []}
         for appointment in appointments:
-            # Format the appointment data (convert date to string) for JSON response
-            appointment["appointment_form"]["date"] = appointment["appointment_form"]["date"].strftime("%Y-%m-%d")
-            all_appointments["appointments"].append(appointment)
+            cleaned_appointments = CleanedAppointment(**appointment.dict()).dict()
+            cleaned_appointments["date"] = cleaned_appointments["date"].strftime("%Y-%m-%d")
+            print("\n", cleaned_appointments, "\n")
+            future_appointments["appointments"].append(cleaned_appointments)
 
-        message = "Appointment fetched"
-        return createJSONResponse(
-            status_code=http_status.HTTP_200_OK,
-            content=ResponseModelContent(error=action_status.DATA_FETCHED, message=message, data=all_appointments),
-        )
+        # future_appointments = {"appointments": []}
+        json_response = {
+            "status_code": http_status.HTTP_200_OK,
+            "error": action_status.DATA_FETCHED,
+            "message": "Appointment fetched",
+            "data": future_appointments,
+        }
+        return createJSONResponse(**json_response)
 
     # User not found
-    return user_pnp_helpers.no_user_found()
+    return user_pnp_helpers.user_not_found()

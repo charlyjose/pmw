@@ -5,7 +5,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import api
 from app.api.models import action_status
-from app.api.models.response import ResponseModelContent
 from app.dependencies import use_logging
 from app.middleware import LoggingMiddleware
 from app.prisma import prisma
@@ -19,21 +18,20 @@ app = FastAPI()
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     # message = "Invalid input(s)"
-    message = "Invalid input(s)\n {0}".format(exc.errors())
-    return createJSONResponse(
-        status_code=http_status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content=ResponseModelContent(error=action_status.VALIDATION_ERROR, message=message),
-    )
+    json_response = {
+        "status_code": http_status.HTTP_422_UNPROCESSABLE_ENTITY,
+        "error": action_status.VALIDATION_ERROR,
+        "message": "Invalid input(s)\n {0}".format(exc.errors()),
+    }
+    return createJSONResponse(**json_response)
 
 
 # TODO: Need to have a more specific exception handler for JWTError
 # Global HTTP Exception Handler
 @app.exception_handler(PMWHTTPException)
 async def pmw_http_exception_handler(request: Request, exc: PMWHTTPException):
-    message = exc.message
-    return createJSONResponse(
-        status_code=http_status.HTTP_403_FORBIDDEN, content=ResponseModelContent(error=action_status.FORBIDDEN, message=message)
-    )
+    json_response = {"status_code": http_status.HTTP_403_FORBIDDEN, "error": action_status.FORBIDDEN, "message": exc.message}
+    return createJSONResponse(**json_response)
 
 
 origins = ["*"]

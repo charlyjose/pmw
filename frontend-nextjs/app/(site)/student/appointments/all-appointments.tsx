@@ -38,9 +38,11 @@ export function AllAppointments() {
       router.push(UNAUTHORISED_REDIRECTION_LINK);
     }
 
-    const API_URI = "http://localhost:8000";
     const fetchData = async () => {
       setIsLoading(true);
+      var toast_variant = "default";
+      var toast_title = "Appointments";
+      var toast_description = "";
 
       const API_URI = "http://localhost:8000";
       var token = session?.token;
@@ -52,13 +54,21 @@ export function AllAppointments() {
       };
 
       await axios
-        .get(`${API_URI}/api/appointments/me`, config)
+        .get(`${API_URI}/api/appointments/me/future`, config)
         .then((e) => {
-          setAppointments(e.data.data.appointments);
-          const toast_variant = "default";
-          const toast_title = "Appointments";
-          const toast_description =
-            "Successfully fetched all your appointments";
+          console.log("APPOINTMENT:", e.data.data.appointments);
+
+          if (e.data.data?.appointments?.length > 0) {
+            setAppointments(e.data.data.appointments);
+
+            toast_variant = "default";
+            toast_title = "Appointments";
+            toast_description = "Successfully fetched all your appointments";
+          } else {
+            toast_variant = "destructive";
+            toast_title = "Appointments";
+            toast_description = "No appointments found";
+          }
           toast({
             variant: toast_variant,
             title: toast_title,
@@ -66,9 +76,9 @@ export function AllAppointments() {
           });
         })
         .catch((e) => {
-          const toast_variant = "destructive";
-          const toast_title = "Appointments";
-          const toast_description = "Error fetching your appointments";
+          toast_variant = "destructive";
+          toast_title = "Appointments";
+          toast_description = "Error fetching your appointments";
           toast({
             variant: toast_variant,
             title: toast_title,
@@ -78,7 +88,7 @@ export function AllAppointments() {
 
       setTimeout(() => {
         setIsLoading(false);
-        router.push("/student/appointments");
+        // router.push("/student/appointments")
       }, 3000);
     };
 
@@ -102,7 +112,7 @@ export function AllAppointments() {
               <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
                 <Icons.spinner className="mr-2 w-20 h-20 text-lime-600 animate-spin" />
                 <h3 className="mt-4 text-lg font-semibold">
-                  Loading appointments
+                  Fetching your appointments
                 </h3>
               </div>
             </div>
@@ -116,10 +126,7 @@ export function AllAppointments() {
 
 export function AppointmentsDisplay(props) {
   const displayAppointments = (props) => {
-
     const { appointments } = props;
-
-    console.log(appointments);
 
     if (appointments.length > 0) {
       return (
@@ -129,47 +136,37 @@ export function AppointmentsDisplay(props) {
               return (
                 <div className="-mx-2 flex items-start space-x-4 rounded-md p-3 transition-all hover:bg-accent hover:text-accent-foreground">
                   {appointment.confirmed === true ? (
-                    <CheckCircledIcon className="mt-px h-5 w-5" />
+                    <CheckCircledIcon className="mt-px h-6 w-6 text-lime-700" />
                   ) : (
-                    <QuestionMarkCircledIcon className="mt-px h-5 w-5" />
+                    <QuestionMarkCircledIcon className="mt-px h-6 w-6 text-red-700" />
                   )}
                   <div className="space-y-1">
                     <p className="text-sm font-medium leading-none">
-                      {new Date(
-                        appointment.appointment_form.date
-                      ).toDateString()}{" "}
-                      @ {appointment.appointment_form.time}
+                      {new Date(appointment.date).toDateString()} @{" "}
+                      {appointment.time}
                     </p>
                     <p className="text-sm font-medium leading-none">
-                      <Badge>
-                        Duration: {appointment.appointment_form.duration} mins
-                      </Badge>{" "}
-                      <Badge>Mode: {appointment.appointment_form.mode}</Badge>{" "}
-                      <Badge>
-                        Team: {appointment.appointment_form.team.toUpperCase()}
-                      </Badge>{" "}
+                      <Badge>Duration: {appointment.duration} mins</Badge>{" "}
+                      <Badge>Mode: {appointment.mode}</Badge>{" "}
+                      <Badge>Team: {appointment.team.toUpperCase()}</Badge>{" "}
                       {appointment.confirmed === true ? (
                         <Badge variant="secondary">
                           Status:{" "}
-                          {appointment.confirmation_status
-                            .charAt(0)
-                            .toUpperCase() +
-                            appointment.confirmation_status.slice(1)}
+                          {appointment.status.charAt(0).toUpperCase() +
+                            appointment.status.slice(1)}
                         </Badge>
                       ) : (
                         <Badge variant="destructive">
                           Status:{" "}
-                          {appointment.confirmation_status
-                            .charAt(0)
-                            .toUpperCase() +
-                            appointment.confirmation_status.slice(1)}
+                          {appointment.status.charAt(0).toUpperCase() +
+                            appointment.status.slice(1)}
                         </Badge>
                       )}{" "}
                     </p>
-                    {appointment.appointment_form.invitees.length > 0 && (
+                    {appointment.invitees.length > 0 && (
                       <p className="text-sm text-muted-foreground">
                         <span className="font-bold">Invitees: </span>
-                        {appointment.appointment_form.invitees.join(", ")}
+                        {appointment.invitees.join(", ")}
                       </p>
                     )}
                   </div>
@@ -180,12 +177,16 @@ export function AppointmentsDisplay(props) {
         </>
       );
     } else {
-      <div className="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed">
-        <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
-          <CalendarX2 className="mr-2 h-10 w-10 text-lime-600" />
-          <h3 className="mt-4 text-lg font-semibold">No future appointments</h3>
+      return (
+        <div className="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed">
+          <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
+            <CalendarX2 className="mr-2 w-20 h-20 text-lime-600" />
+            <h3 className="mt-4 text-lg font-semibold">
+              No future appointments
+            </h3>
+          </div>
         </div>
-      </div>;
+      );
     }
   };
   return <>{displayAppointments(props)}</>;

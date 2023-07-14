@@ -7,7 +7,7 @@ from prisma.models import User
 
 from app.api.models import action_status
 from app.api.models.auth import SignIn, SignUpForm, SignUpUser
-from app.api.models.response import JSONResponseModel, ResponseModelContent
+from app.api.models.response import JSONResponseModel
 from app.api.models.user import CleanedUserData
 from app.prisma import prisma
 from app.utils.auth import encodeJWT, encryptPassword, validatePassword
@@ -32,23 +32,17 @@ class ValidateUserRole:
 async def create_new_user(newUserData: SignUpUser) -> JSONResponseModel:
     try:
         user = await prisma.user.create(newUserData.dict())
-        user = CleanedUserData(**user.__dict__)
+        user = CleanedUserData(**user.__dict__).dict()
         message = "User created"
-        return createJSONResponse(
-            status_code=http_status.HTTP_201_CREATED,
-            content=ResponseModelContent(error=action_status.NO_ERROR, message=message, data=user.dict()),
-        )
+        return createJSONResponse(status_code=http_status.HTTP_201_CREATED, error=action_status.NO_ERROR, message=message, data=user)
 
     except PrismaErrors.UniqueViolationError:
         message = "Email already exists"
-        return createJSONResponse(
-            status_code=http_status.HTTP_400_BAD_REQUEST, content=ResponseModelContent(error=action_status.DUPLICATE_KEY, message=message)
-        )
+        return createJSONResponse(status_code=http_status.HTTP_400_BAD_REQUEST, error=action_status.DUPLICATE_KEY, message=message)
+
     except Exception:
         message = "Something went wrong"
-        return createJSONResponse(
-            status_code=http_status.HTTP_400_BAD_REQUEST, content=ResponseModelContent(error=action_status.UNKNOWN_ERROR, message=message)
-        )
+        return createJSONResponse(status_code=http_status.HTTP_400_BAD_REQUEST, error=action_status.UNKNOWN_ERROR, message=message)
 
 
 @router.post("/auth/signup", summary="Create new user", tags=["auth"], response_model=JSONResponseModel)
@@ -74,9 +68,7 @@ async def signin(signIn: SignIn) -> JSONResponseModel:
     user = await get_user_by_email(signIn.email)
     if not user:
         message = "Incorrect email or password"
-        return createJSONResponse(
-            status_code=http_status.HTTP_401_UNAUTHORIZED, content=ResponseModelContent(error=action_status.UNAUTHORIZED, message=message)
-        )
+        return createJSONResponse(status_code=http_status.HTTP_401_UNAUTHORIZED, error=action_status.UNAUTHORIZED, message=message)
 
     # TODO: Check if user is active
     # await check_user_is_active(signIn.email)
@@ -88,13 +80,8 @@ async def signin(signIn: SignIn) -> JSONResponseModel:
         token = encodeJWT(sub=user.id)
 
         message = "User signed in"
-        return createJSONResponse(
-            status_code=http_status.HTTP_200_OK,
-            content=ResponseModelContent(error=action_status.NO_ERROR, message=message, data={"token": token}),
-        )
+        return createJSONResponse(status_code=http_status.HTTP_200_OK, error=action_status.NO_ERROR, message=message, data={"token": token})
 
     # Incorrect password
     message = "Incorrect email or password"
-    return createJSONResponse(
-        status_code=http_status.HTTP_401_UNAUTHORIZED, content=ResponseModelContent(error=action_status.UNAUTHORIZED, message=message)
-    )
+    return createJSONResponse(status_code=http_status.HTTP_401_UNAUTHORIZED, error=action_status.UNAUTHORIZED, message=message)

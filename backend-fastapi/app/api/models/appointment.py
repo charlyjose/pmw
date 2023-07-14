@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime
 from enum import Enum
 from typing import List, Optional
 
@@ -27,7 +27,7 @@ class AppointmentStatus(str, Enum):
     CANCELLED = "CANCELLED"
     PENDING = "PENDING"
     STARTED = "STARTED"
-    ENDED = "ENDED"
+    COMPLETED = "COMPLETED"
 
 
 class AppointmentForm(BaseModel):
@@ -36,14 +36,25 @@ class AppointmentForm(BaseModel):
     team: AppointmentTeam
     invitees: Optional[List[str]] = []
     description: str
-    date: date
+    date: datetime
     time: str
     duration: str
 
 
-class Appointment(BaseModel):
-    id: str
-    appointment_form: AppointmentForm
-    confirmed: bool
-    notified_invitees: bool
-    confirmation_status: AppointmentStatus
+class Appointment(AppointmentForm):
+    confirmed: bool = False
+    notified_invitees: bool = False
+    status: AppointmentStatus = AppointmentStatus.PENDING
+
+
+class AppointmentInDBBase(Appointment):
+    ownerId: str
+
+
+class CleanedAppointment(Appointment):
+    """
+    A pydantic model to represent a cleaned appointment:
+    - Removes the ownerId field for security reasons
+    """
+
+    pass

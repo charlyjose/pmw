@@ -8,6 +8,8 @@ WORKDIR /app
 ADD ./app ./app
 ADD ./prisma ./prisma
 
+RUN poetry run prisma generate
+
 EXPOSE 80
 
 # Pull the uvicorn_extra build arg and ave it as an env var.

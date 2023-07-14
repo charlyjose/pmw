@@ -84,16 +84,29 @@ export function CreateAppointment() {
   function onSubmit(data: MeetingFormValues) {
     setIsLoading(true);
 
+    console.log("DATE:", data.date);
     const appointmentData = {
       agenda: data.agenda,
       mode: data.mode,
       team: data.team,
       invitees: data.invitees?.flatMap((invitee) => invitee.value),
       description: data.description,
-      date: data.date.toISOString().split("T")[0],
+      date: data.date,
       time: data.time,
       duration: data.duration,
     };
+
+    // console.log("DATE:", data.date.toUTCString())
+    // const appointmentData = {
+    //   agenda: data.agenda,
+    //   mode: data.mode,
+    //   team: data.team,
+    //   invitees: data.invitees?.flatMap((invitee) => invitee.value),
+    //   description: data.description,
+    //   date: data.date.toUTCString().split("T")[0],
+    //   time: data.time,
+    //   duration: data.duration,
+    // };
 
     const API_URI = "http://localhost:8000";
     var token = session?.token;
@@ -103,6 +116,21 @@ export function CreateAppointment() {
         Authorization: `Bearer ${token}`,
       },
     };
+
+    const toast_variant = "default";
+    const toast_title = "Your appointment details:";
+    const toast_description = (
+      <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+        <code className="text-white">
+          {JSON.stringify(appointmentData, null, 2)}
+        </code>
+      </pre>
+    );
+    toast({
+      variant: toast_variant,
+      title: toast_title,
+      description: toast_description,
+    });
 
     axios
       .post(`${API_URI}/api/appointments`, appointmentData, config)
@@ -175,14 +203,14 @@ export function CreateAppointment() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Mock interview">
+                            <SelectItem value="MOCK_INTERVIEW">
                               Mock interview
                             </SelectItem>
-                            <SelectItem value="CV review">CV review</SelectItem>
-                            <SelectItem value="Career guidance">
+                            <SelectItem value="CV_REVIEW">CV review</SelectItem>
+                            <SelectItem value="CAREER_GUIDANCE">
                               Career guidance
                             </SelectItem>
-                            <SelectItem value="Other">Other</SelectItem>
+                            <SelectItem value="OTHER">Other</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -208,8 +236,8 @@ export function CreateAppointment() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Offline">Offline</SelectItem>
-                            <SelectItem value="Online">Online</SelectItem>
+                            <SelectItem value="OFFLINE">Offline</SelectItem>
+                            <SelectItem value="ONLINE">Online</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -235,8 +263,8 @@ export function CreateAppointment() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="csd">Career Services</SelectItem>
-                            <SelectItem value="tutor">
+                            <SelectItem value="CSD">Career Services</SelectItem>
+                            <SelectItem value="TUTOR">
                               Placement Tutor
                             </SelectItem>
                           </SelectContent>
@@ -412,13 +440,13 @@ export function CreateAppointment() {
                   {isLoading && (
                     <>
                       <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                      Submitting...
+                      Hang on! We are creating your appointment...
                     </>
                   )}
                   {!isLoading && (
                     <>
                       <CheckCircle2Icon className="mr-2 h-4 w-4" />
-                      Submit
+                      Create appointment
                     </>
                   )}
                 </Button>
