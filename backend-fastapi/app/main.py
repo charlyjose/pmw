@@ -9,7 +9,7 @@ from app.dependencies import use_logging
 from app.middleware import LoggingMiddleware
 from app.prisma import prisma
 from app.utils.exceptions import PMWHTTPException
-from app.utils.reponse import createJSONResponse
+from app.utils.reponse import ClientResponse
 
 app = FastAPI()
 
@@ -19,11 +19,11 @@ app = FastAPI()
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     # message = "Invalid input(s)"
     json_response = {
-        "status_code": http_status.HTTP_422_UNPROCESSABLE_ENTITY,
-        "error": action_status.VALIDATION_ERROR,
+        "http_status": http_status.HTTP_422_UNPROCESSABLE_ENTITY,
+        "action_status": action_status.VALIDATION_ERROR,
         "message": "Invalid input(s)\n {0}".format(exc.errors()),
     }
-    return createJSONResponse(**json_response)
+    return ClientResponse(**json_response)()
 
 
 # TODO: Need to have a more specific exception handler for JWTError
@@ -31,7 +31,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 @app.exception_handler(PMWHTTPException)
 async def pmw_http_exception_handler(request: Request, exc: PMWHTTPException):
     json_response = {"status_code": http_status.HTTP_403_FORBIDDEN, "error": action_status.FORBIDDEN, "message": exc.message}
-    return createJSONResponse(**json_response)
+    return ClientResponse(**json_response)()
 
 
 origins = ["*"]

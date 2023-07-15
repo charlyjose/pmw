@@ -1,11 +1,15 @@
 from fastapi import status as http_status
 
 from app.api.models import action_status
-from app.utils.reponse import createJSONResponse
+from app.pnp_helpers.client_response import json_response
+from app.utils.reponse import ClientResponse
 
 
 def user_not_found(
-    message: str = "User not found", status_code: int = http_status.HTTP_204_NO_CONTENT, error: str = action_status.DATA_NOT_FOUND
+    http_status: int = http_status.HTTP_204_NO_CONTENT,
+    action_status: str = action_status.DATA_NOT_FOUND,
+    message: str = "User not found",
+    data: dict = None,
 ):
     """
     Boilerplate JSON response for user not found
@@ -13,4 +17,5 @@ def user_not_found(
 
     # User not found
     message = "User not found"
-    return createJSONResponse(status_code=http_status.HTTP_204_NO_CONTENT, error=action_status.DATA_NOT_FOUND, message=message)
+    response = json_response(http_status, action_status, message, data)
+    return ClientResponse(**response)()

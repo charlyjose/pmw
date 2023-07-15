@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 
 class ResponseModelContent(BaseModel):
-    error: str = None
+    action_status: str = None
     message: str
     data: Optional[Dict[str, Any]] = None
 

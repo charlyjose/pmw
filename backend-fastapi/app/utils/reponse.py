@@ -5,16 +5,34 @@ from fastapi.responses import JSONResponse
 from app.api.models.response import JSONResponseModel, ResponseModelContent
 
 
-# A helper function to create a JSON response
-def createJSONResponse(status_code: int, error: str, message: str, data: Any = None, **kwargs) -> JSONResponseModel:
+class ClientResponse:
     '''
-    A helper function to create a JSON response
+    A helper class to create a JSON response
     :param status_code: HTTP status code
+    :param error: Action status
     :param content: ResponseModelContent
     :param kwargs: Any other arguments
     :return: JSONResponseModel
+
+    Usage:
+    json_response = Response(
+        status_code=http_status.HTTP_200_OK,
+        error=action_status.NO_ERROR,
+        message="Appointment created",
+        data=cleaned_appointment,
+    )
+    return json_response()
+
+    Note: The caller must forehandedly perform any JSON serialising
     '''
 
-    content = ResponseModelContent(error=error, message=message, data=data)
-    response_model = JSONResponseModel(status_code=status_code, content=content, **kwargs)
-    return JSONResponse(**response_model.dict())
+    def __init__(self, http_status: int, action_status: str, message: str, data: Any = None):
+        self.http_status = http_status
+        self.action_status = action_status
+        self.message = message
+        self.data = data
+
+    def __call__(self) -> Any:
+        content = ResponseModelContent(**self.__dict__)
+        response_model = JSONResponseModel(status_code=self.http_status, content=content)
+        return JSONResponse(**response_model.dict())
