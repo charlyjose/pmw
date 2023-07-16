@@ -4,8 +4,6 @@ const PAGE_TYPE = "STUDENT";
 const UNAUTHORISED_REDIRECTION_LINK = "/signin?callbackUrl=/protected/server";
 
 import React from "react";
-import { useEffect } from "react";
-
 import { Provider as StyletronProvider } from "styletron-react";
 import { LightTheme, BaseProvider } from "baseui";
 import { styletron } from "./utilities/styletron";
@@ -25,12 +23,10 @@ export function NewMonthlyReport() {
   const [isUploading, setIsUploading] = React.useState(false);
   const timeoutId = React.useRef<any>();
 
-  useEffect(() => {
-    // Validating client-side session
-    if (!session && session?.user?.role != PAGE_TYPE) {
-      router.push(UNAUTHORISED_REDIRECTION_LINK);
-    }
-  }, []);
+  // Validating client-side session
+  if (!session) {
+    router.push("/signin");
+  }
 
   function reset() {
     setIsUploading(false);

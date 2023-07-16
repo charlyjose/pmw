@@ -15,6 +15,111 @@ from app.utils.reponse import ClientResponse
 router = APIRouter()
 
 
+from pydantic import BaseModel
+from datetime import datetime
+from typing import List
+
+from datetime import date
+from datetime import timedelta
+
+
+class Job(BaseModel):
+    id: str
+    title: str
+    company: str
+    description: str
+    salary: str
+    placement: str
+    location: List[str]
+    label: str
+    deadline: date
+    link: str
+
+@router.get("/jobs", response_model=List[Job])
+async def get_all_jobs():
+
+    print("get_all_jobs()")
+
+    title = "Junior Software Engineer in Frontend (Contract)"
+    company = "Awesome Corp"
+    description = "This is an awesome company. **Do apply!**"
+    salary = "£30,000"
+    placement= "hybrid"
+    location = ["London", "Manchester", "Leeds"]
+    label = "feature"
+    deadline = date.today() + timedelta(days=10)
+
+    print()
+    print(title)
+    print(company)
+    print(description)
+    print(salary)
+    print(placement)
+    print(location)
+    print(label)
+    print(deadline)
+    print()
+
+    # Create jobs
+    jobs: List[Job] = []
+    for i in range(20):
+        job_id = f'JOB-{i}'
+        job_title = f'{title} - {i}'
+        link = f'/student/jobs/{i}'
+        jobs.append(Job(id=job_id, title=job_title, company=company, description=description, salary=salary, placement=placement, location=location, label=label, deadline=deadline, link=link))
+
+    return jobs
+
+
+@router.get("/jobs/next", response_model=List[Job])
+async def get_all_jobs_next():
+
+    print("get_all_jobs_next()")
+
+    title = "Placement JOB"
+    company = "Awesome Corp"
+    description = "This is an awesome company. **Do apply!**"
+    salary = "£30,000"
+    placement= "hybrid"
+    location = ["London", "Manchester", "Leeds"]
+    label = "feature"
+    deadline = date.today() + timedelta(days=10)
+
+    print()
+    print(title)
+    print(company)
+    print(description)
+    print(salary)
+    print(placement)
+    print(location)
+    print(label)
+    print(deadline)
+    print()
+
+    # Create jobs
+    jobs: List[Job] = []
+    for i in range(20):
+        job_id = f'JOB_NEXT-{datetime.now().strftime(" (%M: %S) ")}-{i}'
+        job_title = f'{title} - {i}'
+        link = f'/student/jobs/{i}'
+        jobs.append(Job(id=job_id, title=job_title, company=company, description=description, salary=salary, placement=placement, location=location, label=label, deadline=deadline, link=link))
+
+    return jobs
+
+
+
+
+
+
+
+
+
+
+'''
+
+
+
+
 # A helper function to prepare and add a new appointment to the database
 async def add_new_appointment(ownerId: str, appointment: dict) -> Union[dict, None]:
     try:
@@ -83,3 +188,4 @@ async def get_all_my_future_appointments(user_id: str = Depends(pyJWTDecodedUser
 
     # User not found
     return user_pnp_helpers.user_not_found()
+'''

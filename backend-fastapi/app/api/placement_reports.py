@@ -15,6 +15,55 @@ from app.utils.reponse import ClientResponse
 router = APIRouter()
 
 
+from pydantic import BaseModel
+from datetime import datetime
+from typing import List
+
+class PlacementReport(BaseModel):
+    title: str
+    student_id: str
+    submission_date: datetime
+    file_link: str
+
+@router.get("/student/placement/reports", response_model=List[PlacementReport])
+async def placement_application():
+
+    title = "Placement report title"
+    student_id = "student_id"
+    submission_date = datetime.now()
+    file_link = "https://google.com"
+
+    print()
+    print(title)
+    print(student_id)
+    print(submission_date)
+    print(file_link)
+    print()
+
+    report = PlacementReport(title=title, student_id=student_id, submission_date=submission_date, file_link=file_link)
+    reports = [report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report]
+    return reports
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'''
+
+
+
+
 # A helper function to prepare and add a new appointment to the database
 async def add_new_appointment(ownerId: str, appointment: dict) -> Union[dict, None]:
     try:
@@ -83,3 +132,4 @@ async def get_all_my_future_appointments(user_id: str = Depends(pyJWTDecodedUser
 
     # User not found
     return user_pnp_helpers.user_not_found()
+'''

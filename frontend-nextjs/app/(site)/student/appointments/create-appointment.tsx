@@ -6,6 +6,7 @@ const UNAUTHORISED_REDIRECTION_LINK = "/signin?callbackUrl=/protected/server";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -96,18 +97,6 @@ export function CreateAppointment() {
       duration: data.duration,
     };
 
-    // console.log("DATE:", data.date.toUTCString())
-    // const appointmentData = {
-    //   agenda: data.agenda,
-    //   mode: data.mode,
-    //   team: data.team,
-    //   invitees: data.invitees?.flatMap((invitee) => invitee.value),
-    //   description: data.description,
-    //   date: data.date.toUTCString().split("T")[0],
-    //   time: data.time,
-    //   duration: data.duration,
-    // };
-
     const API_URI = "http://localhost:8000";
     var token = session?.token;
     const config = {
@@ -116,21 +105,6 @@ export function CreateAppointment() {
         Authorization: `Bearer ${token}`,
       },
     };
-
-    const toast_variant = "default";
-    const toast_title = "Your appointment details:";
-    const toast_description = (
-      <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-        <code className="text-white">
-          {JSON.stringify(appointmentData, null, 2)}
-        </code>
-      </pre>
-    );
-    toast({
-      variant: toast_variant,
-      title: toast_title,
-      description: toast_description,
-    });
 
     axios
       .post(`${API_URI}/api/appointments`, appointmentData, config)
@@ -160,6 +134,14 @@ export function CreateAppointment() {
         setTimeout(() => {
           setIsLoading(false);
           router.push("/student/appointments");
+          // const refreshData = () => router.replace("/student/appointments");
+          // const refreshData = () => router.refresh();          
+          // const refreshData = () => router.reload();
+          // Reload page to view upated data
+          // window.location.reload();
+          //
+
+          // refreshData();
         }, 1000);
       })
       .catch(() => {

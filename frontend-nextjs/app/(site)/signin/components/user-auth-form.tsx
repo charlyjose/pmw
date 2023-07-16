@@ -1,31 +1,41 @@
 "use client";
 
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { signIn, useSession } from "next-auth/react";
-
 import { useRouter } from "next/navigation";
 
-import { cn } from "@/lib/utils";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/registry/new-york/ui/form";
 
 import { Icons } from "@/components/icons";
 import { Button } from "@/registry/new-york/ui/button";
 import { Input } from "@/registry/new-york/ui/input";
-import { Label } from "@/registry/new-york/ui/label";
+import { PasswordInput } from "@/components/password-input";
 
 import { toast } from "react-hot-toast";
 import { CheckCircle2Icon } from "lucide-react";
 
-interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
+import { signinFormSchema } from "../utilities/validation";
 
-export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
+type SigninFormValues = z.infer<typeof signinFormSchema>;
+const defaultValues: Partial<SigninFormValues> = {};
+
+export function UserAuthForm() {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const session = useSession();
   const router = useRouter();
-  const [data, setData] = useState({
-    email: "",
-    password: "",
-  });
 
   const getPageRedirection = (role: string) => {
     if (role === undefined) {
@@ -43,8 +53,13 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     }
   });
 
-  async function onSubmit(event: React.SyntheticEvent) {
-    event.preventDefault();
+  const form = useForm<SigninFormValues>({
+    resolver: zodResolver(signinFormSchema),
+    defaultValues,
+    mode: "onChange",
+  });
+
+  async function onSubmit(data: SigninFormValues) {
     setIsLoading(true);
 
     signIn("credentials", { ...data, redirect: false }).then((callback) => {
@@ -63,55 +78,51 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   }
 
   return (
-    <div className={cn("grid gap-6", className)} {...props}>
-      <form onSubmit={onSubmit}>
-        <div className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              placeholder="example@domain.com"
-              type="email"
-              autoCapitalize="none"
-              autoComplete="email"
-              autoCorrect="off"
-              disabled={isLoading}
-              value={data.email}
-              onChange={(e) => setData({ ...data, email: e.target.value })}
-              required
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              placeholder="*********"
-              type="password"
-              autoCapitalize="none"
-              autoComplete="none"
-              autoCorrect="off"
-              disabled={isLoading}
-              value={data.password}
-              onChange={(e) => setData({ ...data, password: e.target.value })}
-            />
-          </div>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input placeholder="example@domain.com" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          <Button disabled={isLoading} type="submit">
-            {isLoading && (
-              <>
-                <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                Signing you in...
-              </>
-            )}
-            {!isLoading && (
-              <>
-                <CheckCircle2Icon className="mr-2 h-4 w-4" />
-                Sign In
-              </>
-            )}
-          </Button>
-        </div>
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <PasswordInput placeholder="**********" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Button disabled={isLoading} type="submit">
+          {isLoading && (
+            <>
+              <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+              Hang on! We are signing you in...
+            </>
+          )}
+          {!isLoading && (
+            <>
+              <CheckCircle2Icon className="mr-2 h-4 w-4" />
+              Sign In
+            </>
+          )}
+        </Button>
       </form>
-    </div>
+    </Form>
   );
 }

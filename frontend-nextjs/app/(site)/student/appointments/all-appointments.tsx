@@ -56,8 +56,6 @@ export function AllAppointments() {
       await axios
         .get(`${API_URI}/api/appointments/me/future`, config)
         .then((e) => {
-          console.log("APPOINTMENT:", e.data.data.appointments);
-
           if (e.data.data?.appointments?.length > 0) {
             setAppointments(e.data.data.appointments);
 

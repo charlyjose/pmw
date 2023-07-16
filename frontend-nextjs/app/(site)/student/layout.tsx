@@ -35,10 +35,6 @@ const sidebarNavItems = [
     title: "Appointments",
     href: "/student/appointments",
   },
-  // {
-  //   title: "Tasks",
-  //   href: "/student/tasks",
-  // },
 ];
 
 interface SettingsLayoutProps {
@@ -53,16 +49,9 @@ export default async function SettingsLayout({
   children,
 }: SettingsLayoutProps) {
   const session = await getServerSession(authOptions);
-  // console.log("SESSION: ", session);
-  // console.log("SESSION_ROLE: ", session?.user?.role);
 
-  // SESSION CHECK
-  // User not Logged In
-  if (!session) {
-    redirect(UNAUTHORISED_REDIRECTION_LINK);
-  }
-  // Unauthorised routes
-  if (session?.user?.role != PAGE_TYPE) {
+  // Validating client-side session
+  if (!session && session?.user?.role != PAGE_TYPE) {
     redirect(UNAUTHORISED_REDIRECTION_LINK);
   }
 
@@ -91,7 +80,12 @@ export default async function SettingsLayout({
             </div>
 
             <div className="ml-auto flex items-center space-x-4">
-              <span className="text-bold  font-light text-sm">Hi, <span className="font-extrabold text-black">{session.user.firstName}</span></span>
+              <span className="text-bold  font-light text-sm">
+                Hi,{" "}
+                <span className="font-extrabold text-black">
+                  {session.user.firstName}
+                </span>
+              </span>
               <UserNav user={session.user} />
             </div>
           </div>

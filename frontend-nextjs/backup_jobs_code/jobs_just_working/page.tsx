@@ -1,7 +1,7 @@
 import { Separator } from "@/registry/new-york/ui/separator";
-import { App } from "./jobs-list";
+import { JobsList } from "./jobs-list";
 
-export default function Jobs() {
+export default function MonthlyReportsPage() {
   return (
     <div className="space-y-6">
       <div>
@@ -11,7 +11,7 @@ export default function Jobs() {
         </p>
       </div>
       <Separator />
-      <App />
+      <JobsList />
     </div>
   );
 }

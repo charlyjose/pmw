@@ -1,5 +1,5 @@
 import { Separator } from "@/registry/new-york/ui/separator";
-import { App } from "./jobs-list";
+import { Table } from "./table";
 
 export default function Jobs() {
   return (
@@ -11,7 +11,7 @@ export default function Jobs() {
         </p>
       </div>
       <Separator />
-      <App />
+      <Table />
     </div>
   );
 }

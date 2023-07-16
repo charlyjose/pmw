@@ -38,8 +38,7 @@ export const authOptions = {
                     }
                     return axios.get(`${API_URI}/api/users/me`, config)
                 }).catch((err) => {
-                    console.log("ERROR: ", err.response.data)
-                    throw new Error(err.response.data)
+                    throw new Error(err.response.data.message)
                 });
 
                 user = await res.data.data

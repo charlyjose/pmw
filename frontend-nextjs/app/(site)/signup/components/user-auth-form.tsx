@@ -71,18 +71,16 @@ export function UserAuthForm() {
     setIsLoading(true);
 
     const formData = new FormData();
-    formData.append("first_name", data.first_name);
-    formData.append("last_name", data.last_name);
+    formData.append("firstName", data.firstName);
+    formData.append("lastName", data.lastName);
     formData.append("role", data.role);
     formData.append("department", data.department);
     formData.append("email", data.email);
     formData.append("password", data.password);
 
-    // console.log(formData);
-
-    // const API_URI = "http://localhost:8000";
+    const API_URI = "http://localhost:8000";
     axios
-      .post(`/api/register`, data)
+      .post(`${API_URI}/api/auth/signup`, data)
       .then((e) => {
         setTimeout(() => {
           setIsLoading(false);
@@ -92,9 +90,12 @@ export function UserAuthForm() {
       })
       .catch((e) => {
         console.log(e.response.data);
-        toast.error(e.response.data.message);
-        setIsLoading(false);
+        toast.error(e.response.data.action_status);
       });
+
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 3000);
   }
 
   return (
@@ -104,7 +105,7 @@ export function UserAuthForm() {
           <div className="grid gap-1">
             <FormField
               control={form.control}
-              name="first_name"
+              name="firstName"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>First Name</FormLabel>
@@ -119,7 +120,7 @@ export function UserAuthForm() {
           <div className="grid gap-1">
             <FormField
               control={form.control}
-              name="last_name"
+              name="lastName"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Last Name</FormLabel>
@@ -146,9 +147,9 @@ export function UserAuthForm() {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="student">Student</SelectItem>
-                  <SelectItem value="tutor">Placement Tutor</SelectItem>
-                  <SelectItem value="csd">Career Services</SelectItem>
+                  <SelectItem value="STUDENT">Student</SelectItem>
+                  <SelectItem value="TUTOR">Placement Tutor</SelectItem>
+                  <SelectItem value="CSD">Career Services</SelectItem>
                 </SelectContent>
               </Select>
               <FormDescription>
@@ -172,12 +173,12 @@ export function UserAuthForm() {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="scms">
+                  <SelectItem value="SCMS">
                     School of Computing and Mathematical Sciences
                   </SelectItem>
-                  <SelectItem value="me">Mechanical Engineering</SelectItem>
-                  <SelectItem value="ae">Aeronautical Engineering</SelectItem>
-                  <SelectItem value="csd">Career Services</SelectItem>
+                  <SelectItem value="ME">Mechanical Engineering</SelectItem>
+                  <SelectItem value="AE">Aeronautical Engineering</SelectItem>
+                  <SelectItem value="CSD">Career Services</SelectItem>
                 </SelectContent>
               </Select>
               <FormDescription>

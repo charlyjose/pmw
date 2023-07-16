@@ -53,7 +53,7 @@ export default function LocationSearch() {
     <>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <div className="col-span-2">
-          <Card>
+          <Card className="border-none">
             <CardHeader className="space-y-1">
               <CardTitle>Location Search</CardTitle>
               <CardDescription>Search your placement location</CardDescription>
