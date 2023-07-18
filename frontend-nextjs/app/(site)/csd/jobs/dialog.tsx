@@ -79,7 +79,7 @@ export function DialogDemo({ job }) {
                 <span className="px-1 bg-purple-300 mr-2"></span>
                 DEADLINE
               </div>
-              <div className="text-sm font-normal">{job.deadline}</div>
+              <div className="text-sm font-normal">{new Date(job.deadline).toDateString()}</div>
             </div>
           ) : (
             <div></div>

@@ -75,7 +75,7 @@ export function DialogDemo({ job }) {
                 <span className="px-1 bg-lime-300 mr-2"></span>
                 DEADLINE
               </div>
-              <div className="text-sm font-normal">{job.deadline}</div>
+              <div className="text-sm font-normal">{new Date(job.deadline).toDateString()}</div>
             </div>
           ) : (
             <div></div>
@@ -103,8 +103,7 @@ export function DialogDemo({ job }) {
               </div>
               <div className="text-sm font-normal">
                 <span>
-                  {job.mode.charAt(0).toUpperCase() +
-                    job.mode.slice(1)}
+                  {job.mode.charAt(0).toUpperCase() + job.mode.slice(1)}
                 </span>
               </div>
             </div>
@@ -112,14 +111,18 @@ export function DialogDemo({ job }) {
             <div></div>
           )}
 
-          <div className="text-right text-xs font-medium hover:underline">
-            <Button className="hover:bg-lime-300 hover:text-black">
-              <ArrowUpRight className="mr-0 h-4 w-4" />
-              <Link href={job.link} className="">
-                Apply
-              </Link>
-            </Button>
-          </div>
+          {job.link ? (
+            <div className="text-right text-xs font-medium hover:underline">
+              <Button className="hover:bg-lime-300 hover:text-black">
+                <ArrowUpRight className="mr-0 h-4 w-4" />
+                <Link href={job.link} className="">
+                  Apply
+                </Link>
+              </Button>
+            </div>
+          ) : (
+            <></>
+          )}
         </div>
       </DialogContent>
     </Dialog>

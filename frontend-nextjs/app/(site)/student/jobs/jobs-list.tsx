@@ -14,17 +14,11 @@ import {
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-// import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-
-// import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { ExternalLink } from "lucide-react";
-import Link from "next/link";
 
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -43,30 +37,50 @@ export async function App() {
   );
 }
 
-async function fetchProjects(page = 0) {
+async function fetchJobs(page = 1, token) {
+  const config = {
+    headers: {
+      "Content-Type": `application/json`,
+      Authorization: `Bearer ${token}`,
+    },
+  };
+
   const API_URI = "http://localhost:8000";
-  const { data } = await axios.get(`${API_URI}/api/jobs/page/${page}`);
-  console.log("DATA: ", data);
+  const { data } = await (
+    await axios.get(`${API_URI}/api/jobs?page=${page + 1}`, config)
+  ).data;
+
   return data;
 }
 
 function Jobs() {
+  const { data: session } = useSession();
+  const router = useRouter();
+
   const queryClient = useQueryClient();
   const [page, setPage] = React.useState(0);
+  const [token, setToken] = React.useState(session?.token);
 
   const { status, data, error, isFetching, isPreviousData } = useQuery({
-    queryKey: ["projects", page],
-    queryFn: () => fetchProjects(page),
+    queryKey: ["jobs", page, token],
+    queryFn: () => fetchJobs(page, token),
     keepPreviousData: true,
     staleTime: 5000,
   });
 
   // Prefetch the next page!
   React.useEffect(() => {
+    // Validating client-side session
+    if (!session && session?.user?.role != PAGE_TYPE) {
+      router.push(UNAUTHORISED_REDIRECTION_LINK);
+    }
+
+    setToken(session?.token);
+
     if (!isPreviousData && data?.hasMore) {
       queryClient.prefetchQuery({
-        queryKey: ["projects", page + 1],
-        queryFn: () => fetchProjects(page + 1),
+        queryKey: ["jobs", page + 1],
+        queryFn: () => fetchJobs(page + 1, token),
       });
     }
   }, [data, isPreviousData, page, queryClient]);
@@ -91,31 +105,24 @@ function Jobs() {
                 <TableHead className="font-medium">Mode</TableHead>
                 <TableHead className="font-medium">Location</TableHead>
                 <TableHead className="font-medium">Deadline</TableHead>
-                {/* <TableHead className="font-medium">View</TableHead> */}
-
-                {/* <TableHead className="text-right">Amount</TableHead> */}
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.projects.map((project) => (
-                <TableRow key={project.id}>
-                  <TableCell className="font-medium">{project.role}</TableCell>
+              {data.jobs.map((job) => (
+                <TableRow key={job.id}>
+                  <TableCell className="font-medium">{job.role}</TableCell>
+                  <TableCell className="font-light">{job.company}</TableCell>
+                  <TableCell className="font-light">{job.salary}</TableCell>
+                  <TableCell className="font-medium">{job.mode}</TableCell>
                   <TableCell className="font-light">
-                    {project.company}
+                    {job.location.join(", ")}
                   </TableCell>
-                  <TableCell className="font-light">{project.salary}</TableCell>
-                  <TableCell className="font-medium">{project.mode}</TableCell>
-                  <TableCell className="font-light">
-                    {/* {project.location} */}
-                    {/* {project.location.length > 0 && ( */}
-                    {project.location.join(", ")}
-                    {/* )} */}
-                  </TableCell>
+
                   <TableCell className="font-medium">
-                    {project.deadline}
+                    {new Date(job.deadline).toDateString()}
                   </TableCell>
                   <TableCell className="font-light">
-                    <DialogDemo job={project} />
+                    <DialogDemo job={job} />
                   </TableCell>
                 </TableRow>
               ))}
@@ -124,40 +131,9 @@ function Jobs() {
         </div>
       )}
 
-      {/* 
-      <div className="grid grid-cols-3 gap-4">
-        <div className="grid gap-1"></div>
-        <div className="grid gap-1">
-          <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-            Current Page: {page + 1}
-          </div>
-        </div>
-        <div className="grid gap-1">
-          <Button
-            variant="outline"
-            onClick={() => setPage((old) => Math.max(old - 1, 0))}
-            disabled={page === 0}
-          >
-            Previous Page
-          </Button>{" "}
-          <Button
-            variant="outline"
-            onClick={() => {
-              setPage((old) => (data?.hasMore ? old + 1 : old));
-            }}
-            disabled={isPreviousData || !data?.hasMore}
-          >
-            Next Page
-          </Button>
-        </div>
-      </div>
- */}
-
       <div className="flex items-center justify-between px-2">
         <div className="flex-1 text-sm text-muted-foreground">
-          {/* {table.getFilteredSelectedRowModel().rows.length} of{" "}
-        {table.getFilteredRowModel().rows.length} row(s) selected. */}
-          Page: {page + 1}
+          Page {page + 1}
         </div>
         <div className="flex items-center space-x-6 lg:space-x-8">
           <div className="flex items-center space-x-2"></div>

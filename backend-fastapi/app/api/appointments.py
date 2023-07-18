@@ -36,6 +36,7 @@ async def read_appointment(appointmentForm: AppointmentForm):
 async def create_new_appointment(
     user_id: str = Depends(pyJWTDecodedUserId()), appointmentForm: AppointmentForm = Depends(read_appointment)
 ) -> JSONResponseModel:
+    print(appointmentForm)
     if user_id:
         # Add appointment to database
         cleaned_appointment = await add_new_appointment(user_id, appointmentForm)
@@ -83,3 +84,5 @@ async def get_all_my_future_appointments(user_id: str = Depends(pyJWTDecodedUser
 
     # User not found
     return user_pnp_helpers.user_not_found()
+
+

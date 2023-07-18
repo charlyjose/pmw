@@ -85,7 +85,6 @@ export function CreateAppointment() {
   function onSubmit(data: MeetingFormValues) {
     setIsLoading(true);
 
-    console.log("DATE:", data.date);
     const appointmentData = {
       agenda: data.agenda,
       mode: data.mode,
@@ -105,6 +104,10 @@ export function CreateAppointment() {
         Authorization: `Bearer ${token}`,
       },
     };
+
+    console.log(appointmentData)
+    console.log(config)
+
 
     axios
       .post(`${API_URI}/api/appointments`, appointmentData, config)
@@ -134,14 +137,6 @@ export function CreateAppointment() {
         setTimeout(() => {
           setIsLoading(false);
           router.push("/student/appointments");
-          // const refreshData = () => router.replace("/student/appointments");
-          // const refreshData = () => router.refresh();          
-          // const refreshData = () => router.reload();
-          // Reload page to view upated data
-          // window.location.reload();
-          //
-
-          // refreshData();
         }, 1000);
       })
       .catch(() => {

@@ -164,51 +164,52 @@ export function AppointmentsDisplay(props) {
 
     if (appointments.length > 0) {
       return (
-        <ScrollArea className="rounded-md h-96 p-2">
-          {appointments.map((appointment) => {
-            return (
-              <div className="grid grid-cols-12 gap-4 pb-5 rounded-md p-3 transition-all hover:bg-accent hover:text-accent-foreground">
-                <div className="col-span-1">
+        <>
+          <ScrollArea className="rounded-md h-96 p-2">
+            {appointments.map((appointment) => {
+              return (
+                <div className="-mx-2 flex items-start space-x-4 rounded-md p-3 transition-all hover:bg-accent hover:text-accent-foreground">
                   {appointment.confirmed === true ? (
                     <CheckCircledIcon className="mt-px h-6 w-6 text-lime-700" />
                   ) : (
                     <QuestionMarkCircledIcon className="mt-px h-6 w-6 text-red-700" />
                   )}
-                </div>
-                <div className="col-span-11">
-                  <div className="grid grid-cols-1 gap-4">
-                    <p className="text-2xl font-bold leading-none">
+                  <div className="space-y-1">
+                    <p className="text-xl font-medium leading-none">
                       {new Date(appointment.date).toDateString()} @{" "}
                       {appointment.time}
                     </p>
-                  </div>
-                  <div className="grid grid-cols-5 gap-4 pt-2">
-                    <div className="col-span-4">
-                      <p className="text-sm font-medium leading-none">
-                        <Badge>Duration: {appointment.duration} mins</Badge>{" "}
-                        <Badge>Mode: {appointment.mode}</Badge>{" "}
-                        <Badge>Team: {appointment.team.toUpperCase()}</Badge>{" "}
-                        {appointment.confirmed === true ? (
-                          <Badge variant="secondary">
-                            Status:{" "}
-                            {appointment.status.charAt(0).toUpperCase() +
-                              appointment.status.slice(1)}
-                          </Badge>
-                        ) : (
-                          <Badge variant="destructive">
-                            Status:{" "}
-                            {appointment.status.charAt(0).toUpperCase() +
-                              appointment.status.slice(1)}
-                          </Badge>
-                        )}{" "}
+                    <p className="text-sm font-medium leading-none">
+                      <Badge>Duration: {appointment.duration} mins</Badge>{" "}
+                      <Badge>Mode: {appointment.mode}</Badge>{" "}
+                      <Badge>Team: {appointment.team.toUpperCase()}</Badge>{" "}
+                      {appointment.confirmed === true ? (
+                        <Badge variant="secondary">
+                          Status:{" "}
+                          {appointment.status.charAt(0).toUpperCase() +
+                            appointment.status.slice(1)}
+                        </Badge>
+                      ) : (
+                        <Badge variant="destructive">
+                          Status:{" "}
+                          {appointment.status.charAt(0).toUpperCase() +
+                            appointment.status.slice(1)}
+                        </Badge>
+                      )}{" "}
+                    </p>
+                    {appointment.invitees.length > 0 && (
+                      <p className="text-sm text-muted-foreground">
+                        <span className="font-bold">Invitees: </span>
+                        {appointment.invitees.join(", ")}
                       </p>
-                    </div>
-                    <div className="col-span-1">
+                    )}
+
+                    <>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="link">
                             <span className="sr-only">Actions</span>
-                            RESPOND
+                            Take Action
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -226,82 +227,68 @@ export function AppointmentsDisplay(props) {
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                    </div>
-                  </div>
-                  {appointment.invitees.length > 0 && (
-                    <>
-                      <div className="grid grid-cols-1 gap-4">
-                        <span className="text-md font-medium">INVITEES: </span>
-                      </div>
-                      <div className="grid grid-cols-1 gap-4">
-                        <div className="col-span-1">
-                          <span className="text-sm font-medium">
-                            {appointment.invitees.join(", ")}
-                          </span>
-                        </div>
-                        <div className="col-span-4"></div>
-                      </div>
+                      <AlertDialog open={open} onOpenChange={setIsOpen}>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              We will notify the organisers
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <Button
+                              variant="default"
+                              onClick={() => {
+                                setIsOpen(false);
+                                toast({
+                                  title: "Notified the organisers",
+                                });
+                              }}
+                            >
+                              Respond Yes
+                            </Button>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                      <AlertDialog
+                        open={showDeleteDialog}
+                        onOpenChange={setShowDeleteDialog}
+                      >
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              Are you sure sure?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <Button
+                              variant="destructive"
+                              onClick={() => {
+                                setShowDeleteDialog(false);
+                                toast({
+                                  title: "Notified the organisers",
+                                });
+                              }}
+                            >
+                              Respond No
+                            </Button>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </>
-                  )}
-
-                  <AlertDialog open={open} onOpenChange={setIsOpen}>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          We will notify the organisers
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <Button
-                          variant="default"
-                          onClick={() => {
-                            setIsOpen(false);
-                            toast({
-                              title: "Notified the organisers",
-                            });
-                          }}
-                        >
-                          Respond Yes
-                        </Button>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                  <AlertDialog
-                    open={showDeleteDialog}
-                    onOpenChange={setShowDeleteDialog}
-                  >
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <Button
-                          variant="destructive"
-                          onClick={() => {
-                            setShowDeleteDialog(false);
-                            toast({
-                              title: "Notified the organisers",
-                            });
-                          }}
-                        >
-                          Respond No
-                        </Button>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </ScrollArea>
+              );
+            })}
+          </ScrollArea>
+        </>
       );
     } else {
       return (

@@ -30,7 +30,7 @@ class GetUserData:
 
 # Get all users data: Admin only
 @router.get("/users/", summary="Get all users data. Admin previlages required", tags=["users"])
-async def get_all_user_data(user_id=Depends(pyJWTDecodedUserId())):
+async def get_all_user_data(user_id: str = Depends(pyJWTDecodedUserId())):
     if user_id:
         # validate user is ADMIN
         roles = [UserRole.ADMIN]
@@ -61,7 +61,7 @@ async def get_all_user_data(user_id=Depends(pyJWTDecodedUserId())):
 
 # Get own data
 @router.get("/users/me", summary="Get own user data", tags=["users"])
-async def get_own_user_data(user_id=Depends(pyJWTDecodedUserId())):
+async def get_own_user_data(user_id: str = Depends(pyJWTDecodedUserId())):
     if user_id:
         user = await GetUserData(user_id)()
         user = CleanedUserData(**user.__dict__) if user else None
@@ -75,3 +75,33 @@ async def get_own_user_data(user_id=Depends(pyJWTDecodedUserId())):
 
     # User not found
     return user_pnp_helpers.user_not_found()
+
+
+# Check if a user with the given email exists
+class CheckUserEmail:
+    def __init__(self, email: str):
+        self.email = email
+
+    # Check if user exists in database
+    async def __call__(self) -> bool:
+        user = await user_db.get_user_by_email(self.email)
+        if user:
+            return True
+        return False
+
+
+# Get user data by email
+@router.get("/users/email/exists", summary="Check user email exists", tags=["users"])
+async def chech_user_email_exists(email: str):
+    user_email_exists = await CheckUserEmail(email)()
+
+    if user_email_exists:
+        message = "User email exists"
+        data = {"exists": True}
+        response = json_response(http_status=http_status.HTTP_200_OK, action_status=action_status.NO_ERROR, message=message, data=data)
+        return ClientResponse(**response)()
+    else:
+        message = "User email does not exist"
+        data = {"exists": False}
+        response = json_response(http_status=http_status.HTTP_200_OK, action_status=action_status.NO_ERROR, message=message, data=data)
+        return ClientResponse(**response)()
