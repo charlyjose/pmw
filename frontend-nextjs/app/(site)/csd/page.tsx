@@ -1,20 +1,22 @@
 import { Separator } from "@/registry/new-york/ui/separator";
-import { App } from "./jobs-list";
+import { DashboardPage } from "./dashboard";
 
-export default function Jobs() {
+export default function SettingsProfilePage() {
   return (
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium">
-          <span className="px-1 bg-lime-300 mr-2 "></span>
-          Jobs
+          <span className="px-1 bg-purple-300 mr-2 "></span>
+          Home
         </h3>
         <p className="text-sm text-muted-foreground">
-          Here you can view all the curated jobs from career service.
+          Your personal dashboard
         </p>
       </div>
       <Separator />
-      <App />
+      <div className="p-2">
+        <DashboardPage />
+      </div>
     </div>
   );
 }

@@ -2,9 +2,9 @@ from fastapi import APIRouter
 
 from app.api.appointments import router as appointmentsRouter
 from app.api.auth import router as authRouter
-from app.api.users import router as usersRouter
-from app.api.placement_reports import router as placementReportsRouter
 from app.api.jobs import router as jobsRouter
+from app.api.placement_reports import router as placementReportsRouter
+from app.api.users import router as usersRouter
 
 api = APIRouter()
 api.include_router(authRouter)

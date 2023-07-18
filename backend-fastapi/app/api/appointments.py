@@ -5,7 +5,7 @@ from fastapi import status as http_status
 
 import app.pnp_helpers.user as user_pnp_helpers
 from app.api.models import action_status
-from app.api.models.appointment import AppointmentForm, AppointmentInDBBase, CleanedAppointment
+from app.api.models.appointment import AppointmentForm, AppointmentInDB, CleanedAppointment
 from app.api.models.response import JSONResponseModel
 from app.pnp_helpers.client_response import json_response
 from app.utils.auth import pyJWTDecodedUserId
@@ -15,10 +15,10 @@ from app.utils.reponse import ClientResponse
 router = APIRouter()
 
 
-# A helper function to prepare and add a new appointment to the database
-async def add_new_appointment(ownerId: str, appointment: dict) -> Union[dict, None]:
+# A helper function to prepare and add a new appointment to the database and return the cleaned appointment
+async def add_new_appointment(ownerId: str, appointment: dict) -> Union[CleanedAppointment, None]:
     try:
-        appointment = AppointmentInDBBase(ownerId=ownerId, **appointment.dict()).dict()
+        appointment = AppointmentInDB(ownerId=ownerId, **appointment.dict()).dict()
         appointment = await appointment_db.add_new_appointment_to_db(appointment)
         return CleanedAppointment(**appointment.dict()).dict()
     except Exception:

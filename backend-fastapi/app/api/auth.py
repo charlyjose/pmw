@@ -1,3 +1,5 @@
+from typing import List
+
 import prisma.errors as PrismaErrors
 from fastapi import APIRouter
 from fastapi import status as http_status
@@ -16,12 +18,12 @@ router = APIRouter()
 
 # Validate user role
 class ValidateUserRole:
-    def __init__(self, user_id: str, role: str):
+    def __init__(self, user_id: str, roles: List[str]):
         self.user_id = user_id
-        self.role = role
+        self.roles = roles
 
     async def __call__(self) -> bool:
-        user = await user_db.check_user_role(self.user_id, self.role)
+        user = await user_db.check_user_role(self.user_id, self.roles)
         if user:
             return True
         return False

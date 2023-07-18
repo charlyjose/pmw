@@ -1,12 +1,11 @@
 "use client";
 
-const PAGE_TYPE = "STUDENT";
+const PAGE_TYPE = "CSD";
 const UNAUTHORISED_REDIRECTION_LINK = "/signin?callbackUrl=/protected/server";
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { redirect } from "next/navigation";
 
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -42,12 +41,14 @@ import { Calendar } from "@/registry/new-york/ui/calendar";
 import { Textarea } from "@/registry/new-york/ui/textarea";
 import { Separator } from "@/registry/new-york/ui/separator";
 import { Input } from "@/registry/new-york/ui/input";
+
 import { Icons } from "@/components/icons";
+import { CalendarIcon } from "lucide-react";
+import { CheckCircle2Icon } from "lucide-react";
+
 import { toast } from "@/registry/new-york/ui/use-toast";
 import { toast as hotToast } from "react-hot-toast";
 
-import { CalendarIcon } from "lucide-react";
-import { CheckCircle2Icon } from "lucide-react";
 
 import { meetingFormSchema } from "./utilities/validation";
 
@@ -85,7 +86,6 @@ export function CreateAppointment() {
   function onSubmit(data: MeetingFormValues) {
     setIsLoading(true);
 
-    console.log("DATE:", data.date);
     const appointmentData = {
       agenda: data.agenda,
       mode: data.mode,
@@ -133,15 +133,7 @@ export function CreateAppointment() {
 
         setTimeout(() => {
           setIsLoading(false);
-          router.push("/student/appointments");
-          // const refreshData = () => router.replace("/student/appointments");
-          // const refreshData = () => router.refresh();          
-          // const refreshData = () => router.reload();
-          // Reload page to view upated data
-          // window.location.reload();
-          //
-
-          // refreshData();
+          router.push("/csd/appointments");
         }, 1000);
       })
       .catch(() => {
@@ -158,7 +150,7 @@ export function CreateAppointment() {
       <Card>
         <CardHeader>
           <CardTitle>
-            <span className="px-1 bg-lime-300 mr-2 "></span>
+            <span className="px-1 bg-purple-300 mr-2 "></span>
             Create an appointment
             <Separator className="my-2" />
           </CardTitle>
@@ -249,6 +241,7 @@ export function CreateAppointment() {
                             <SelectItem value="TUTOR">
                               Placement Tutor
                             </SelectItem>
+                            <SelectItem value="STUDENT">Student</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />

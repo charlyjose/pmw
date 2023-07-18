@@ -1,23 +1,11 @@
-from typing import Union
+from datetime import datetime
+from typing import List
 
-from fastapi import APIRouter, Depends
-from fastapi import status as http_status
-
-import app.pnp_helpers.user as user_pnp_helpers
-from app.api.models import action_status
-from app.api.models.appointment import AppointmentForm, AppointmentInDBBase, CleanedAppointment
-from app.api.models.response import JSONResponseModel
-from app.pnp_helpers.client_response import json_response
-from app.utils.auth import pyJWTDecodedUserId
-from app.utils.db import appointment as appointment_db
-from app.utils.reponse import ClientResponse
+from fastapi import APIRouter
+from pydantic import BaseModel
 
 router = APIRouter()
 
-
-from pydantic import BaseModel
-from datetime import datetime
-from typing import List
 
 class PlacementReport(BaseModel):
     title: str
@@ -25,9 +13,9 @@ class PlacementReport(BaseModel):
     submission_date: datetime
     file_link: str
 
+
 @router.get("/student/placement/reports", response_model=List[PlacementReport])
 async def placement_application():
-
     title = "Placement report title"
     student_id = "student_id"
     submission_date = datetime.now()
@@ -41,22 +29,53 @@ async def placement_application():
     print()
 
     report = PlacementReport(title=title, student_id=student_id, submission_date=submission_date, file_link=file_link)
-    reports = [report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report, report]
+    reports = [
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+        report,
+    ]
     return reports
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 '''
@@ -67,7 +86,7 @@ async def placement_application():
 # A helper function to prepare and add a new appointment to the database
 async def add_new_appointment(ownerId: str, appointment: dict) -> Union[dict, None]:
     try:
-        appointment = AppointmentInDBBase(ownerId=ownerId, **appointment.dict()).dict()
+        appointment = AppointmentInDB(ownerId=ownerId, **appointment.dict()).dict()
         appointment = await appointment_db.add_new_appointment_to_db(appointment)
         return CleanedAppointment(**appointment.dict()).dict()
     except Exception:

@@ -11,10 +11,14 @@ import {
 
 import { ArrowUpRight } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import { ExternalLink } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-import { Badge } from "antd";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/registry/new-york/ui/tooltip";
 
 import Link from "next/link";
 
@@ -52,7 +56,7 @@ export function DialogDemo({ job }) {
         <DialogFooter></DialogFooter>
 
         <div className="text-left text-lg font-bold">
-          <span className="px-1 bg-lime-300 mr-2 "></span>
+          <span className="px-1 bg-purple-300 mr-2 "></span>
           More Details
           <Separator className="my-1" />
         </div>
@@ -60,7 +64,7 @@ export function DialogDemo({ job }) {
           {job.salary ? (
             <div className="grid gap-1">
               <div className="text-xs font-light">
-                <span className="px-1 bg-lime-300 mr-2"></span>
+                <span className="px-1 bg-purple-300 mr-2"></span>
                 SALARY
               </div>
               <div className="text-sm font-normal">{job.salary}</div>
@@ -72,7 +76,7 @@ export function DialogDemo({ job }) {
           {job.deadline ? (
             <div className="grid gap-1">
               <div className="text-xs font-light">
-                <span className="px-1 bg-lime-300 mr-2"></span>
+                <span className="px-1 bg-purple-300 mr-2"></span>
                 DEADLINE
               </div>
               <div className="text-sm font-normal">{job.deadline}</div>
@@ -84,7 +88,7 @@ export function DialogDemo({ job }) {
           {job.location ? (
             <div className="grid gap-1">
               <div className="text-xs font-light">
-                <span className="px-1 bg-lime-300 mr-2"></span>
+                <span className="px-1 bg-purple-300 mr-2"></span>
                 LOCATIONS
               </div>
               <div className="text-sm font-normal">
@@ -98,13 +102,12 @@ export function DialogDemo({ job }) {
           {job.mode ? (
             <div className="grid gap-1">
               <div className="text-xs font-light">
-                <span className="px-1 bg-lime-300 mr-2"></span>
+                <span className="px-1 bg-purple-300 mr-2"></span>
                 WORKING MODE
               </div>
               <div className="text-sm font-normal">
                 <span>
-                  {job.mode.charAt(0).toUpperCase() +
-                    job.mode.slice(1)}
+                  {job.mode.charAt(0).toUpperCase() + job.mode.slice(1)}
                 </span>
               </div>
             </div>
@@ -112,14 +115,31 @@ export function DialogDemo({ job }) {
             <div></div>
           )}
 
-          <div className="text-right text-xs font-medium hover:underline">
-            <Button className="hover:bg-lime-300 hover:text-black">
-              <ArrowUpRight className="mr-0 h-4 w-4" />
-              <Link href={job.link} className="">
-                Apply
-              </Link>
-            </Button>
-          </div>
+          {job.link ? (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="text-right text-xs font-medium hover:underline">
+                    <Button
+                      className="hover:bg-purple-300 hover:text-black"
+                      disabled
+                    >
+                      <ArrowUpRight className="mr-0 h-4 w-4" />
+                      <Link href={job.link} className="">
+                        Apply
+                      </Link>
+                    </Button>
+                  </div>
+                </TooltipTrigger>
+
+                <TooltipContent>
+                  <p>This feature is only available for students</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : (
+            <></>
+          )}
         </div>
       </DialogContent>
     </Dialog>

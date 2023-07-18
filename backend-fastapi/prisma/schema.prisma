@@ -39,6 +39,7 @@ model User {
 
   // accounts    Account[]
   Appointment Appointment[]
+  Job         Job[]
 }
 
 enum AppointmentAgenda {
@@ -86,6 +87,28 @@ model Appointment {
 
   // TODO: Invitee email should be a user email from the user model
   // TODO: Schema change for notification status for individual invitees
+}
+
+enum JobMode {
+  REMOTE
+  HYBRID
+  OFFICE
+}
+
+model Job {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  ownerId     String   @db.ObjectId
+  owner       User     @relation(fields: [ownerId], references: [id])
+  role        String
+  company     String
+  description String
+  salary      Int
+  mode        JobMode
+  location    String[]
+  deadline    DateTime
+  link        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 // model Account {

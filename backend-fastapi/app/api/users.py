@@ -33,8 +33,8 @@ class GetUserData:
 async def get_all_user_data(user_id=Depends(pyJWTDecodedUserId())):
     if user_id:
         # validate user is ADMIN
-        role = UserRole.ADMIN
-        valid_user_role = await ValidateUserRole(user_id, role)()
+        roles = [UserRole.ADMIN]
+        valid_user_role = await ValidateUserRole(user_id, roles)()
         if valid_user_role:
             users = await user_db.get_all_users()
             user_list = {"users": []}

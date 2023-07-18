@@ -20,6 +20,7 @@ class AppointmentMode(str, Enum):
 class AppointmentTeam(str, Enum):
     CSD = "CSD"
     TUTOR = "TUTOR"
+    STUDENT = "STUDENT"
 
 
 class AppointmentStatus(str, Enum):
@@ -47,7 +48,7 @@ class Appointment(AppointmentForm):
     status: AppointmentStatus = AppointmentStatus.PENDING
 
 
-class AppointmentInDBBase(Appointment):
+class AppointmentInDB(Appointment):
     ownerId: str
 
 
