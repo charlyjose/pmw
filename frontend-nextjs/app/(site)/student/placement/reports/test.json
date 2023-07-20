@@ -1,0 +1,34 @@
+{
+  "data": {},
+  "status": 200,
+  "statusText": "OK",
+  "headers": {
+    "content-length": "20949",
+    "content-type": "application/octet-stream",
+    "last-modified": "Thu, 20 Jul 2023 04:47:29 GMT"
+  },
+  "config": {
+    "transitional": {
+      "silentJSONParsing": true,
+      "forcedJSONParsing": true,
+      "clarifyTimeoutError": false
+    },
+    "adapter": ["xhr", "http"],
+    "transformRequest": [null],
+    "transformResponse": [null],
+    "timeout": 0,
+    "xsrfCookieName": "XSRF-TOKEN",
+    "xsrfHeaderName": "X-XSRF-TOKEN",
+    "maxContentLength": -1,
+    "maxBodyLength": -1,
+    "env": {},
+    "headers": {
+      "Accept": "application/json",
+      "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2NGIxZTliZmRiOTQ3N2ZkNzA3NTdiZTgiLCJleHAiOjE2ODk5MDY0MTcsImlhdCI6MTY4OTgyMDAxNywibmJmIjoxNjg5ODIwMDE3LCJpc3MiOiJwbXctYmFja2VuZC1mYXN0YXBpIn0.aQpnvDk0FyQy5yhRrup8Nn5pt7CyquqQn7BfPJm-QcE"
+    },
+    "responseType": "blob",
+    "method": "get",
+    "url": "http://localhost:8000/api/student/placement/reports/download?report_id=64b8bc6167fb51b4d968af73"
+  },
+  "request": {}
+}

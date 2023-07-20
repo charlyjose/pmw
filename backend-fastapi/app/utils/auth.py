@@ -106,9 +106,13 @@ class pyJWTDecodedUserId(JWTBearer):
         super(pyJWTDecodedUserId, self).__init__(auto_error=auto_error)
 
     async def __call__(self, request: Request) -> str:
-        pyJWTdecoded: Union[bool, JWTPayload] = await super(pyJWTDecodedUserId, self).__call__(request)
-        user_id = pyJWTdecoded.sub
-        return user_id
+        try:
+            pyJWTdecoded: Union[bool, JWTPayload] = await super(pyJWTDecodedUserId, self).__call__(request)
+            user_id = pyJWTdecoded.sub
+            return user_id
+        except Exception as e:
+            print(e)
+            raise PMWHTTPException(status_code=http_status.HTTP_403_FORBIDDEN, message="User not authenticated")
 
 
 def encryptPassword(password: str) -> str:

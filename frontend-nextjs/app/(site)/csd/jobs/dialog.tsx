@@ -36,10 +36,9 @@ export function DialogDemo({ job }) {
           </div>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[900px] ">
+      <DialogContent className="sm:max-w-[900px]">
         <DialogHeader>
           <DialogTitle>
-            {/* <Badge.Ribbon text="⭐ Highly Rated" color="green"></Badge.Ribbon> */}
             <div className="pt-1">{job.role}</div>
             <div className="pt-2 text-md font-light">{job.company}</div>
           </DialogTitle>

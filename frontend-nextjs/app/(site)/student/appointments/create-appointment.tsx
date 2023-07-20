@@ -105,10 +105,6 @@ export function CreateAppointment() {
       },
     };
 
-    console.log(appointmentData)
-    console.log(config)
-
-
     axios
       .post(`${API_URI}/api/appointments`, appointmentData, config)
       .then((e) => {

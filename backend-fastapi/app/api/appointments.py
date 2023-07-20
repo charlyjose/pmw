@@ -68,6 +68,12 @@ async def get_all_my_future_appointments(user_id: str = Depends(pyJWTDecodedUser
     if user_id:
         # Get all future appointments from the database
         appointments = await appointment_db.get_all_future_appointments_by_ownerId_from_db(user_id)
+        if not appointments:
+            message = "No appointment found"
+            response = json_response(
+                http_status=http_status.HTTP_404_NOT_FOUND, action_status=action_status.DATA_NOT_FOUND, message=message
+            )
+            return ClientResponse(**response)()
 
         # Format the appointment data (convert date to string) for JSON response
         future_appointments = {"appointments": []}
@@ -84,5 +90,3 @@ async def get_all_my_future_appointments(user_id: str = Depends(pyJWTDecodedUser
 
     # User not found
     return user_pnp_helpers.user_not_found()
-
-

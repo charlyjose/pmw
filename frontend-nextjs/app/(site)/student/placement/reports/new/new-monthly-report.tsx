@@ -5,25 +5,32 @@ const UNAUTHORISED_REDIRECTION_LINK = "/signin?callbackUrl=/protected/server";
 
 import React from "react";
 import { useEffect } from "react";
-
-import { Provider as StyletronProvider } from "styletron-react";
-import { LightTheme, BaseProvider } from "baseui";
-import { styletron } from "./utilities/styletron";
-
-import { FileUploader } from "baseui/file-uploader";
-
-import axios from "axios";
-import { toast } from "@/registry/new-york/ui/use-toast";
-
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+
+import axios from "axios";
+
+import { InboxOutlined, UploadOutlined } from "@ant-design/icons";
+import { Form, Select, Upload, message, Input } from "antd";
+const { Option } = Select;
+
+import { Button as ShadcnButton } from "@/registry/new-york/ui/button";
+
+import { CheckCircle2Icon } from "lucide-react";
+import { Icons } from "@/components/icons";
+
+import { toast } from "@/registry/new-york/ui/use-toast";
+import { toast as hotToast } from "react-hot-toast";
+
+const formItemLayout = {
+  labelCol: { span: 6 },
+  wrapperCol: { span: 14 },
+};
 
 export function NewMonthlyReport() {
   const { data: session } = useSession();
   const router = useRouter();
-
-  const [isUploading, setIsUploading] = React.useState(false);
-  const timeoutId = React.useRef<any>();
+  const [isLoading, setIsLoading] = React.useState(false);
 
   useEffect(() => {
     // Validating client-side session
@@ -32,19 +39,35 @@ export function NewMonthlyReport() {
     }
   }, []);
 
-  function reset() {
-    setIsUploading(false);
-    clearTimeout(timeoutId.current);
+  function validateUpload(file) {
+    const isPDF = file.type === "application/pdf";
+    const isLt2M = file.size / 1024 / 1024 < 2;
+
+    if (!isPDF) {
+      message.error(`${file.name} is not a pdf file`);
+    }
+    if (!isLt2M) {
+      message.error("File size must be less than 2MB");
+    }
+    return (isPDF && isLt2M) || Upload.LIST_IGNORE;
   }
 
-  function startProgress() {
-    setIsUploading(true);
-    timeoutId.current = setTimeout(reset, 4000);
-  }
+  const normFile = (e: any) => {
+    if (Array.isArray(e)) {
+      return e;
+    }
+    return e?.fileList;
+  };
 
-  function handleFileUpload(files: File[]) {
-    const formData = new FormData();
-    formData.append("file", files[0]);
+  const onFinish = (data: any) => {
+    setIsLoading(true);
+    console.log("Received values of form: ", data);
+
+    const reportData = {
+      title: data.title,
+      month: data.month,
+      report: data.report[0],
+    };
 
     function formatBytes(size) {
       var units = ["B", "KB", "MB", "GB", "TB"],
@@ -58,18 +81,33 @@ export function NewMonthlyReport() {
     }
 
     var file_details = {
-      name: files[0].name,
-      size: `${formatBytes(files[0].size)}`,
-      type: files[0].type,
+      title: reportData.title,
+      month: reportData.month,
+      report: {
+        name: reportData.report.name,
+        size: `${formatBytes(reportData.report.size)}`,
+        type: reportData.report.type.split("/")[1].toUpperCase(),  
+      }
     };
 
     const API_URI = "http://localhost:8000";
+    var token = session?.token;
+    const config = {
+      headers: {
+        "Content-Type": `multipart/form-data`,
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    const formData = new FormData();
+    formData.append("report", reportData.report.originFileObj);
+
     axios
-      .post(`${API_URI}/api/placement/reports/new/`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
+      .post(
+        `${API_URI}/api/student/placement/reports?title=${reportData.title}&month=${reportData.month}&file_type=${file_details.report.type}`,
+        formData,
+        config
+      )
       .then((response) => {
         toast({
           title: "File uploaded successfully",
@@ -83,45 +121,140 @@ export function NewMonthlyReport() {
             </>
           ),
         });
-        console.log(response);
+
+        hotToast.success(response.data.message, {
+          style: {
+            background: "#4B5563",
+            color: "#F3F4F6",
+          },
+        });
+
+        setTimeout(() => {
+          setIsLoading(false);
+          router.push("/student/placement/reports/new");
+        }, 1000);
       })
       .catch((error) => {
         console.log(error);
         toast({
           variant: "destructive",
-          title: "Uh oh! Something went wrong. File upload failed",
-          description: (
-            <>
-              <pre className="mt-2 w-[340px] rounded-md bg-white p-4">
-                <code className="text-black">
-                  {JSON.stringify(file_details, null, 2)}
-                </code>
-              </pre>
-              <pre className="mt-2 w-[340px] rounded-md bg-white p-4">
-                <code className="text-black">
-                  {JSON.stringify(error.message, null, 2)}
-                </code>
-              </pre>
-            </>
-          ),
+          title: error.response.data.message,
         });
+
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 1000);
       });
-  }
+  };
 
   return (
     <>
-      <StyletronProvider value={styletron}>
-        <BaseProvider theme={LightTheme}>
-          <FileUploader
-            onCancel={reset}
-            onDrop={(acceptedFiles, rejectedFiles) => {
-              handleFileUpload(acceptedFiles);
-              startProgress();
-            }}
-            progressMessage={isUploading ? `Uploading...` : ""}
-          />
-        </BaseProvider>
-      </StyletronProvider>
+      <div className="space-y-8">
+        <Form
+          name="validate_other"
+          {...formItemLayout}
+          onFinish={onFinish}
+          initialValues={{}}
+          style={{ alignSelf: "left", alignContent: "left" }}
+          layout="vertical"
+        >
+          <Form.Item
+            name="title"
+            label="Title"
+            hasFeedback
+            className="font-medium p-0"
+            rules={[
+              {
+                required: true,
+                message: "Report title is required",
+              },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item
+            name="month"
+            label="Month"
+            wrapperCol={{ span: 3 }}
+            hasFeedback
+            rules={[
+              {
+                required: true,
+                message: "Please a month for the report you are submitting",
+              },
+            ]}
+          >
+            <Select
+              placeholder="Please select a month"
+            >
+              <Option value="MONTH_1">Month 1</Option>
+              <Option value="MONTH_2">Month 2</Option>
+              <Option value="MONTH_3">Month 3</Option>
+              <Option value="MONTH_4">Month 4</Option>
+              <Option value="MONTH_5">Month 5</Option>
+              <Option value="MONTH_6">Month 6</Option>
+              <Option value="MONTH_7">Month 7</Option>
+              <Option value="MONTH_8">Month 8</Option>
+              <Option value="MONTH_9">Month 9</Option>
+              <Option value="MONTH_10">Month 10</Option>
+              <Option value="MONTH_11">Month 11</Option>
+              <Option value="MONTH_12">Month 12</Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item label="File" className="pt-3 font-medium">
+            <Form.Item
+              name="report"
+              label="Report file"
+              valuePropName="fileList"
+              getValueFromEvent={normFile}
+              noStyle
+              rules={[
+                {
+                  required: true,
+                  message: "Report file is required",
+                },
+              ]}
+            >
+              <Upload.Dragger
+                name="report"
+                maxCount={1}
+                beforeUpload={validateUpload}
+                multiple={false}
+                showUploadList={true}
+                accept=".pdf"
+              >
+                <p className="ant-upload-drag-icon">
+                  <InboxOutlined />
+                </p>
+                <p className="ant-upload-text">
+                  Click or drag file to this area to upload
+                </p>
+              </Upload.Dragger>
+            </Form.Item>
+          </Form.Item>
+
+          <Form.Item className="pt-5">
+            <div className="text-right text-xs font-medium hover:underline">
+              <ShadcnButton disabled={isLoading} type="submit">
+                {isLoading && (
+                  <>
+                    <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                    Hang on! We are uploading your report...
+                  </>
+                )}
+                {!isLoading && (
+                  <>
+                    <CheckCircle2Icon className="mr-2 h-4 w-4" />
+                    Submit report
+                  </>
+                )}
+              </ShadcnButton>
+            </div>
+          </Form.Item>
+        </Form>
+      </div>
     </>
   );
 }

@@ -53,7 +53,7 @@ export function DialogDemo({ form }) {
           <div className="text-right font-normal hover:underline">Preview</div>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[900px] ">
+      <DialogContent className="sm:max-w-[900px]">
         {job.role ||
         job.company ||
         job.description ||
@@ -62,14 +62,14 @@ export function DialogDemo({ form }) {
         job.mode ? (
           <>
             <DialogHeader>
-              {job.role ? (
-                <DialogTitle>
-                  <div className="pt-1">{job.role}</div>
+              <DialogTitle>
+                {job.role ? <div className="pt-1">{job.role}</div> : <></>}
+                {job.company ? (
                   <div className="pt-2 text-md font-light">{job.company}</div>
-                </DialogTitle>
-              ) : (
-                <></>
-              )}
+                ) : (
+                  <></>
+                )}
+              </DialogTitle>
 
               {job.description ? (
                 <DialogDescription className="pt-5">
@@ -85,7 +85,7 @@ export function DialogDemo({ form }) {
               )}
             </DialogHeader>
 
-            {job.salary || job.deadline || job.mode ? (
+            {job.salary || job.deadline || job.mode || job.link ? (
               <>
                 <div className="text-left text-lg font-bold">
                   <span className="px-1 bg-purple-300 mr-2 "></span>

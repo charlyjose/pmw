@@ -71,33 +71,39 @@ async def create_new_job(user_id: str = Depends(pyJWTDecodedUserId()), jobForm: 
             response = json_response(http_status=http_status.HTTP_403_FORBIDDEN, action_status=action_status.UNAUTHORIZED, message=message)
             return ClientResponse(**response)()
     else:
-        # User not found
         return user_pnp_helpers.user_not_found()
 
 
 @router.get("/jobs", summary="View jobs", tags=["jobs"])
 async def get_all_jobs_paginated(page: int, user_id: str = Depends(pyJWTDecodedUserId())):
-    # Page must be greater than 0
-    if page > 0:
-        skip = (page - 1) * 10
-        take = 10
-        # Get paginated jobs from the database
-        jobs = await job_db.get_all_jobs_paginated(skip=skip, take=take)
+    if user_id:
+        # Page must be greater than 0
+        if page > 0:
+            skip = (page - 1) * 10
+            take = 10
+            # Get paginated jobs from the database
+            jobs = await job_db.get_all_jobs_paginated(skip=skip, take=take)
 
-        job_list = []
-        for job in jobs:
-            cleaned_job_for_user = CleanedJobForUser(**job.dict()).dict()
-            json_compatible_cleaned_job = jsonable_encoder(cleaned_job_for_user)
-            job_list.append(json_compatible_cleaned_job)
+            job_list = []
+            for job in jobs:
+                cleaned_job_for_user = CleanedJobForUser(**job.dict()).dict()
+                json_compatible_cleaned_job = jsonable_encoder(cleaned_job_for_user)
+                job_list.append(json_compatible_cleaned_job)
 
-        # Set hasMore to true if there are more jobs to be fetched
-        hasMore = len(jobs) == 10
+            # Set hasMore to true if there are more jobs to be fetched
+            hasMore = len(jobs) == 10
 
-        data = {"jobs": job_list, "hasMore": hasMore}
-        message = "Job created"
-        response = json_response(http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_FETCHED, message=message, data=data)
-        return ClientResponse(**response)()
+            data = {"jobs": job_list, "hasMore": hasMore}
+            message = "Job created"
+            response = json_response(
+                http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_FETCHED, message=message, data=data
+            )
+            return ClientResponse(**response)()
+        else:
+            message = "Page must be greater than 0"
+            response = json_response(
+                http_status=http_status.HTTP_204_NO_CONTENT, action_status=action_status.DATA_NOT_FOUND, message=message
+            )
+            return ClientResponse(**response)()
     else:
-        message = "Page must be greater than 0"
-        response = json_response(http_status=http_status.HTTP_204_NO_CONTENT, action_status=action_status.DATA_NOT_FOUND, message=message)
-        return ClientResponse(**response)()
+        return user_pnp_helpers.user_not_found()

@@ -16,23 +16,11 @@ const sidebarNavItems = [
     href: "/csd",
   },
   {
-    title: "Placement Application",
-    href: "/csd/placement/applications",
-  },
-  {
-    title: "Monthly Reports",
-    href: "/csd/placement/reports",
-  },
-  {
-    title: "New Monthly Report",
-    href: "/csd/placement/reports/new",
-  },
-  {
     title: "Jobs",
     href: "/csd/jobs",
   },
   {
-    title: "New Jobs",
+    title: "Add jobs",
     href: "/csd/jobs/new",
   },
   {

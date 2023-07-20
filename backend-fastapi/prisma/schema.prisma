@@ -8,7 +8,6 @@ generator client {
   recursive_type_depth = -1
 }
 
-// User model
 enum Role {
   ADMIN
   STUDENT
@@ -37,9 +36,9 @@ model User {
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
 
-  // accounts    Account[]
-  Appointment Appointment[]
-  Job         Job[]
+  Appointment     Appointment[]
+  Job             Job[]
+  PlacementReport PlacementReport[]
 }
 
 enum AppointmentAgenda {
@@ -111,21 +110,37 @@ model Job {
   updatedAt   DateTime @updatedAt
 }
 
-// model Account {
-//   id                String  @id @default(auto()) @map("_id") @db.ObjectId
-//   userId            String  @db.ObjectId
-//   type              String
-//   provider          String
-//   providerAccountId String
-//   refresh_token     String? @db.String
-//   access_token      String? @db.String
-//   expires_at        Int?
-//   token_type        String?
-//   scope             String?
-//   id_token          String? @db.String
-//   session_state     String?
+enum PlacementReportMonth {
+  MONTH_1
+  MONTH_2
+  MONTH_3
+  MONTH_4
+  MONTH_5
+  MONTH_6
+  MONTH_7
+  MONTH_8
+  MONTH_9
+  MONTH_10
+  MONTH_11
+  MONTH_12
+}
 
-//   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+enum PlacementReportFileType {
+  PDF
+  DOCX
+  DOC
+  TXT
+  OTHER
+}
 
-//   @@unique([provider, providerAccountId])
-// }
+model PlacementReport {
+  id          String                  @id @default(auto()) @map("_id") @db.ObjectId
+  ownerId     String                  @db.ObjectId
+  owner       User                    @relation(fields: [ownerId], references: [id])
+  title       String
+  month       PlacementReportMonth
+  report_name String
+  file_type   PlacementReportFileType
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+}
