@@ -21,6 +21,12 @@ async def check_user_role(user_id: str, roles: List[str]) -> bool:
     return False
 
 
+# Get user role by user id
+async def get_user_role(user_id: str) -> Optional[User]:
+    user = await prisma.user.find_unique(where={"id": user_id})
+    return user.role if user else None
+
+
 async def get_user_by_id(user_id: str) -> Optional[User]:
     user = await prisma.user.find_unique(where={"id": user_id})
     return user if user else None

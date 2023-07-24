@@ -3,6 +3,8 @@ from fastapi import status as http_status
 from prisma.models import User
 
 import app.pnp_helpers.user as user_pnp_helpers
+import app.pnp_helpers.auth as auth_pnp_helpers
+
 from app.api.auth import ValidateUserRole
 from app.api.models import action_status
 from app.api.models.auth import Role as UserRole
@@ -53,25 +55,19 @@ async def get_all_user_data(user_id: str = Depends(pyJWTDecodedUserId())):
 
             return ClientResponse(**response)()
 
-    # No previlages to access this content
-    message = "No previlages to access this content"
-    response = json_response(http_status=http_status.HTTP_403_FORBIDDEN, action_status=action_status.UNAUTHORIZED, message=message)
-    return ClientResponse(**response)()
+    return auth_pnp_helpers.no_access_to_content(message="No valid previlages to access users data")
 
 
 # Get own data
 @router.get("/users/me", summary="Get own user data", tags=["users"])
 async def get_own_user_data(user_id: str = Depends(pyJWTDecodedUserId())):
     if user_id:
-        user = await GetUserData(user_id)()
-        user = CleanedUserData(**user.__dict__) if user else None
-
-        message = "User data"
-        response = json_response(http_status=http_status.HTTP_200_OK, action_status=action_status.NO_ERROR, message=message, data=user)
-
-        print(response)
-
-        return ClientResponse(**response)()
+        user = await user_db.get_user_by_id(user_id)
+        if user:
+            user = CleanedUserData(**user.__dict__) if user else None
+            message = "User data"
+            response = json_response(http_status=http_status.HTTP_200_OK, action_status=action_status.NO_ERROR, message=message, data=user)
+            return ClientResponse(**response)()
 
     # User not found
     return user_pnp_helpers.user_not_found()

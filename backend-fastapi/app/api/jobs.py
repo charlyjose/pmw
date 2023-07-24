@@ -6,6 +6,8 @@ from fastapi.encoders import jsonable_encoder
 from prisma.models import Job
 
 import app.pnp_helpers.user as user_pnp_helpers
+import app.pnp_helpers.auth as auth_pnp_helpers
+
 from app.api.auth import ValidateUserRole
 from app.api.models import action_status
 from app.api.models.auth import Role as UserRole
@@ -31,15 +33,13 @@ async def add_new_job(ownerId: str, job: dict) -> Union[Job, None]:
 
 # Read appointment from submitted json data
 # TODO: In the future, we will perform validation on the appointment form
-async def read_job(jobForm: JobForm):
-    print(jobForm)
+async def read_job(jobForm: JobForm) -> JobForm:
     return jobForm
 
 
 @router.post("/jobs", summary="Create new job", tags=["jobs"])
 async def create_new_job(user_id: str = Depends(pyJWTDecodedUserId()), jobForm: JobForm = Depends(read_job)) -> JSONResponseModel:
     if user_id:
-        # Validate user is CSD or TUTOR
         roles = [UserRole.CSD, UserRole.TUTOR]
         valid_user_role = await ValidateUserRole(user_id, roles)()
         if valid_user_role:
@@ -66,10 +66,7 @@ async def create_new_job(user_id: str = Depends(pyJWTDecodedUserId()), jobForm: 
             )
             return ClientResponse(**response)()
         else:
-            # No previlages to access this content
-            message = "No previlages to create a job"
-            response = json_response(http_status=http_status.HTTP_403_FORBIDDEN, action_status=action_status.UNAUTHORIZED, message=message)
-            return ClientResponse(**response)()
+            return auth_pnp_helpers.no_access_to_content(message="No valid previlages to create job")
     else:
         return user_pnp_helpers.user_not_found()
 

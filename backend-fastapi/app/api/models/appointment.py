@@ -1,6 +1,5 @@
 from datetime import datetime
 from enum import Enum
-from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -22,7 +21,6 @@ class AppointmentTeam(str, Enum):
     TUTOR = "TUTOR"
     STUDENT = "STUDENT"
 
-
 class AppointmentStatus(str, Enum):
     CONFIRMED = "CONFIRMED"
     CANCELLED = "CANCELLED"
@@ -35,16 +33,13 @@ class AppointmentForm(BaseModel):
     agenda: AppointmentAgenda
     mode: AppointmentMode
     team: AppointmentTeam
-    invitees: Optional[List[str]] = []
     description: str
     date: datetime
     time: str
-    duration: str
 
 
 class Appointment(AppointmentForm):
     confirmed: bool = False
-    notified_invitees: bool = False
     status: AppointmentStatus = AppointmentStatus.PENDING
 
 
@@ -58,4 +53,6 @@ class CleanedAppointment(Appointment):
     - Removes the ownerId field for security reasons
     """
 
-    pass
+    id: str
+    createdAt: datetime
+    updatedAt: datetime

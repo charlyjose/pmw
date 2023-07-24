@@ -85,3 +85,35 @@ async def get_all_appointments_by_ownerId_and_status_from_db(ownerId: str, statu
     :return: list
     '''
     return await prisma.appointment.find_many(where={"ownerId": ownerId, "status": status})
+
+
+# Get all future appointments from the database by team
+async def get_all_future_appointments_by_team_from_db(team: str) -> list:
+    '''
+    Get all future appointments from the database by team
+    :param team: str
+    :return: list
+    '''
+    return await prisma.appointment.find_many(where={"team": team, "date": {"gte": datetime.today()}})
+
+
+
+# A helper function to a specific appointment from the database by id
+async def get_appointment_by_id_from_db(id: str) -> Appointment:
+    '''
+    A helper function to a specific appointment from the database by id
+    :param id: str
+    :return: Appointment
+    '''
+    return await prisma.appointment.find_unique(where={"id": id})
+
+
+# A helper function to update status of a specific appointment from the database by id
+async def update_appointment_status_by_id_from_db(id: str, status: AppointmentStatus, confirmed: bool) -> Appointment:
+    '''
+    A helper function to update status of a specific appointment from the database by id
+    :param id: str
+    :param status: AppointmentStatus
+    :return: Appointment
+    '''
+    return await prisma.appointment.update(where={"id": id}, data={"status": status, "confirmed": confirmed})

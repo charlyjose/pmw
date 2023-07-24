@@ -23,22 +23,37 @@ enum Department {
   CSD
 }
 
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum StudentStatus {
+  ON_PLACEMENT
+  NOT_ON_PLACEMENT
+  GRADUATED
+  NOT_APPLICABLE
+}
+
 model User {
-  id             String     @id @default(auto()) @map("_id") @db.ObjectId
+  id             String        @id @default(auto()) @map("_id") @db.ObjectId
   firstName      String
   lastName       String
   name           String
   role           Role
   department     Department
-  email          String     @unique
+  status         UserStatus    @default(ACTIVE)
+  studentStatus  StudentStatus @default(NOT_APPLICABLE)
+  email          String        @unique
   hashedPassword String
   emailVerified  DateTime?
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
-  Appointment     Appointment[]
-  Job             Job[]
-  PlacementReport PlacementReport[]
+  Appointment          Appointment[]
+  Job                  Job[]
+  PlacementReport      PlacementReport[]
+  PlacementApplication PlacementApplication?
 }
 
 enum AppointmentAgenda {
@@ -67,25 +82,19 @@ enum AppointmentStatus {
 }
 
 model Appointment {
-  id                String            @id @default(auto()) @map("_id") @db.ObjectId
-  ownerId           String            @db.ObjectId
-  owner             User              @relation(fields: [ownerId], references: [id])
-  confirmed         Boolean           @default(false)
-  notified_invitees Boolean           @default(false)
-  status            AppointmentStatus @default(PENDING)
-  agenda            AppointmentAgenda
-  mode              AppointmentMode
-  team              AppointmentTeam
-  invitees          String[]
-  description       String
-  date              DateTime
-  time              String
-  duration          String
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
-
-  // TODO: Invitee email should be a user email from the user model
-  // TODO: Schema change for notification status for individual invitees
+  id          String            @id @default(auto()) @map("_id") @db.ObjectId
+  ownerId     String            @db.ObjectId
+  owner       User              @relation(fields: [ownerId], references: [id])
+  confirmed   Boolean           @default(false)
+  status      AppointmentStatus @default(PENDING)
+  agenda      AppointmentAgenda
+  mode        AppointmentMode
+  team        AppointmentTeam
+  description String
+  date        DateTime
+  time        String
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
 }
 
 enum JobMode {
@@ -141,6 +150,165 @@ model PlacementReport {
   month       PlacementReportMonth
   report_name String
   file_type   PlacementReportFileType
-  createdAt   DateTime                @default(now())
-  updatedAt   DateTime                @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
+
+enum PlacementApplicationStudentVisa {
+  YES
+  NO
+}
+
+enum PlacementApplicationProbationPeriod {
+  YES
+  NO
+}
+
+enum PlacementApplicationRoleInformed {
+  YES
+  NO
+}
+
+enum PlacementApplicationRemoteWorking {
+  YES
+  NO
+}
+
+enum PlacementApplicationTravelMethod {
+  OWN_VEHICLE
+  PUBLIC_TRANSPORT
+  WALKING
+  CYCLE
+  OTHER
+}
+
+enum PlacementApplicationTravelDifferentLocation {
+  YES
+  NO
+}
+
+enum PlacementApplicationLocationRisks {
+  YES
+  NO
+}
+
+enum PlacementApplicationAccommodationArrangements {
+  RENT_SHARED_HOUSE_FLAT
+  RENT_INDIVIDUAL_HOUSE_FLAT
+  LIVE_AT_HOME
+  OTHER
+}
+
+enum PlacementApplicationPrecautionaryMeasures {
+  YES
+  NO
+}
+
+enum PlacementApplicationHealthConditions {
+  YES
+  NO
+}
+
+enum PlacementApplicationDisability {
+  YES
+  NO
+}
+
+enum PlacementApplicationOverseas {
+  YES
+  NO
+}
+
+enum PlacementApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model PlacementApplication {
+  id                                    String                                        @id @default(auto()) @map("_id") @db.ObjectId
+  ownerId                               String                                        @unique @db.ObjectId
+  owner                                 User                                          @relation(fields: [ownerId], references: [id])
+  // Student details
+  firstName                             String
+  lastName                              String
+  studentNumber                         String
+  email                                 String
+  programme                             String
+  department                            String
+  contactNumber                         String
+  studentVisa                           PlacementApplicationStudentVisa               @default(NO)
+  // Placement provider details
+  organisationName                      String
+  organisationAddress                   String
+  organisationPostcode                  String
+  organisationWebAddress                String
+  organisationContactName               String
+  organisationContactJobTitle           String
+  organisationContactEmail              String
+  organisationContactNumber             String
+  organisationLocationGoogleMapsAddress String
+  organisationLocationGoogleMapsLat     Float
+  organisationLocationGoogleMapsLng     Float
+  // Placement Role Details
+  roleTitle                             String
+  roleStartDate                         DateTime
+  roleEndDate                           DateTime
+  workingHours                          Int
+  probationPeriod                       PlacementApplicationProbationPeriod           @default(NO)
+  salary                                Int
+  roleSource                            String
+  roleInformed                          PlacementApplicationRoleInformed              @default(NO)
+  roleDescription                       String
+  probationPeriodDetails                String
+  // Work Factors
+  remoteWorking                         PlacementApplicationRemoteWorking             @default(NO)
+  remoteWorkingOverview                 String
+  remoteWorkingReason                   String
+  // Transport and Travel Factors
+  travelMethod                          PlacementApplicationTravelMethod
+  travelMethodDetails                   String
+  travelMethodDifferentLocation         PlacementApplicationTravelDifferentLocation   @default(NO)
+  travelMethodDifferentLocationDetails  String
+  // Location and Regional Factors
+  locationRisks                         PlacementApplicationLocationRisks             @default(NO)
+  locationRisksDetails                  String
+  accommodationArrangements             PlacementApplicationAccommodationArrangements @default(RENT_SHARED_HOUSE_FLAT)
+  accommodationArrangementsDetails      String
+  // Health and Environmental Factors
+  precautionaryMeasures                 PlacementApplicationPrecautionaryMeasures     @default(NO)
+  precautionaryMeasuresDetails          String
+  // Personal Factors
+  healthConditions                      PlacementApplicationHealthConditions          @default(NO)
+  healthConditionsDetails               String
+  disability                            PlacementApplicationDisability                @default(NO)
+  disabilityDetails                     String
+  // Policies and Insurance
+  placementOverseas                     PlacementApplicationOverseas                  @default(NO)
+  // Declaration and Signature
+  declarationName                       String
+  declarationSignature                  String
+  declarationDate                       DateTime
+  // Status
+  status                                PlacementApplicationStatus                    @default(PENDING)
+  // Review
+  reviewerId                            String                                        @db.ObjectId
+  // reviewer                              User                                          @relation(fields: [reviewerId], references: [id])
+  createdAt                             DateTime                                      @default(now())
+  updatedAt                             DateTime                                      @updatedAt
+}
+
+// 
+// model PlacementReport {
+//   id          String                  @id @default(auto()) @map("_id") @db.ObjectId
+//   ownerId     String                  @db.ObjectId
+//   owner       User                    @relation(fields: [ownerId], references: [id])
+//   title       String
+//   month       PlacementReportMonth
+//   report_name String
+//   file_type   PlacementReportFileType
+//   createdAt   DateTime                @default(now())
+//   updatedAt   DateTime                @updatedAt
+// }
+//

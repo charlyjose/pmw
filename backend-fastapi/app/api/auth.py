@@ -36,7 +36,6 @@ async def signup(signupForm: SignUpForm) -> JSONResponseModel:
     newUserData = SignUpUser(**signupUser)
 
     try:
-        print(newUserData.dict())
         user = await user_db.create_new_user(newUserData.dict())
         user = CleanedUserData(**user.__dict__).dict()
         response = json_response(
@@ -49,8 +48,7 @@ async def signup(signupForm: SignUpForm) -> JSONResponseModel:
         response = json_response(http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.DUPLICATE_KEY, message=message)
         return ClientResponse(**response)()
 
-    except Exception as e:
-        print(e)
+    except Exception:
         message = "Something went wrong"
         response = json_response(http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.UNKNOWN_ERROR, message=message)
         return ClientResponse(**response)()
