@@ -7,10 +7,10 @@ export default function PlacementApplicationPage() {
       <div>
         <h3 className="text-lg font-medium">
           <span className="px-1 bg-lime-300 mr-2 "></span>
-          Placement Application
+          Placement Authorisation Request Form
         </h3>
         <p className="text-sm text-muted-foreground">
-          Create or make amends to your placement authorisation form
+          Create or make amends to your placement application
         </p>
       </div>
       <Separator />

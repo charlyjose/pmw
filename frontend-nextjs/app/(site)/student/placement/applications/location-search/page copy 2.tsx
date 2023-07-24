@@ -20,6 +20,7 @@ import {
   FormMessage,
 } from "@/registry/new-york/ui/form";
 
+
 import {
   Command,
   CommandGroup,
@@ -59,26 +60,21 @@ export function LocationSearch(props: any) {
     return <p>Loading...</p>;
   }
 
-  const sendBackAddress = (address: string, lat: number, lng: number) => {
-    props.organisationLocationGoogleMapsAddress(address);
-    props.organisationLocationGoogleMapsLat(lat);
-    props.organisationLocationGoogleMapsLng(lng);
+  const sendBackData = (address: string, lat: number, lng: number) => {
+    props.orgLocationName(address);
+    props.orgLocationLat(lat);
+    props.orgLocationLng(lng);
   };
 
   return (
     <>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <div className="col-span-2">
-          <FormLabel>
-            <span className="grid grid-cols-1 gap-4">
-              Your placement location
-            </span>
-            <p className="grid grid-cols-1 pt-2 pb-2 text-xs font-normal italic">
-              Search your placement location
-            </p>
-          </FormLabel>
-
-          <CardContent className="grid gap-1 p-0 pt-2">
+          <CardHeader className="space-y-1 p-0">
+            <CardTitle className="text-sm font-medium">Location Search</CardTitle>
+            <CardDescription>Search your placement location</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-4 p-0 pt-2">
             {/* render Places Auto Complete and pass custom handler which updates the state */}
             <PlacesAutocomplete
               onAddressSelect={(address) => {
@@ -86,7 +82,7 @@ export function LocationSearch(props: any) {
                   const { lat, lng } = getLatLng(results[0]);
                   setLat(lat);
                   setLng(lng);
-                  sendBackAddress(address, lat, lng);
+                  sendBackData(address, lat, lng);
                 });
               }}
             />
@@ -175,7 +171,7 @@ const PlacesAutocomplete = ({
       </div>
       <Command className="rounded-lg shadow-md">
         {status === "OK" && (
-          <ScrollArea className="rounded-md border">
+          <ScrollArea className="h-36 rounded-md border">
             <CommandList>
               <CommandGroup heading="Suggestions">
                 {renderSuggestions()}

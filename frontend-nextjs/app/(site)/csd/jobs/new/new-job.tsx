@@ -337,7 +337,7 @@ export function NewJob() {
                                 // Disable dates in the past
                                 date < new Date()
                               }
-                              initialFocus
+                              // initialFocus
                             />
                           </PopoverContent>
                         </Popover>

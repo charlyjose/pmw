@@ -10,52 +10,27 @@ import { useEffect } from "react";
 
 import axios from "axios";
 
-import { Dialog } from "@radix-ui/react-dialog";
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/registry/new-york/ui/alert-dialog";
-import {
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/registry/new-york/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/registry/new-york/ui/dropdown-menu";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/registry/new-york/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/registry/new-york/ui/hover-card";
 import { Button } from "@/registry/new-york/ui/button";
-import { Label } from "@/registry/new-york/ui/label";
-import { Switch } from "@/registry/new-york/ui/switch";
 
 import { Icons } from "@/components/icons";
 import {
   CheckCircledIcon,
   QuestionMarkCircledIcon,
+  CrossCircledIcon,
 } from "@radix-ui/react-icons";
 import { CalendarX2 } from "lucide-react";
-import {
-  Flag,
-  MoreHorizontal,
-  Trash,
-  CalendarOffIcon,
-  CalendarCheckIcon,
-  CalendarCheck2Icon,
-} from "lucide-react";
+
+import { MdOutlineCalendarMonth } from "react-icons/md";
+import { MdOutlineEditCalendar } from "react-icons/md";
 
 import { toast } from "@/registry/new-york/ui/use-toast";
 
@@ -169,134 +144,91 @@ export function AppointmentsDisplay(props) {
             return (
               <div className="grid grid-cols-12 gap-4 pb-5 rounded-md p-3 transition-all hover:bg-accent hover:text-accent-foreground">
                 <div className="col-span-1">
-                  {appointment.confirmed === true ? (
+                  {appointment.status.toUpperCase() === "CONFIRMED" ? (
                     <CheckCircledIcon className="mt-px h-6 w-6 text-lime-700" />
+                  ) : appointment.status.toUpperCase() === "CANCELLED" ? (
+                    <CrossCircledIcon className="mt-px h-6 w-6 text-red-700" />
                   ) : (
-                    <QuestionMarkCircledIcon className="mt-px h-6 w-6 text-red-700" />
+                    <QuestionMarkCircledIcon className="mt-px h-6 w-6 text-yellow-500" />
                   )}
                 </div>
                 <div className="col-span-11">
-                  <div className="grid grid-cols-1 gap-4">
-                    <p className="text-2xl font-bold leading-none">
-                      {new Date(appointment.date).toDateString()} @{" "}
-                      {appointment.time}
-                    </p>
+                  <div className="grid grid-cols-5 gap-4">
+                    <div className="col-span-4">
+                      <p className="leading-none">
+                        <span className="text-xl font-extrabold">
+                          {new Date(appointment.date).toDateString()}
+                        </span>
+                        <span className="text-md font-light"> @ </span>
+                        <span className="text-md font-extrabold">
+                          {appointment.time}
+                        </span>
+                      </p>
+                    </div>
+                    <div className="col-span-1">
+                      <HoverCard>
+                        <HoverCardTrigger asChild>
+                          <Button
+                            variant="link"
+                            className="text-right font-medium"
+                          >
+                            View
+                          </Button>
+                        </HoverCardTrigger>
+                        <HoverCardContent className="w-80">
+                          <div className="flex justify-between space-x-4">
+                            <div className="space-y-1">
+                              <h4 className="text-sm font-semibold">
+                                Description
+                              </h4>
+                              <p className="text-sm">
+                                {appointment.description}
+                              </p>
+                              <div className="flex items-center pt-2">
+                                <MdOutlineCalendarMonth className="mr-1 h-4 w-4 opacity-70" />{" "}
+                                <span className="text-xs text-muted-foreground">
+                                  Created on{" "}
+                                  {new Date(
+                                    appointment.createdAt
+                                  ).toDateString()}
+                                </span>
+                              </div>
+                              <div className="flex items-center pt-1">
+                                <MdOutlineEditCalendar className="mr-1 h-4 w-4 opacity-70" />{" "}
+                                <span className="text-xs text-muted-foreground">
+                                  Updated on{" "}
+                                  {new Date(
+                                    appointment.createdAt
+                                  ).toDateString()}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </HoverCardContent>
+                      </HoverCard>
+                    </div>
                   </div>
                   <div className="grid grid-cols-5 gap-4 pt-2">
                     <div className="col-span-4">
                       <p className="text-sm font-medium leading-none">
-                        <Badge>Duration: {appointment.duration} mins</Badge>{" "}
-                        <Badge>Mode: {appointment.mode}</Badge>{" "}
-                        <Badge>Team: {appointment.team.toUpperCase()}</Badge>{" "}
-                        {appointment.confirmed === true ? (
-                          <Badge variant="secondary">
-                            Status:{" "}
-                            {appointment.status.charAt(0).toUpperCase() +
-                              appointment.status.slice(1)}
-                          </Badge>
+                        <Badge variant="outline">{appointment.mode}</Badge>{" "}
+                        <Badge variant="outline">
+                          {appointment.agenda.replace("_", " ")}
+                        </Badge>{" "}
+                        <Badge variant="outline">
+                          MEETING WITH {appointment.team.toUpperCase()}
+                        </Badge>{" "}
+                        {appointment.status.toUpperCase() === "CONFIRMED" ? (
+                          <Badge variant="default">CONFIRMED</Badge>
+                        ) : appointment.status.toUpperCase() === "CANCELLED" ? (
+                          <Badge variant="secondary">CANCELLED</Badge>
                         ) : (
-                          <Badge variant="destructive">
-                            Status:{" "}
-                            {appointment.status.charAt(0).toUpperCase() +
-                              appointment.status.slice(1)}
-                          </Badge>
-                        )}{" "}
+                          <Badge variant="destructive">PENDING</Badge>
+                        )}
                       </p>
                     </div>
-                    <div className="col-span-1">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="link">
-                            <span className="sr-only">Actions</span>
-                            RESPOND
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onSelect={() => setIsOpen(true)}>
-                            <CalendarCheck2Icon className="mr-2 h-4 w-4" />
-                            Available
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onSelect={() => setShowDeleteDialog(true)}
-                            className="text-red-600"
-                          >
-                            <CalendarOffIcon className="mr-2 h-4 w-4" />
-                            Unavailable
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
+                    <div className="col-span-1"></div>
                   </div>
-                  {appointment.invitees.length > 0 && (
-                    <>
-                      <div className="grid grid-cols-1 gap-4">
-                        <span className="text-md font-medium">INVITEES: </span>
-                      </div>
-                      <div className="grid grid-cols-1 gap-4">
-                        <div className="col-span-1">
-                          <span className="text-sm font-medium">
-                            {appointment.invitees.join(", ")}
-                          </span>
-                        </div>
-                        <div className="col-span-4"></div>
-                      </div>
-                    </>
-                  )}
-
-                  <AlertDialog open={open} onOpenChange={setIsOpen}>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          We will notify the organisers
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <Button
-                          variant="default"
-                          onClick={() => {
-                            setIsOpen(false);
-                            toast({
-                              title: "Notified the organisers",
-                            });
-                          }}
-                        >
-                          Respond Yes
-                        </Button>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                  <AlertDialog
-                    open={showDeleteDialog}
-                    onOpenChange={setShowDeleteDialog}
-                  >
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <Button
-                          variant="destructive"
-                          onClick={() => {
-                            setShowDeleteDialog(false);
-                            toast({
-                              title: "Notified the organisers",
-                            });
-                          }}
-                        >
-                          Respond No
-                        </Button>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
                 </div>
               </div>
             );

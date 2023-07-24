@@ -24,6 +24,9 @@ import { FileTextIcon } from "lucide-react";
 import { DownloadIcon } from "lucide-react";
 import { Icons } from "@/components/icons";
 import { FaFilePdf } from "react-icons/fa6";
+import { BsFiletypeDocx } from "react-icons/bs";
+import { BsFiletypeDoc } from "react-icons/bs";
+import { BsFileEarmarkPdf } from "react-icons/bs";
 
 import { toast } from "@/registry/new-york/ui/use-toast";
 import { set } from "date-fns";
@@ -124,22 +127,23 @@ export function ReportsDisplay(props) {
   const displayReports = (props) => {
     const { reports, axiosConfig } = props;
 
-    console.log(reports);
-
-    function downloadFile(e) {
+    function downloadFile(report) {
       var config = axiosConfig;
       delete config.headers["Content-Type"];
       config.responseType = "blob";
       config.headers["accept"] = "application/json";
 
-      const report_id = e.target.value;
+      var report_id = report.id;
+      var file_type = report.file_type;
+      var report_name = report.report_name;
+
       axios
         .get(
           `${API_URI}/api/student/placement/reports/download?report_id=${report_id}`,
           config
         )
         .then((e) => {
-          saveAs(e.data, `${report_id}.pdf`);
+          saveAs(e.data, `${report_name}`);
           toast({
             variant: "default",
             title: "Placement reports",
@@ -171,7 +175,7 @@ export function ReportsDisplay(props) {
           )}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {reports.map((report) => (
-              <Card className="transition-all hover:bg-accent hover:text-accent-foreground">
+              <Card className="transition-all hover:bg-accent hover:text-accent-foreground" key={report.id}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
                     <div className="text-sm font-normal">{report.title}</div>
@@ -185,9 +189,19 @@ export function ReportsDisplay(props) {
                     </div> */}
                   </CardTitle>
                   {report.file_type === "PDF" ? (
-                    <FaFilePdf className="mr-1 w-8 h-8 text-lime-600" />
+                    <BsFileEarmarkPdf className="mr-1 w-8 h-8 text-lime-600" />
                   ) : (
-                    <FileTextIcon className="mr-1 w-8 h-8 text-lime-600" />
+                    <></>
+                  )}
+                  {report.file_type === "DOCX" ? (
+                    <BsFiletypeDocx className="mr-1 w-8 h-8 text-lime-600" />
+                  ) : (
+                    <></>
+                  )}{" "}
+                  {report.file_type === "DOC" ? (
+                    <BsFiletypeDoc className="mr-1 w-8 h-8 text-lime-600" />
+                  ) : (
+                    <></>
                   )}
                 </CardHeader>
 
@@ -206,8 +220,7 @@ export function ReportsDisplay(props) {
                           <Button
                             variant="link"
                             className="pl-0"
-                            value={report.id}
-                            onClick={(e) => downloadFile(e)}
+                            onClick={(e) => downloadFile(report)}
                           >
                             <DownloadIcon className="mr-1 h-4 w-4" />
                             Download

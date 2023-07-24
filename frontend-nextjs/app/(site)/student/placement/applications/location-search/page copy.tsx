@@ -11,16 +11,6 @@ import { Input } from "@/registry/new-york/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/registry/new-york/ui/form";
-
-import {
   Command,
   CommandGroup,
   CommandItem,
@@ -34,7 +24,7 @@ import usePlacesAutocomplete, {
   getLatLng,
 } from "use-places-autocomplete";
 
-export function LocationSearch(props: any) {
+export default function LocationSearch() {
   const [lat, setLat] = useState(52.620674);
   const [lng, setLng] = useState(-1.125511);
 
@@ -59,54 +49,45 @@ export function LocationSearch(props: any) {
     return <p>Loading...</p>;
   }
 
-  const sendBackAddress = (address: string, lat: number, lng: number) => {
-    props.organisationLocationGoogleMapsAddress(address);
-    props.organisationLocationGoogleMapsLat(lat);
-    props.organisationLocationGoogleMapsLng(lng);
-  };
-
   return (
     <>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <div className="col-span-2">
-          <FormLabel>
-            <span className="grid grid-cols-1 gap-4">
-              Your placement location
-            </span>
-            <p className="grid grid-cols-1 pt-2 pb-2 text-xs font-normal italic">
-              Search your placement location
-            </p>
-          </FormLabel>
+          <Card className="border-none">
+            <CardHeader className="space-y-1">
+              <CardTitle>Location Search</CardTitle>
+              <CardDescription>Search your placement location</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4">
+              {/* render Places Auto Complete and pass custom handler which updates the state */}
+              <PlacesAutocomplete
+                onAddressSelect={(address) => {
+                  getGeocode({ address: address }).then((results) => {
+                    const { lat, lng } = getLatLng(results[0]);
 
-          <CardContent className="grid gap-1 p-0 pt-2">
-            {/* render Places Auto Complete and pass custom handler which updates the state */}
-            <PlacesAutocomplete
-              onAddressSelect={(address) => {
-                getGeocode({ address: address }).then((results) => {
-                  const { lat, lng } = getLatLng(results[0]);
-                  setLat(lat);
-                  setLng(lng);
-                  sendBackAddress(address, lat, lng);
-                });
-              }}
-            />
-          </CardContent>
+                    setLat(lat);
+                    setLng(lng);
+                  });
+                }}
+              />
+            </CardContent>
+          </Card>
         </div>
 
         <div className="col-span-5">
-          <GoogleMap
-            options={mapOptions}
-            zoom={14}
-            center={mapCenter}
-            mapTypeId={google.maps.MapTypeId.ROADMAP}
-            mapContainerStyle={{ width: "1200px", height: "430px" }}
-            onLoad={(map) => console.log("Map Loaded")}
-          >
-            <MarkerF
-              position={mapCenter}
-              onLoad={() => console.log("Marker Loaded")}
-            />
-          </GoogleMap>
+              <GoogleMap
+                options={mapOptions}
+                zoom={14}
+                center={mapCenter}
+                mapTypeId={google.maps.MapTypeId.ROADMAP}
+                mapContainerStyle={{ width: "1200px", height: "430px" }}
+                onLoad={(map) => console.log("Map Loaded")}
+              >
+                <MarkerF
+                  position={mapCenter}
+                  onLoad={() => console.log("Marker Loaded")}
+                />
+              </GoogleMap>
         </div>
       </div>
     </>
@@ -165,17 +146,14 @@ const PlacesAutocomplete = ({
         <Input
           value={value}
           disabled={!ready}
-          onChange={(e) => {
-            setValue(e.target.value);
-          }}
+          onChange={(e) => setValue(e.target.value)}
           type="text"
           placeholder="Search Google Maps"
-          required
         />
       </div>
       <Command className="rounded-lg shadow-md">
         {status === "OK" && (
-          <ScrollArea className="rounded-md border">
+          <ScrollArea className="h-36 rounded-md border">
             <CommandList>
               <CommandGroup heading="Suggestions">
                 {renderSuggestions()}

@@ -16,18 +16,6 @@ export const jobFormSchema = z.object({
     mode: z.string({
         required_error: "Working mode is required",
     }),
-    // location: z
-    //     .array(
-    //         z.object({
-    //             value: z.string().min(2, {
-    //                 message: "Location must be at least 2 character long",
-    //             }),
-    //         })
-    //     ).nonempty({
-    //         message: "At least one location is required"
-    //     }).min(1, {
-    //         message: "At least one location is required"
-    //     }),
     location: z
         .array(
             z.object({

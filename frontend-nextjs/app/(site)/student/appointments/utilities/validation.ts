@@ -1,4 +1,3 @@
-import axios from "axios";
 import * as z from "zod";
 
 export const meetingFormSchema = z.object({
@@ -11,15 +10,14 @@ export const meetingFormSchema = z.object({
     team: z.string({
         required_error: "Please select your meeting party",
     }),
-    invitees: z
-        .array(
-            z.object({
-                value: z.string().email({ message: "Please enter a valid email" }),
-            })
-        ).optional(),
     description: z.string({
         required_error: "Description must be at least 4 characters",
-    }).min(4).max(160),
+    }).min(4, {
+        message: "Description must be at least 4 characters",
+    }).max(300,
+        {
+            message: "Description must be less than 300 characters",
+        }),
     date: z.date({
         required_error: "Meeting date is required",
     }).refine((data) => {
@@ -31,8 +29,5 @@ export const meetingFormSchema = z.object({
     }),
     time: z.string({
         required_error: "Please select meeting time",
-    }),
-    duration: z.string({
-        required_error: "Please select meeting duration",
     }),
 });

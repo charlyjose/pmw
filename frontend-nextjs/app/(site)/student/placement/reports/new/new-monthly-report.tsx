@@ -22,6 +22,19 @@ import { Icons } from "@/components/icons";
 import { toast } from "@/registry/new-york/ui/use-toast";
 import { toast as hotToast } from "react-hot-toast";
 
+const acceptedTypes = [
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+];
+
+const acceptedFileTypesAliases = {
+  "application/pdf": "PDF",
+  "application/msword": "DOC",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+    "DOCX",
+};
+
 const formItemLayout = {
   labelCol: { span: 6 },
   wrapperCol: { span: 14 },
@@ -40,16 +53,18 @@ export function NewMonthlyReport() {
   }, []);
 
   function validateUpload(file) {
-    const isPDF = file.type === "application/pdf";
+    const validFileType = acceptedTypes.includes(file.type);
+
+    if (!validFileType) {
+      message.error(`${file.name} is not a supported file type`);
+    }
+
     const isLt2M = file.size / 1024 / 1024 < 2;
 
-    if (!isPDF) {
-      message.error(`${file.name} is not a pdf file`);
-    }
     if (!isLt2M) {
       message.error("File size must be less than 2MB");
     }
-    return (isPDF && isLt2M) || Upload.LIST_IGNORE;
+    return (validFileType && isLt2M) || Upload.LIST_IGNORE;
   }
 
   const normFile = (e: any) => {
@@ -61,7 +76,6 @@ export function NewMonthlyReport() {
 
   const onFinish = (data: any) => {
     setIsLoading(true);
-    console.log("Received values of form: ", data);
 
     const reportData = {
       title: data.title,
@@ -86,9 +100,11 @@ export function NewMonthlyReport() {
       report: {
         name: reportData.report.name,
         size: `${formatBytes(reportData.report.size)}`,
-        type: reportData.report.type.split("/")[1].toUpperCase(),  
-      }
+        type: acceptedFileTypesAliases[reportData.report.type],
+      },
     };
+
+    console.log(file_details);
 
     const API_URI = "http://localhost:8000";
     var token = session?.token;
@@ -158,50 +174,48 @@ export function NewMonthlyReport() {
           style={{ alignSelf: "left", alignContent: "left" }}
           layout="vertical"
         >
-          <Form.Item
-            name="title"
-            label="Title"
-            hasFeedback
-            className="font-medium p-0"
-            rules={[
-              {
-                required: true,
-                message: "Report title is required",
-              },
-            ]}
-          >
-            <Input />
-          </Form.Item>
+              <Form.Item
+                name="title"
+                label="Title"
+                hasFeedback
+                className="font-medium p-0"
+                rules={[
+                  {
+                    required: true,
+                    message: "Report title is required",
+                  },
+                ]}
+              >
+                <Input />
+              </Form.Item>
 
-          <Form.Item
-            name="month"
-            label="Month"
-            wrapperCol={{ span: 3 }}
-            hasFeedback
-            rules={[
-              {
-                required: true,
-                message: "Please a month for the report you are submitting",
-              },
-            ]}
-          >
-            <Select
-              placeholder="Please select a month"
-            >
-              <Option value="MONTH_1">Month 1</Option>
-              <Option value="MONTH_2">Month 2</Option>
-              <Option value="MONTH_3">Month 3</Option>
-              <Option value="MONTH_4">Month 4</Option>
-              <Option value="MONTH_5">Month 5</Option>
-              <Option value="MONTH_6">Month 6</Option>
-              <Option value="MONTH_7">Month 7</Option>
-              <Option value="MONTH_8">Month 8</Option>
-              <Option value="MONTH_9">Month 9</Option>
-              <Option value="MONTH_10">Month 10</Option>
-              <Option value="MONTH_11">Month 11</Option>
-              <Option value="MONTH_12">Month 12</Option>
-            </Select>
-          </Form.Item>
+              <Form.Item
+                name="month"
+                label="Month"
+                wrapperCol={{ span: 3 }}
+                hasFeedback
+                rules={[
+                  {
+                    required: true,
+                    message: "Please a month for the report you are submitting",
+                  },
+                ]}
+              >
+                <Select placeholder="Please select a month">
+                  <Option value="MONTH_1">Month 1</Option>
+                  <Option value="MONTH_2">Month 2</Option>
+                  <Option value="MONTH_3">Month 3</Option>
+                  <Option value="MONTH_4">Month 4</Option>
+                  <Option value="MONTH_5">Month 5</Option>
+                  <Option value="MONTH_6">Month 6</Option>
+                  <Option value="MONTH_7">Month 7</Option>
+                  <Option value="MONTH_8">Month 8</Option>
+                  <Option value="MONTH_9">Month 9</Option>
+                  <Option value="MONTH_10">Month 10</Option>
+                  <Option value="MONTH_11">Month 11</Option>
+                  <Option value="MONTH_12">Month 12</Option>
+                </Select>
+              </Form.Item>
 
           <Form.Item label="File" className="pt-3 font-medium">
             <Form.Item
@@ -223,7 +237,7 @@ export function NewMonthlyReport() {
                 beforeUpload={validateUpload}
                 multiple={false}
                 showUploadList={true}
-                accept=".pdf"
+                // accept=".pdf"
               >
                 <p className="ant-upload-drag-icon">
                   <InboxOutlined />
