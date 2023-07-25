@@ -19,14 +19,43 @@ class Department(str, Enum):
     CSD = "CSD"
 
 
-class SignUpForm(BaseModel):
+class UserStatus(str, Enum):
+    ACTIVE = "ACTIVE"
+    INACTIVE = "INACTIVE"
+
+
+class StudentStatus(str, Enum):
+    ON_PLACEMENT = "ON_PLACEMENT"
+    NOT_ON_PLACEMENT = "NOT_ON_PLACEMENT"
+    GRADUATED = "GRADUATED"
+    NOT_APPLICABLE = "NOT_APPLICABLE"
+
+
+class StudentLevel(str, Enum):
+    NOT_APPLICABLE = "NOT_APPLICABLE"
+    UNDERGRADUATE = "UNDERGRADUATE"
+    POSTGRADUATE = "POSTGRADUATE"
+    PHD = "PHD"
+
+
+class SignUpFormForStudent(BaseModel):
+    studentStatus: Optional[StudentStatus] = StudentStatus.NOT_APPLICABLE
+    studentLevel: Optional[StudentLevel] = StudentLevel.NOT_APPLICABLE
+
+
+class SignUpFormWithRole(BaseModel):
+    role: Role
+
+
+class SignUpFormWithDepartment(BaseModel):
+    department: Department
+
+
+class SignUpFormGeneral(BaseModel):
     firstName: str
     lastName: str
     name: Optional[str] = ""
-    role: Role
-    department: Department
     email: EmailStr
-    password: str
 
     # Validater to format name field to title case
     @validator("firstName", "lastName", always=True)
@@ -39,13 +68,19 @@ class SignUpForm(BaseModel):
         return values["firstName"] + " " + values["lastName"]
 
 
-class SignUpUser(BaseModel):
-    name: str
-    firstName: str
-    lastName: str
-    role: Role
-    department: Department
-    email: str
+class SignUpFormWithoutPassword(SignUpFormForStudent, SignUpFormWithRole, SignUpFormWithDepartment, SignUpFormGeneral):
+    pass
+
+
+class SignUpFormWithPassword(BaseModel):
+    password: str
+
+
+class SignUpForm(SignUpFormWithoutPassword, SignUpFormWithPassword):
+    pass
+
+
+class SignUpUserInDB(SignUpFormWithoutPassword):
     hashedPassword: str
 
 

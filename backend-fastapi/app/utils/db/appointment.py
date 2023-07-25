@@ -97,7 +97,6 @@ async def get_all_future_appointments_by_team_from_db(team: str) -> list:
     return await prisma.appointment.find_many(where={"team": team, "date": {"gte": datetime.today()}})
 
 
-
 # A helper function to a specific appointment from the database by id
 async def get_appointment_by_id_from_db(id: str) -> Appointment:
     '''

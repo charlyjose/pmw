@@ -21,6 +21,7 @@ class AppointmentTeam(str, Enum):
     TUTOR = "TUTOR"
     STUDENT = "STUDENT"
 
+
 class AppointmentStatus(str, Enum):
     CONFIRMED = "CONFIRMED"
     CANCELLED = "CANCELLED"

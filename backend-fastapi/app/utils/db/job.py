@@ -24,6 +24,7 @@ async def get_all_jobs_from_db() -> List[Job]:
     return await prisma.job.find_many()
 
 
+# A helper function to get all jobs from the database with pagination
 async def get_all_jobs_paginated(skip: int, take: int = 10) -> List[Job]:
     '''
     A helper function to get all appointments from the database

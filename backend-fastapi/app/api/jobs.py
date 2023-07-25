@@ -5,15 +5,14 @@ from fastapi import status as http_status
 from fastapi.encoders import jsonable_encoder
 from prisma.models import Job
 
-import app.pnp_helpers.user as user_pnp_helpers
-import app.pnp_helpers.auth as auth_pnp_helpers
-
 from app.api.auth import ValidateUserRole
 from app.api.models import action_status
 from app.api.models.auth import Role as UserRole
 from app.api.models.job import CleanedJobForUser, CleanedJobWithCreaterName, JobForm, JobInDB
 from app.api.models.response import JSONResponseModel
+from app.pnp_helpers.auth import no_access_to_content_response
 from app.pnp_helpers.client_response import json_response
+from app.pnp_helpers.user import user_not_found_response
 from app.utils.auth import pyJWTDecodedUserId
 from app.utils.db import job as job_db
 from app.utils.db import user as user_db
@@ -53,8 +52,8 @@ async def create_new_job(user_id: str = Depends(pyJWTDecodedUserId()), jobForm: 
                 return ClientResponse(**response)()
 
             # Create a new cleaned job object with the owner's name and convert it to a JSON compatible object
-            owner = await user_db.get_user_name_by_user_id(user_id)
-            cleaned_job = CleanedJobWithCreaterName(**new_job.dict(), createdBy=owner.name).dict()
+            owner_name = await user_db.get_user_name_by_user_id(user_id)
+            cleaned_job = CleanedJobWithCreaterName(**new_job.dict(), createdBy=owner_name).dict()
             json_compatible_cleaned_job = jsonable_encoder(cleaned_job)
 
             message = "Job created"
@@ -66,15 +65,15 @@ async def create_new_job(user_id: str = Depends(pyJWTDecodedUserId()), jobForm: 
             )
             return ClientResponse(**response)()
         else:
-            return auth_pnp_helpers.no_access_to_content(message="No valid previlages to create job")
+            return no_access_to_content_response(message="No valid previlages to create job")
     else:
-        return user_pnp_helpers.user_not_found()
+        return user_not_found_response()
 
 
 @router.get("/jobs", summary="View jobs", tags=["jobs"])
-async def get_all_jobs_paginated(page: int, user_id: str = Depends(pyJWTDecodedUserId())):
+async def get_all_jobs_paginated(page: int = 1, user_id: str = Depends(pyJWTDecodedUserId())):
     if user_id:
-        # Page must be greater than 0
+        # Page nmber should be greater than 0
         if page > 0:
             skip = (page - 1) * 10
             take = 10
@@ -91,16 +90,16 @@ async def get_all_jobs_paginated(page: int, user_id: str = Depends(pyJWTDecodedU
             hasMore = len(jobs) == 10
 
             data = {"jobs": job_list, "hasMore": hasMore}
-            message = "Job created"
+            message = "Jobs fetched"
             response = json_response(
                 http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_FETCHED, message=message, data=data
             )
             return ClientResponse(**response)()
         else:
-            message = "Page must be greater than 0"
+            message = "Page number should be greater than 0"
             response = json_response(
                 http_status=http_status.HTTP_204_NO_CONTENT, action_status=action_status.DATA_NOT_FOUND, message=message
             )
             return ClientResponse(**response)()
     else:
-        return user_pnp_helpers.user_not_found()
+        return user_not_found_response()

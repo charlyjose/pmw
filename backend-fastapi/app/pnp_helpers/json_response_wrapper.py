@@ -5,14 +5,14 @@ from app.pnp_helpers.client_response import json_response
 from app.utils.reponse import ClientResponse
 
 
-def no_access_to_content_response(
-    http_status: int = http_status.HTTP_403_FORBIDDEN,
-    action_status: str = action_status.UNAUTHORIZED,
-    message: str = "No valid access previlages",
+def default_response(
+    http_status: int = http_status.HTTP_204_NO_CONTENT,
+    action_status: str = action_status.DATA_NOT_FOUND,
+    message: str = "User not found",
     data: dict = None,
 ):
     """
-    Boilerplate JSON response for invalid access previlages
+    Boilerplate JSON response for most use cases
     """
 
     # User not found

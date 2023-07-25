@@ -4,21 +4,19 @@ from typing import Any, Optional
 from fastapi import APIRouter, Depends, UploadFile
 from fastapi import status as http_status
 from fastapi.encoders import jsonable_encoder
+from starlette.responses import FileResponse
 
-import app.pnp_helpers.user as user_pnp_helpers
-import app.pnp_helpers.auth as auth_pnp_helpers
-
+from app.api.auth import ValidateUserRole
 from app.api.models import action_status
+from app.api.models.auth import Role as UserRole
 from app.api.models.placement_report import CleanedReportForUser, ReportForm, ReportInDB
 from app.api.models.response import JSONResponseModel
+from app.pnp_helpers.auth import no_access_to_content_response
 from app.pnp_helpers.client_response import json_response
+from app.pnp_helpers.user import user_not_found_response
 from app.utils.auth import pyJWTDecodedUserId
 from app.utils.db import placement_report as placement_report_db
 from app.utils.reponse import ClientResponse
-from starlette.responses import FileResponse
-from app.api.auth import ValidateUserRole
-from app.api.models.auth import Role as UserRole
-
 
 router = APIRouter()
 
@@ -127,7 +125,7 @@ async def get_own_placement_report(user_id: str = Depends(pyJWTDecodedUserId()))
         return ClientResponse(**response)()
 
     else:
-        return user_pnp_helpers.user_not_found()
+        return user_not_found_response()
 
 
 @router.get("/student/placement/reports/download", summary="Download placement report", tags=["placement_reports"])
@@ -175,6 +173,6 @@ async def download_placement_report(report_id: str, user_id: str = Depends(pyJWT
                 headers={"Content-Disposition": "attachment; filename=" + report.report_name},
             )
         else:
-            return auth_pnp_helpers.no_access_to_content(message="No valid previlages to access this content")
+            return no_access_to_content_response(message="No valid previlages to access this content")
     else:
-        return user_pnp_helpers.user_not_found()
+        return user_not_found_response()

@@ -2,22 +2,20 @@ from typing import Union
 
 from fastapi import APIRouter, Depends
 from fastapi import status as http_status
-
-import app.pnp_helpers.user as user_pnp_helpers
-import app.pnp_helpers.auth as auth_pnp_helpers
-
 from fastapi.encoders import jsonable_encoder
 
+from app.api.auth import ValidateUserRole
 from app.api.models import action_status
-from app.api.models.appointment import AppointmentForm, AppointmentInDB, CleanedAppointment, AppointmentStatus
+from app.api.models.appointment import AppointmentForm, AppointmentInDB, AppointmentStatus, CleanedAppointment
+from app.api.models.auth import Role as UserRole
 from app.api.models.response import JSONResponseModel
+from app.pnp_helpers.auth import no_access_to_content_response
 from app.pnp_helpers.client_response import json_response
+from app.pnp_helpers.user import user_not_found_response
 from app.utils.auth import pyJWTDecodedUserId
 from app.utils.db import appointment as appointment_db
 from app.utils.db import user as user_db
 from app.utils.reponse import ClientResponse
-from app.api.auth import ValidateUserRole
-from app.api.models.auth import Role as UserRole
 
 router = APIRouter()
 
@@ -58,7 +56,7 @@ async def create_new_appointment(
         return ClientResponse(**response)()
 
     # User not found
-    return user_pnp_helpers.user_not_found()
+    return user_not_found_response()
 
 
 # Get own all future appointments
@@ -89,13 +87,20 @@ async def get_all_my_future_appointments(user_id: str = Depends(pyJWTDecodedUser
         return ClientResponse(**response)()
 
     # User not found
-    return user_pnp_helpers.user_not_found()
+    return user_not_found_response()
 
 
-# Get all future appointments for team CSD
-@router.get("/appointments/team/future", summary="Get all future appointments for team CSD", tags=["appointments"])
+# BUG: BUSINESS LOGIC NOT AS INTENDED.
+# An appointment created by a student for a
+# tutor will be visible to all tutors in the
+# current implementation. This is not as intended.
+# Expected behaviour: An appointment created by a student for a tutor
+# should only be visible to the intended tutor.
+
+
+# Get all future appointments for a team
+@router.get("/appointments/team/future", summary="Get all future appointments for a team", tags=["appointments"])
 async def get_all_future_appointments_for_team_csd(team: str, user_id: str = Depends(pyJWTDecodedUserId())) -> JSONResponseModel:
-    # Check if the team exists
     valid_team = team.upper() in UserRole.__members__.keys()
     if valid_team:
         roles = [UserRole.CSD, UserRole.TUTOR, UserRole.ADMIN]
@@ -125,9 +130,9 @@ async def get_all_future_appointments_for_team_csd(team: str, user_id: str = Dep
                 )
                 return ClientResponse(**response)()
             else:
-                return auth_pnp_helpers.no_access_to_content(message="No valid previlages to access this content")
+                return no_access_to_content_response(message="No valid previlages to access this content")
         else:
-            return user_pnp_helpers.user_not_found()
+            return user_not_found_response()
     else:
         message = "Invalid team"
         response = json_response(http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.INVALID_INPUT, message=message)
@@ -202,9 +207,9 @@ async def save_response_for_a_specific_appointment(id: str, status: str, user_id
                     )
                     return ClientResponse(**response)()
         else:
-            return auth_pnp_helpers.no_access_to_content(message="No valid previlages to respond to this appointment")
+            return no_access_to_content_response(message="No valid previlages to respond to this appointment")
     else:
-        return user_pnp_helpers.user_not_found()
+        return user_not_found_response()
 
     message = "Response saved"
     response = json_response(http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_CREATED, message=message)

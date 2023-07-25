@@ -38,4 +38,26 @@ async def get_all_users() -> list:
 
 async def get_user_name_by_user_id(user_id: str) -> Optional[User]:
     user = await prisma.user.find_unique(where={"id": user_id})
-    return user if user else None
+    return user.name if user else None
+
+
+# Helper function to get the student department
+async def get_user_department(user_id: str) -> Optional[str]:
+    """
+    Helper function to get the student department
+    :param user_id: str
+    :return department: str
+    """
+    user = await prisma.user.find_unique(where={"id": user_id})
+    return user.department if user else None
+
+
+# Helper function to get user user firstName and lastName for a list of user ids
+async def get_users_by_user_ids(user_ids: List[str]) -> List[User]:
+    """
+    Helper function to get user data for a list of user ids
+    :param user_ids: List[str]
+    :return users: List[User]
+    """
+    users = await prisma.user.find_many(where={"id": {"in": user_ids}})
+    return users if users else None

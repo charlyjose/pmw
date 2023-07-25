@@ -1,23 +1,9 @@
-from pydantic import BaseModel
-from enum import Enum
+from app.api.models.auth import SignUpFormForStudent, SignUpFormGeneral, SignUpFormWithDepartment, SignUpFormWithoutPassword
 
 
-class UserStatus(str, Enum):
-    ACTIVE = "ACTIVE"
-    INACTIVE = "INACTIVE"
+class CleanedUserData(SignUpFormWithoutPassword):
+    pass
 
 
-class StudentStatus(str, Enum):
-    ON_PLACEMENT = "ON_PLACEMENT"
-    NOT_ON_PLACEMENT = "NOT_ON_PLACEMENT"
-    GRADUATED = "GRADUATED"
-    NOT_APPLICABLE = "NOT_APPLICABLE"
-
-
-class CleanedUserData(BaseModel):
-    name: str
-    firstName: str
-    lastName: str
-    role: str
-    department: str
-    email: str
+class CleanedStudentData(SignUpFormGeneral, SignUpFormForStudent, SignUpFormWithDepartment):
+    pass

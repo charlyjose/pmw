@@ -1,8 +1,10 @@
 from datetime import datetime
 from enum import Enum
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel
+
+from app.api.models.auth import StudentLevel
 
 
 class PlacementStudentVisa(str, Enum):
@@ -71,17 +73,15 @@ class PlacementOverseas(str, Enum):
 
 
 class PlacementApplicationForm(BaseModel):
-    # 1. Student details
     firstName: str
     lastName: str
-    studentNumber: int
+    studentNumber: str
     email: str
     programme: str
     department: str
     contactNumber: str
     studentVisa: PlacementStudentVisa
 
-    # 2. Placement provider details
     organisationName: str
     organisationAddress: str
     organisationPostcode: str
@@ -94,7 +94,6 @@ class PlacementApplicationForm(BaseModel):
     organisationLocationGoogleMapsLat: float
     organisationLocationGoogleMapsLng: float
 
-    # 3. Placement Role Details
     roleTitle: str
     roleStartDate: datetime
     roleEndDate: datetime
@@ -106,37 +105,115 @@ class PlacementApplicationForm(BaseModel):
     roleDescription: str
     probationPeriodDetails: Optional[str] = ""
 
-    # 4. Work Factors
     remoteWorking: PlacementRemoteWorking
     remoteWorkingOverview: Optional[str] = ""
     remoteWorkingReason: Optional[str] = ""
 
-    # 5. Transport and Travel Factors
     travelMethod: PlacementTravelMethod
     travelMethodDetails: Optional[str] = ""
     travelDifferentLocation: PlacementTravelDifferentLocation
     travelDifferentLocationDetails: Optional[str] = ""
 
-    # 6. Location and Regional Factors
     locationRisks: PlacementLocationRisks
     locationRisksDetails: Optional[str]
     accommodationArrangements: PlacementAccommodationArrangements
     accommodationArrangementsDetails: Optional[str] = ""
 
-    # 7. Health and Environmental Factors
     precautionaryMeasures: PlacementPrecautionaryMeasures
     precautionaryMeasuresDetails: Optional[str] = ""
 
-    # 8. Personal Factors
     healthConditions: PlacementHealthConditions
     healthConditionsDetails: Optional[str] = ""
     disability: PlacementDisability
     disabilityDetails: Optional[str] = ""
 
-    # 9. Policies and Insurance
     placementOverseas: PlacementOverseas
 
-    # 10. Declaration and Signature
     declarationName: str
     declarationSignature: str
     declarationDate: datetime
+
+
+class PlacementApplicationInDB(PlacementApplicationForm):
+    ownerId: str
+    reviewerId: str
+
+
+class PlacementApplicationStatus(str, Enum):
+    PENDING = "PENDING"
+    REVIEW = "REVIEW"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+
+
+class PlacementApplicationInDBUpdateStatus(PlacementApplicationForm):
+    status: PlacementApplicationStatus
+
+
+class PlacementApplicationInDBUpdateReviewer(PlacementApplicationForm):
+    reviewerId: str
+
+
+class CleanedPlacementApplicationForUser(PlacementApplicationForm):
+    """
+    A pydantic model to represent a cleaned placement application:
+    - Removes the ownerId and reviewerId field for security reasons
+    """
+
+    id: str
+    status: PlacementApplicationStatus
+    createdAt: datetime
+    updatedAt: datetime
+
+
+class CleanedPlacementApplicationForTutor(CleanedPlacementApplicationForUser):
+    studentLevel: StudentLevel
+
+
+# class CleanedPlacementApplicationForUser(PlacementApplicationForm):
+#     """
+#     A pydantic model to represent a cleaned placement application:
+#     - Removes the ownerId and reviewerId field for security reasons
+#     """
+
+#     status: PlacementApplicationStatus
+#     createdAt: datetime
+#     updatedAt: datetime
+
+
+class CleanedPlacementApplicationWithReviewerName(CleanedPlacementApplicationForUser):
+    """
+    A pydantic model to represent a cleaned placement application:
+    - Removes the ownerId and reviewerId field for security reasons
+    - Add reviewer full name
+    """
+
+    reviewedBy: str
+
+
+class CleanedPlacementApplicationWithCreaterAndReviewerName(CleanedPlacementApplicationForUser):
+    """
+    A pydantic model to represent a cleaned placement application:
+    - Removes the ownerId and reviewerId field for security reasons
+    - Add owner and reviewer full name
+    """
+
+    reviewedBy: str
+
+
+class ReviewCommentsForm(BaseModel):
+    comment_list: List[str]
+
+
+# class ReviewCommentsInDB(ReviewCommentsForm):
+#     reviewerId: str
+#     applicationId: str
+#     comment: str
+#     createdAt: datetime
+#     updatedAt: datetime
+
+
+class ReviewCommentsInDB(BaseModel):
+    ownerId: str
+    applicationId: str
+    comments: List[str]

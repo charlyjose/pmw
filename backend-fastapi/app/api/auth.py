@@ -5,7 +5,7 @@ from fastapi import APIRouter
 from fastapi import status as http_status
 
 from app.api.models import action_status
-from app.api.models.auth import SignIn, SignUpForm, SignUpUser
+from app.api.models.auth import SignIn, SignUpForm, SignUpUserInDB
 from app.api.models.response import JSONResponseModel
 from app.api.models.user import CleanedUserData
 from app.pnp_helpers.client_response import json_response
@@ -33,7 +33,7 @@ class ValidateUserRole:
 async def signup(signupForm: SignUpForm) -> JSONResponseModel:
     hashedPassword = encryptPassword(signupForm.password)
     signupUser = {**signupForm.dict(), "hashedPassword": hashedPassword}
-    newUserData = SignUpUser(**signupUser)
+    newUserData = SignUpUserInDB(**signupUser)
 
     try:
         user = await user_db.create_new_user(newUserData.dict())
