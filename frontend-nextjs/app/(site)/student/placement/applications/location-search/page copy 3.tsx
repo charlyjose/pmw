@@ -35,12 +35,8 @@ import usePlacesAutocomplete, {
 } from "use-places-autocomplete";
 
 export function LocationSearch(props: any) {
-  // const [lat, setLat] = useState(52.620674);
-  // const [lng, setLng] = useState(-1.125511);
-  const { searchAddress, searchLat, searchLng } = props;
-  // const [address, setAddress] = useState(searchAddress);
-  const [lat, setLat] = useState(searchLat);
-  const [lng, setLng] = useState(searchLng);
+  const [lat, setLat] = useState(52.620674);
+  const [lng, setLng] = useState(-1.125511);
 
   const libraries = useMemo(() => ["places"], []);
   const mapCenter = useMemo(() => ({ lat: lat, lng: lng }), [lat, lng]);

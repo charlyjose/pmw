@@ -78,9 +78,11 @@ export function UserAuthForm() {
     formData.append("email", data.email);
     formData.append("password", data.password);
 
+    const signupData = { ...data };
+
     const API_URI = "http://localhost:8000";
     axios
-      .post(`${API_URI}/api/auth/signup`, data)
+      .post(`${API_URI}/api/auth/signup`, signupData)
       .then((e) => {
         setTimeout(() => {
           setIsLoading(false);
@@ -159,6 +161,74 @@ export function UserAuthForm() {
             </FormItem>
           )}
         />
+
+        {/* Only show this component if the role is STUDENT */}
+        {form.watch("role") === "STUDENT" && (
+          <>
+            <FormField
+              control={form.control}
+              name="studentLevel"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Level</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select your study level" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="UNDERGRADUATE">
+                        Under Graduate
+                      </SelectItem>
+                      <SelectItem value="POSTGRADUATE">
+                        Post Graduate
+                      </SelectItem>
+                      <SelectItem value="PHD">PhD</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    We use this information to tag you into correct study level
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="studentStatus"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Status</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select your current status" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="ON_PLACEMENT">On Placement</SelectItem>
+                      <SelectItem value="NOT_ON_PLACEMENT">
+                        Not on Placement
+                      </SelectItem>
+                      <SelectItem value="GRADUATED">Graduated</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    We use this information to assist you with your placement
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
+        )}
 
         <FormField
           control={form.control}

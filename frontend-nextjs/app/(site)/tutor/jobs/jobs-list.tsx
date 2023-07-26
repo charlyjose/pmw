@@ -1,6 +1,6 @@
 "use client";
 
-const PAGE_TYPE = "CSD";
+const PAGE_TYPE = "TUTOR";
 const UNAUTHORISED_REDIRECTION_LINK = "/signin?callbackUrl=/protected/server";
 
 import { useSession } from "next-auth/react";
@@ -14,6 +14,7 @@ import {
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
+
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Icons } from "@/components/icons";
 
@@ -91,7 +92,7 @@ function Jobs() {
       {status === "loading" ? (
         <div className="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed">
           <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
-            <Icons.spinner className="mr-2 w-20 h-20 text-purple-600 animate-spin" />
+            <Icons.spinner className="mr-2 w-20 h-20 text-red-600 animate-spin" />
             <h3 className="mt-4 text-lg font-semibold">Fetching jobs</h3>
           </div>
         </div>

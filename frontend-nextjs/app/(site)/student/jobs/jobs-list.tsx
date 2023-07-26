@@ -15,6 +15,7 @@ import {
   QueryClientProvider,
 } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { Icons } from "@/components/icons";
 
 import {
   Table,
@@ -88,7 +89,12 @@ function Jobs() {
   return (
     <div className="space-y-4">
       {status === "loading" ? (
-        <div>Loading...</div>
+        <div className="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed">
+          <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
+            <Icons.spinner className="mr-2 w-20 h-20 text-lime-600 animate-spin" />
+            <h3 className="mt-4 text-lg font-semibold">Fetching jobs</h3>
+          </div>
+        </div>
       ) : status === "error" ? (
         <div>Error: {error.message}</div>
       ) : (
@@ -113,7 +119,11 @@ function Jobs() {
                   <TableCell className="font-medium">{job.role}</TableCell>
                   <TableCell className="font-light">{job.company}</TableCell>
                   <TableCell className="font-light">{job.salary}</TableCell>
-                  <TableCell className="font-medium">{job.mode}</TableCell>
+                  <TableCell className="font-medium">
+                    {" "}
+                    {job.mode.charAt(0).toUpperCase() +
+                      job.mode.slice(1).toLowerCase()}
+                  </TableCell>
                   <TableCell className="font-light">
                     {job.location.join(", ")}
                   </TableCell>

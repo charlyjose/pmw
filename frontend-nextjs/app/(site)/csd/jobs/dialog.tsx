@@ -78,7 +78,9 @@ export function DialogDemo({ job }) {
                 <span className="px-1 bg-purple-300 mr-2"></span>
                 DEADLINE
               </div>
-              <div className="text-sm font-normal">{new Date(job.deadline).toDateString()}</div>
+              <div className="text-sm font-normal">
+                {new Date(job.deadline).toDateString()}
+              </div>
             </div>
           ) : (
             <div></div>
@@ -106,7 +108,8 @@ export function DialogDemo({ job }) {
               </div>
               <div className="text-sm font-normal">
                 <span>
-                  {job.mode.charAt(0).toUpperCase() + job.mode.slice(1)}
+                  {job.mode.charAt(0).toUpperCase() +
+                    job.mode.slice(1).toLowerCase()}
                 </span>
               </div>
             </div>

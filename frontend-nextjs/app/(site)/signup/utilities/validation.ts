@@ -20,7 +20,12 @@ export const signupFormSchema = z.object({
   role: z.string({
     required_error: "User role is required",
   }),
-  department: z.string({
+  studentLevel: z.string({
+    required_error: "Level is required",
+  }).optional(),
+  studentStatus: z.string({
+    required_error: "Status is required",
+  }).optional(), department: z.string({
     required_error: "Department is required",
   }),
   email: z

@@ -1,6 +1,6 @@
 "use client";
 
-const PAGE_TYPE = "CSD";
+const PAGE_TYPE = "TUTOR";
 const UNAUTHORISED_REDIRECTION_LINK = "/signin?callbackUrl=/protected/server";
 
 import { useSession } from "next-auth/react";
@@ -15,7 +15,6 @@ import {
   QueryClientProvider,
 } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { Icons } from "@/components/icons";
 
 import {
   Table,
@@ -33,7 +32,7 @@ const queryClient = new QueryClient();
 export async function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Jobs />
+      <PlacementApplications />
     </QueryClientProvider>
   );
 }
@@ -54,7 +53,7 @@ async function fetchJobs(page = 1, token) {
   return data;
 }
 
-function Jobs() {
+function PlacementApplications() {
   const { data: session } = useSession();
   const router = useRouter();
 
@@ -89,12 +88,7 @@ function Jobs() {
   return (
     <div className="space-y-4">
       {status === "loading" ? (
-        <div className="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed">
-          <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
-            <Icons.spinner className="mr-2 w-20 h-20 text-purple-600 animate-spin" />
-            <h3 className="mt-4 text-lg font-semibold">Fetching jobs</h3>
-          </div>
-        </div>
+        <div>Loading...</div>
       ) : status === "error" ? (
         <div>Error: {error.message}</div>
       ) : (
@@ -105,12 +99,12 @@ function Jobs() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="font-medium">Role</TableHead>
-                <TableHead className="font-medium">Company</TableHead>
-                <TableHead className="font-medium">Salary</TableHead>
-                <TableHead className="font-medium">Mode</TableHead>
-                <TableHead className="font-medium">Location</TableHead>
-                <TableHead className="font-medium">Deadline</TableHead>
+                <TableHead className="font-medium">Student</TableHead>
+                <TableHead className="font-medium">Level</TableHead>
+                <TableHead className="font-medium">Locality</TableHead>
+                <TableHead className="font-medium">Submission Date</TableHead>
+                <TableHead className="font-medium">Start Date</TableHead>
+                <TableHead className="font-medium">End Date</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

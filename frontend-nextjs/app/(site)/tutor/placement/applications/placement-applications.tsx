@@ -1,6 +1,6 @@
 "use client";
 
-const PAGE_TYPE = "CSD";
+const PAGE_TYPE = "TUTOR";
 const UNAUTHORISED_REDIRECTION_LINK = "/signin?callbackUrl=/protected/server";
 
 import { useSession } from "next-auth/react";
@@ -14,8 +14,16 @@ import {
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
+
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Icons } from "@/components/icons";
+import {
+  CheckCircledIcon,
+  CrossCircledIcon,
+  QuestionMarkCircledIcon,
+  CalendarIcon,
+} from "@radix-ui/react-icons";
+import { Badge } from "@/registry/new-york/ui/badge";
 
 import {
   Table,
@@ -33,7 +41,7 @@ const queryClient = new QueryClient();
 export async function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Jobs />
+      <PlacementApplications />
     </QueryClientProvider>
   );
 }
@@ -48,13 +56,16 @@ async function fetchJobs(page = 1, token) {
 
   const API_URI = "http://localhost:8000";
   const { data } = await (
-    await axios.get(`${API_URI}/api/jobs?page=${page + 1}`, config)
+    await axios.get(
+      `${API_URI}/api/tutor/placement/applications?page=${page + 1}`,
+      config
+    )
   ).data;
 
   return data;
 }
 
-function Jobs() {
+function PlacementApplications() {
   const { data: session } = useSession();
   const router = useRouter();
 
@@ -62,8 +73,15 @@ function Jobs() {
   const [page, setPage] = React.useState(0);
   const [token, setToken] = React.useState(session?.token);
 
+  const axiosConfig = {
+    headers: {
+      "Content-Type": `application/json`,
+      Authorization: `Bearer ${token}`,
+    },
+  };
+
   const { status, data, error, isFetching, isPreviousData } = useQuery({
-    queryKey: ["jobs", page, token],
+    queryKey: ["applications", page, token],
     queryFn: () => fetchJobs(page, token),
     keepPreviousData: true,
     staleTime: 5000,
@@ -91,8 +109,10 @@ function Jobs() {
       {status === "loading" ? (
         <div className="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed">
           <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
-            <Icons.spinner className="mr-2 w-20 h-20 text-purple-600 animate-spin" />
-            <h3 className="mt-4 text-lg font-semibold">Fetching jobs</h3>
+            <Icons.spinner className="mr-2 w-20 h-20 text-red-600 animate-spin" />
+            <h3 className="mt-4 text-lg font-semibold">
+              Fetching applications
+            </h3>
           </div>
         </div>
       ) : status === "error" ? (
@@ -105,34 +125,56 @@ function Jobs() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="font-medium">Role</TableHead>
-                <TableHead className="font-medium">Company</TableHead>
-                <TableHead className="font-medium">Salary</TableHead>
-                <TableHead className="font-medium">Mode</TableHead>
-                <TableHead className="font-medium">Location</TableHead>
-                <TableHead className="font-medium">Deadline</TableHead>
+                <TableHead className="font-medium">Student</TableHead>
+                <TableHead className="font-medium">Level</TableHead>
+                <TableHead className="font-medium">Placement</TableHead>
+                <TableHead className="font-medium">Student Visa</TableHead>
+                <TableHead className="font-medium">Role Start</TableHead>
+                <TableHead className="font-medium">Last Update</TableHead>
+                <TableHead className="font-medium">Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.jobs.map((job) => (
-                <TableRow key={job.id}>
-                  <TableCell className="font-medium">{job.role}</TableCell>
-                  <TableCell className="font-light">{job.company}</TableCell>
-                  <TableCell className="font-light">{job.salary}</TableCell>
+              {data.applications.map((application) => (
+                <TableRow key={application.id}>
                   <TableCell className="font-medium">
-                    {" "}
-                    {job.mode.charAt(0).toUpperCase() +
-                      job.mode.slice(1).toLowerCase()}
+                    {application.declarationName}
                   </TableCell>
                   <TableCell className="font-light">
-                    {job.location.join(", ")}
+                    {application.studentLevel
+                      .toUpperCase()
+                      .replace("_", " ")
+                      .charAt(0) +
+                      application.studentLevel.slice(1).toLowerCase()}
                   </TableCell>
-
                   <TableCell className="font-medium">
-                    {new Date(job.deadline).toDateString()}
+                    {application.placementOverseas ? "Overseas" : "Local"}
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    {application.studentVisa ? "Yes" : "No"}
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    {new Date(application.roleStartDate).toDateString()}
                   </TableCell>
                   <TableCell className="font-light">
-                    <DialogDemo job={job} />
+                    {new Date(application.updatedAt).toDateString()}
+                  </TableCell>
+                  <TableCell className="font-light">
+                    {application.status.toUpperCase() === "APPROVED" ? (
+                      <Badge variant="outline">APPROVED</Badge>
+                    ) : application.status.toUpperCase() === "REVIEW" ? (
+                      <Badge variant="secondary">REVIEW</Badge>
+                    ) : application.status.toUpperCase() === "REJECTED" ? (
+                      <Badge variant="destructive">REJECTED</Badge>
+                    ) : (
+                      <Badge variant="default">PENDING</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="font-light">
+                    <DialogDemo
+                      application={application}
+                      axiosConfig={axiosConfig}
+                    />
                   </TableCell>
                 </TableRow>
               ))}

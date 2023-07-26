@@ -55,14 +55,6 @@ export function UserNav({ user }) {
               <span className=" font-bold">Department: </span>
               {user.department.toUpperCase()}
             </p>
-            <p className="text-xs leading-none text-muted-foreground">
-              <span className=" font-bold">Level: </span>
-              {user.studentLevel.toUpperCase()}
-            </p>
-            <p className="text-xs leading-none text-muted-foreground">
-              <span className=" font-bold">Status: </span>
-              {user.studentStatus.toUpperCase()}
-            </p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
