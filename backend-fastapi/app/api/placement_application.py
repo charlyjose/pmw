@@ -10,11 +10,10 @@ from app.api.models import action_status
 from app.api.models.auth import Role as UserRole
 from app.api.models.placement_application import (
     CleanedPlacementApplicationForTutor,
-    CleanedPlacementApplicationWithCreaterAndReviewerName,
+    CleanedPlacementApplicationWithCreaterAndReviewerNameAndComments,
     PlacementApplicationForm,
     PlacementApplicationInDB,
     PlacementApplicationInDBUpdateStatus,
-    CleanedPlacementApplicationWithCreaterAndReviewerNameAndComments,
 )
 from app.api.models.placement_application import PlacementApplicationStatus as application_status
 from app.api.models.placement_application import ReviewCommentsForm, ReviewCommentsInDB
@@ -249,6 +248,8 @@ async def change_placement_application_status(id: str, status: str, user_id: str
                 return ClientResponse(**response)()
         else:
             return no_access_to_content_response(message="No valid previlages to change placement application status")
+    else:
+        return user_not_found_response()
 
 
 async def read_placement_application_review_comments(review_comments: ReviewCommentsForm) -> PlacementApplicationForm:
@@ -288,38 +289,5 @@ async def add_review_comments_to_placement_application(
                 )
         else:
             return no_access_to_content_response(message="No valid previlages to add review comments to placement application")
-
-
-# # Add review comments to a placement application
-# @router.put("/tutor/placement/application/review", summary="Add review comments to a placement application", tags=["placement_application"])
-# async def add_review_comments_to_placement_application(
-#     id: str,
-#     review_comments: ReviewCommentsForm = Depends(read_placement_application_review_comments),
-#     user_id: str = Depends(pyJWTDecodedUserId()),
-# ) -> JSONResponseModel:
-#     if user_id:
-#         # Only tutors can add review comments to placement applications
-#         roles = [UserRole.TUTOR]
-#         valid_user_role = await ValidateUserRole(user_id, roles)()
-#         if valid_user_role:
-#             application = await placement_application_db.get_application_by_id(id)
-#             if application:
-#                 update = ReviewCommentsInDB(ownerId=user_id, applicationId=id, comments=review_comments.comment_list).dict()
-#                 updated_application = await placement_application_review_comments_db.create_or_update_placement_application_review_comment(
-#                     update
-#                 )
-#                 if updated_application:
-#                     message = "Review comments added"
-#                     return default_response(http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_UPDATED, message=message)
-#                 else:
-#                     message = "Review comments not added"
-#                     return default_response(
-#                         http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.DATA_NOT_UPDATED, message=message
-#                     )
-#             else:
-#                 message = "Application not found"
-#                 return default_response(
-#                     http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.DATA_NOT_FOUND, message=message
-#                 )
-#         else:
-#             return no_access_to_content_response(message="No valid previlages to add review comments to placement application")
+    else:
+        return user_not_found_response()
