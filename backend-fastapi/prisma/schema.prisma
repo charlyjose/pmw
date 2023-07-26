@@ -240,6 +240,7 @@ enum PlacementApplicationOverseas {
 }
 
 enum PlacementApplicationStatus {
+  SUBMITTED
   PENDING
   REVIEW
   APPROVED
@@ -326,7 +327,18 @@ model PlacementApplicationReviewComments {
   owner         User                 @relation(fields: [ownerId], references: [id])
   applicationId String               @unique @db.ObjectId
   application   PlacementApplication @relation(fields: [applicationId], references: [id])
-  comments      String[]
+  comments      String
   createdAt     DateTime             @default(now())
   updatedAt     DateTime             @updatedAt
 }
+
+// model PlacementApplicationReviewComments {
+//   id            String               @id @default(auto()) @map("_id") @db.ObjectId
+//   ownerId       String               @db.ObjectId
+//   owner         User                 @relation(fields: [ownerId], references: [id])
+//   applicationId String               @unique @db.ObjectId
+//   application   PlacementApplication @relation(fields: [applicationId], references: [id])
+//   comments      String[]
+//   createdAt     DateTime             @default(now())
+//   updatedAt     DateTime             @updatedAt
+// }

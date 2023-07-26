@@ -14,6 +14,7 @@ from app.api.models.placement_application import (
     PlacementApplicationForm,
     PlacementApplicationInDB,
     PlacementApplicationInDBUpdateStatus,
+    CleanedPlacementApplicationWithCreaterAndReviewerNameAndComments,
 )
 from app.api.models.placement_application import PlacementApplicationStatus as application_status
 from app.api.models.placement_application import ReviewCommentsForm, ReviewCommentsInDB
@@ -115,9 +116,17 @@ async def get_placement_application(user_id: str = Depends(pyJWTDecodedUserId())
             if application:
                 # Get the name of the reviewer
                 reviewer_name = await user_db.get_user_name_by_user_id(application.reviewerId)
+
+                review_comments = (
+                    await placement_application_review_comments_db.get_placement_application_review_comments_by_application_ids(
+                        [application.id]
+                    )
+                )
+                comments = next((comment.comments for comment in review_comments if comment.applicationId == application.id), None)
+
                 cleaned_applications = []
-                cleaned_application_for_user = CleanedPlacementApplicationWithCreaterAndReviewerName(
-                    reviewedBy=reviewer_name, **application.dict()
+                cleaned_application_for_user = CleanedPlacementApplicationWithCreaterAndReviewerNameAndComments(
+                    reviewedBy=reviewer_name, comments=comments, **application.dict()
                 ).dict()
                 json_compatible_cleaned_application = jsonable_encoder(cleaned_application_for_user)
                 cleaned_applications.append(json_compatible_cleaned_application)
@@ -169,11 +178,13 @@ async def get_placement_applications_for_tutor_by_department(
                 # From the list of users, get the user with the ownerId
                 studentLevel = next((user for user in users if user.id == application.ownerId), None).studentLevel
                 # From the list of review comments, get the review comments with the applicationId
-                comments = next((comment.comments for comment in review_comments if comment.applicationId == application.id), [])
+                comments = next((comment.comments for comment in review_comments if comment.applicationId == application.id), None)
 
-                cleaned_application_for_user = CleanedPlacementApplicationForTutor(studentLevel=studentLevel, **application.dict()).dict()
+                cleaned_application_for_user = CleanedPlacementApplicationForTutor(
+                    studentLevel=studentLevel, comments=comments, **application.dict()
+                ).dict()
                 json_compatible_cleaned_application = jsonable_encoder(cleaned_application_for_user)
-                json_compatible_cleaned_application["review_comments"] = comments
+                # json_compatible_cleaned_application["review_comments"] = comments
                 application_list.append(json_compatible_cleaned_application)
 
             # Set hasMore to true if there are more applications to be fetched
@@ -247,18 +258,18 @@ async def read_placement_application_review_comments(review_comments: ReviewComm
 # Add review comments to a placement application
 @router.put("/tutor/placement/application/review", summary="Add review comments to a placement application", tags=["placement_application"])
 async def add_review_comments_to_placement_application(
-    id: str,
-    review_comments: ReviewCommentsForm = Depends(read_placement_application_review_comments),
-    user_id: str = Depends(pyJWTDecodedUserId()),
+    review_comments: ReviewCommentsForm = Depends(read_placement_application_review_comments), user_id: str = Depends(pyJWTDecodedUserId())
 ) -> JSONResponseModel:
     if user_id:
         # Only tutors can add review comments to placement applications
         roles = [UserRole.TUTOR]
         valid_user_role = await ValidateUserRole(user_id, roles)()
         if valid_user_role:
-            application = await placement_application_db.get_application_by_id(id)
+            application = await placement_application_db.get_application_by_id(review_comments.applicationId)
             if application:
-                update = ReviewCommentsInDB(ownerId=user_id, applicationId=id, comments=review_comments.comment_list).dict()
+                update = ReviewCommentsInDB(
+                    ownerId=user_id, applicationId=review_comments.applicationId, comments=review_comments.comments
+                ).dict()
                 updated_application = await placement_application_review_comments_db.create_or_update_placement_application_review_comment(
                     update
                 )
@@ -277,3 +288,38 @@ async def add_review_comments_to_placement_application(
                 )
         else:
             return no_access_to_content_response(message="No valid previlages to add review comments to placement application")
+
+
+# # Add review comments to a placement application
+# @router.put("/tutor/placement/application/review", summary="Add review comments to a placement application", tags=["placement_application"])
+# async def add_review_comments_to_placement_application(
+#     id: str,
+#     review_comments: ReviewCommentsForm = Depends(read_placement_application_review_comments),
+#     user_id: str = Depends(pyJWTDecodedUserId()),
+# ) -> JSONResponseModel:
+#     if user_id:
+#         # Only tutors can add review comments to placement applications
+#         roles = [UserRole.TUTOR]
+#         valid_user_role = await ValidateUserRole(user_id, roles)()
+#         if valid_user_role:
+#             application = await placement_application_db.get_application_by_id(id)
+#             if application:
+#                 update = ReviewCommentsInDB(ownerId=user_id, applicationId=id, comments=review_comments.comment_list).dict()
+#                 updated_application = await placement_application_review_comments_db.create_or_update_placement_application_review_comment(
+#                     update
+#                 )
+#                 if updated_application:
+#                     message = "Review comments added"
+#                     return default_response(http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_UPDATED, message=message)
+#                 else:
+#                     message = "Review comments not added"
+#                     return default_response(
+#                         http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.DATA_NOT_UPDATED, message=message
+#                     )
+#             else:
+#                 message = "Application not found"
+#                 return default_response(
+#                     http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.DATA_NOT_FOUND, message=message
+#                 )
+#         else:
+#             return no_access_to_content_response(message="No valid previlages to add review comments to placement application")

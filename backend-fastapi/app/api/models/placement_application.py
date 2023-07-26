@@ -140,6 +140,7 @@ class PlacementApplicationInDB(PlacementApplicationForm):
 
 
 class PlacementApplicationStatus(str, Enum):
+    SUBMITTED = "SUBMITTED"
     PENDING = "PENDING"
     REVIEW = "REVIEW"
     APPROVED = "APPROVED"
@@ -168,6 +169,7 @@ class CleanedPlacementApplicationForUser(PlacementApplicationForm):
 
 class CleanedPlacementApplicationForTutor(CleanedPlacementApplicationForUser):
     studentLevel: StudentLevel
+    comments: Optional[str] = None
 
 
 # class CleanedPlacementApplicationForUser(PlacementApplicationForm):
@@ -201,19 +203,21 @@ class CleanedPlacementApplicationWithCreaterAndReviewerName(CleanedPlacementAppl
     reviewedBy: str
 
 
+class CleanedPlacementApplicationWithCreaterAndReviewerNameAndComments(CleanedPlacementApplicationWithCreaterAndReviewerName):
+    """
+    A pydantic model to represent a cleaned placement application:
+    - Removes the ownerId and reviewerId field for security reasons
+    - Add owner and reviewer full name
+    """
+
+    reviewedBy: str
+    comments: str
+
+
 class ReviewCommentsForm(BaseModel):
-    comment_list: List[str]
-
-
-# class ReviewCommentsInDB(ReviewCommentsForm):
-#     reviewerId: str
-#     applicationId: str
-#     comment: str
-#     createdAt: datetime
-#     updatedAt: datetime
-
-
-class ReviewCommentsInDB(BaseModel):
-    ownerId: str
     applicationId: str
-    comments: List[str]
+    comments: str
+
+
+class ReviewCommentsInDB(ReviewCommentsForm):
+    ownerId: str
