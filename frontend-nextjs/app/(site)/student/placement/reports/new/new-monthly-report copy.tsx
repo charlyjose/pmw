@@ -172,8 +172,6 @@ export function NewMonthlyReport() {
           style={{ alignSelf: "left", alignContent: "left" }}
           layout="vertical"
         >
-          <div className="grid grid-cols-12 gap-4">
-            <div className="col-span-9">
               <Form.Item
                 name="title"
                 label="Title"
@@ -188,12 +186,11 @@ export function NewMonthlyReport() {
               >
                 <Input />
               </Form.Item>
-            </div>
 
-            <div className="col-span-3">
               <Form.Item
                 name="month"
                 label="Month"
+                wrapperCol={{ span: 3 }}
                 hasFeedback
                 rules={[
                   {
@@ -217,8 +214,6 @@ export function NewMonthlyReport() {
                   <Option value="MONTH_12">Month 12</Option>
                 </Select>
               </Form.Item>
-            </div>
-          </div>
 
           <Form.Item label="File" className="pt-3 font-medium">
             <Form.Item

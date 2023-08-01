@@ -17,14 +17,15 @@ import {
 
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Icons } from "@/components/icons";
+import { FrownIcon } from "lucide-react";
 import {
   CheckCircledIcon,
   CrossCircledIcon,
   QuestionMarkCircledIcon,
   CalendarIcon,
 } from "@radix-ui/react-icons";
-import { Badge } from "@/registry/new-york/ui/badge";
 
+import { Badge } from "@/registry/new-york/ui/badge";
 import {
   Table,
   TableBody,
@@ -34,7 +35,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { DialogDemo } from "./dialog";
+import { ApplicationDialog } from "./application-dialog";
 
 const queryClient = new QueryClient();
 
@@ -116,7 +117,17 @@ function PlacementApplications() {
           </div>
         </div>
       ) : status === "error" ? (
-        <div>Error: {error.message}</div>
+        <>
+          {/* <div>Error: {error.message}</div> */}
+          <div className="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed">
+            <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
+              <FrownIcon className="mr-2 w-20 h-20 text-red-600" />
+              <h3 className="mt-4 text-lg font-semibold">
+                Error fetching applications. Please try again later.
+              </h3>
+            </div>
+          </div>
+        </>
       ) : (
         // `data` will either resolve to the latest page's data
         // or if fetching a new page, the last successful page's data
@@ -171,7 +182,7 @@ function PlacementApplications() {
                     )}
                   </TableCell>
                   <TableCell className="font-light">
-                    <DialogDemo
+                    <ApplicationDialog
                       application={application}
                       axiosConfig={axiosConfig}
                     />

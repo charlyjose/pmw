@@ -49,7 +49,6 @@ import { CheckCircle2Icon } from "lucide-react";
 import { toast } from "@/registry/new-york/ui/use-toast";
 import { toast as hotToast } from "react-hot-toast";
 
-
 import { meetingFormSchema } from "./utilities/validation";
 
 type MeetingFormValues = z.infer<typeof meetingFormSchema>;
@@ -57,17 +56,16 @@ type MeetingFormValues = z.infer<typeof meetingFormSchema>;
 const defaultValues: Partial<MeetingFormValues> = {};
 
 export function CreateAppointment() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // Client side Auth check
-    if (
-      !session &&
-      session?.status !== "authenticated" &&
-      session?.user?.role != PAGE_TYPE
-    ) {
+    // Auth check
+    if (status === "loading") return; // Do nothing while loading
+    if (!session) {
+      router.push(UNAUTHORISED_REDIRECTION_LINK);
+    } else if (session?.user?.role != PAGE_TYPE) {
       router.push(UNAUTHORISED_REDIRECTION_LINK);
     }
   }, []);
@@ -151,7 +149,7 @@ export function CreateAppointment() {
         <CardHeader>
           <CardTitle>
             <span className="px-1 bg-red-300 mr-2 "></span>
-            Create an appointment
+            Create appointment
             <Separator className="my-2" />
           </CardTitle>
         </CardHeader>

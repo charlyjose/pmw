@@ -64,6 +64,8 @@ model User {
   PlacementReport                    PlacementReport[]
   PlacementApplication               PlacementApplication?
   PlacementApplicationReviewComments PlacementApplicationReviewComments[]
+  PlacementStudents                  PlacementStudents?
+  JobApplication                     JobApplication[]
 }
 
 model PlacementTutor {
@@ -136,6 +138,8 @@ model Job {
   link        String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  JobApplication JobApplication[]
 }
 
 enum PlacementReportMonth {
@@ -169,6 +173,29 @@ model PlacementReport {
   month       PlacementReportMonth
   report_name String
   file_type   PlacementReportFileType
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum JobApplicationFileType {
+  PDF
+  DOCX
+  DOC
+  TXT
+  OTHER
+}
+
+model JobApplication {
+  id        String                 @id @default(auto()) @map("_id") @db.ObjectId
+  ownerId   String                 @db.ObjectId
+  owner     User                   @relation(fields: [ownerId], references: [id])
+  jobId     String                 @db.ObjectId
+  job       Job                    @relation(fields: [jobId], references: [id])
+  name      String
+  email     String
+  cvName   String
+  fileType JobApplicationFileType
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -332,13 +359,50 @@ model PlacementApplicationReviewComments {
   updatedAt     DateTime             @updatedAt
 }
 
-// model PlacementApplicationReviewComments {
-//   id            String               @id @default(auto()) @map("_id") @db.ObjectId
-//   ownerId       String               @db.ObjectId
-//   owner         User                 @relation(fields: [ownerId], references: [id])
-//   applicationId String               @unique @db.ObjectId
-//   application   PlacementApplication @relation(fields: [applicationId], references: [id])
-//   comments      String[]
-//   createdAt     DateTime             @default(now())
-//   updatedAt     DateTime             @updatedAt
-// }
+enum StudentPlacementStatus {
+  ON_PLACEMENT
+  NOT_ON_PLACEMENT
+  COMPLETED_PLACEMENT
+}
+
+enum PlacementVisitStatus {
+  PENDING
+  SCHEDULED
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum PlacementVisitRegion {
+  LONDON
+  SE
+  SW
+  WALES
+  EM
+  WM
+  NE
+  NW
+  YH
+  NI
+  SCOTLAND
+  INTERNATIONAL
+}
+
+model PlacementStudents {
+  id          String                 @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String                 @unique @db.ObjectId
+  user        User                   @relation(fields: [userId], references: [id])
+  status      StudentPlacementStatus @default(ON_PLACEMENT)
+  startDate   DateTime
+  endDate     DateTime
+  roleTitle   String
+  orgName     String
+  address     String
+  latitude    Float
+  longitude   Float
+  region      PlacementVisitRegion
+  visitStatus PlacementVisitStatus   @default(PENDING)
+  tutorId     String                 @db.ObjectId
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+}

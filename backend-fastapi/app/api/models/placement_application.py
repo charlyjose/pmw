@@ -172,17 +172,6 @@ class CleanedPlacementApplicationForTutor(CleanedPlacementApplicationForUser):
     comments: Optional[str] = None
 
 
-# class CleanedPlacementApplicationForUser(PlacementApplicationForm):
-#     """
-#     A pydantic model to represent a cleaned placement application:
-#     - Removes the ownerId and reviewerId field for security reasons
-#     """
-
-#     status: PlacementApplicationStatus
-#     createdAt: datetime
-#     updatedAt: datetime
-
-
 class CleanedPlacementApplicationWithReviewerName(CleanedPlacementApplicationForUser):
     """
     A pydantic model to represent a cleaned placement application:

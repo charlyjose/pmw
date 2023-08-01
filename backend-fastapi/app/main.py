@@ -18,7 +18,6 @@ app = FastAPI()
 # Global Validation Exception Handler
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    # message = "Invalid input(s)"
     message = "Invalid input(s)\n {0}".format(exc.errors())
     response = json_response(
         http_status=http_status.HTTP_422_UNPROCESSABLE_ENTITY, action_status=action_status.VALIDATION_ERROR, message=message
@@ -50,7 +49,6 @@ async def root(logger=Depends(use_logging)):
 
 @app.on_event("startup")
 async def startup() -> None:
-    print("START UP: Connecting to database")
     await prisma.connect()
     print("START UP: Connected to database")
 
@@ -58,6 +56,5 @@ async def startup() -> None:
 @app.on_event("shutdown")
 async def shutdown() -> None:
     if prisma.is_connected():
-        print("SHUTDOWN: Disconnecting from database")
         await prisma.disconnect()
         print("SHUTDOWN: Disconnected from database")

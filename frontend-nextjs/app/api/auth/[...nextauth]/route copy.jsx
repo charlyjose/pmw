@@ -3,6 +3,7 @@ import prisma from '../../../libs/prismadb'
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import CredentialsProvider from "next-auth/providers/credentials";
 import axios from "axios";
+import { AxiosError } from "axios";
 
 export const authOptions = {
     adapter: PrismaAdapter(prisma),
@@ -49,7 +50,9 @@ export const authOptions = {
                 }
 
                 // If no error and we have user data, return it
-                if (user) return userData;
+                if (user) {
+                    return userData
+                }
                 return null;
             },
         }),
@@ -60,6 +63,31 @@ export const authOptions = {
     },
     callbacks: {
         async jwt({ token, user }) {
+
+            console.log("\n\n\n--------------------")
+            console.log(token.token)
+            console.log(token.user)
+            console.log(token.iat)
+            console.log(token.exp)
+            console.log(token.jti)
+            console.log("--------------------\n\n\n")
+
+            // Update next auth token expiration to match API token expiration
+            if (token?.token?.access_token) {
+                console.log("------------------------------------------------")
+                console.log("Updating token")
+                token.accessToken = token.token.access_token
+                token.accessTokenExpires = new Date(token.token.expires_at).getTime()
+                token.refreshToken = token.token.refresh_token
+                token.refreshTokenExpires = new Date(token.token.refresh_expires_at).getTime()
+                token.idToken = token.token.id_token
+                token.idTokenExpires = new Date(token.token.id_expires_at).getTime()
+                console.log("------------------------------------------------")
+            }
+
+
+
+
             return { ...token, ...user };
         },
         async session({ session, token }) {

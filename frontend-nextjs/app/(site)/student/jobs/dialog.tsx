@@ -1,3 +1,8 @@
+import Link from "next/link";
+
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,15 +16,9 @@ import {
 
 import { ArrowUpRight } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import { ExternalLink } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-import { Badge } from "antd";
 
-import Link from "next/link";
-
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 
 export function DialogDemo({ job }) {
   return (
@@ -32,10 +31,9 @@ export function DialogDemo({ job }) {
           </div>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[900px] ">
+      <DialogContent className="sm:max-w-[900px]">
         <DialogHeader>
           <DialogTitle>
-            {/* <Badge.Ribbon text="⭐ Highly Rated" color="green"></Badge.Ribbon> */}
             <div className="pt-1">{job.role}</div>
             <div className="pt-2 text-md font-light">{job.company}</div>
           </DialogTitle>
@@ -118,9 +116,8 @@ export function DialogDemo({ job }) {
             <div className="text-right text-xs font-medium hover:underline">
               <Button className="hover:bg-lime-300 hover:text-black">
                 <ArrowUpRight className="mr-0 h-4 w-4" />
-                <Link href={job.link} className="">
-                  Apply
-                </Link>
+                {/* <Link href={`jobs/job?id=${job.id}`} target="_blank"> */}
+                <Link href={`jobs/job?id=${job.id}`}>Apply</Link>
               </Button>
             </div>
           ) : (

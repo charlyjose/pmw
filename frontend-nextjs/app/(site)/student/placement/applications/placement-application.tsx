@@ -304,6 +304,10 @@ export function PlacementApplication() {
                     },
                     {
                       title: "Pending",
+                      description:
+                        application_status == "PENDING"
+                          ? `Last updated on ${last_updated}`
+                          : "",
                     },
                     {
                       title: "Review",
@@ -353,7 +357,7 @@ export function PlacementApplication() {
                 </div>
               </>
             )}
-            <Separator />
+            {/* <Separator /> */}
           </div>
         </>
       )}

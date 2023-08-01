@@ -1,5 +1,5 @@
 from typing import Union
-
+import os
 from fastapi import APIRouter, Depends
 from fastapi import status as http_status
 from fastapi.encoders import jsonable_encoder
@@ -17,6 +17,9 @@ from app.utils.auth import pyJWTDecodedUserId
 from app.utils.db import job as job_db
 from app.utils.db import user as user_db
 from app.utils.reponse import ClientResponse
+from bson import ObjectId
+from app.pnp_helpers.json_response_wrapper import default_response
+
 
 router = APIRouter()
 
@@ -101,5 +104,32 @@ async def get_all_jobs_paginated(page: int = 1, user_id: str = Depends(pyJWTDeco
                 http_status=http_status.HTTP_204_NO_CONTENT, action_status=action_status.DATA_NOT_FOUND, message=message
             )
             return ClientResponse(**response)()
+    else:
+        return user_not_found_response()
+
+
+# Get a single job by id
+@router.get("/jobs/{id}", summary="View job", tags=["jobs"])
+async def get_job_by_id(id: str, user_id: str = Depends(pyJWTDecodedUserId())):
+    if user_id:
+        # Check if ID is a valid ObjectId string for MongoDB
+        if not ObjectId.is_valid(id):
+            message = "Invalid job id"
+            return default_response(http_status=http_status.HTTP_404_NOT_FOUND, action_status=action_status.DATA_NOT_FOUND, message=message)
+
+        jobs = await job_db.get_job_by_id([id])
+        if jobs:
+            for job in jobs:
+                cleaned_job_for_user = CleanedJobForUser(**job.dict()).dict()
+                json_compatible_cleaned_job = jsonable_encoder(cleaned_job_for_user)
+                message = "Job fetched"
+                data = {"job": json_compatible_cleaned_job}
+                return default_response(
+                    http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_FETCHED, message=message, data=data
+                )
+        else:
+            message = "Job not found"
+            return default_response(http_status=http_status.HTTP_404_NOT_FOUND, action_status=action_status.DATA_NOT_FOUND, message=message)
+
     else:
         return user_not_found_response()

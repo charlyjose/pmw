@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import axios from "axios";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -65,29 +65,6 @@ import { placementFormSchema } from "./utilities/validation";
 import { LocationSearch } from "./location-search/page";
 
 export const commentFormSchema = z.object({
-  comment: z
-    .array(
-      z.object({
-        value: z.string().refine(
-          (data) => {
-            // Trim whitespace from the beginning and end of the string
-            const trimmedData = data.trim();
-            // Check if the trimmed string is empty
-            return trimmedData.length > 0;
-          },
-          {
-            message: "Comment must not be empty",
-          }
-        ),
-      })
-    )
-    .nonempty({
-      message: "At least one comment is required",
-    })
-    .min(1, {
-      message: "At least one comment is required",
-    }),
-
   comments: z
     .string()
     .max(1500, {
@@ -100,7 +77,7 @@ type CommentFormValues = z.infer<typeof commentFormSchema>;
 
 type PlacementFormValues = z.infer<typeof placementFormSchema>;
 
-export function DialogDemo({ application, axiosConfig }) {
+export function ApplicationDialog({ application, axiosConfig }) {
   const [isLoadingComment, setIsLoadingComment] = useState(false);
 
   const [
@@ -132,21 +109,10 @@ export function DialogDemo({ application, axiosConfig }) {
 
   const commentForm = useForm<CommentFormValues>({
     resolver: zodResolver(commentFormSchema),
-    // Populate the comment field with the existing comments if they exist else populate with an empty string
     defaultValues: {
-      comment:
-        application.review_comments?.length > 0
-          ? application.review_comments?.map((comment) => {
-              return { value: comment };
-            })
-          : [{ value: " " }],
+      comments: application.comments,
     },
     mode: "onChange",
-  });
-
-  const { fields, append } = useFieldArray({
-    name: "comment",
-    control: commentForm.control,
   });
 
   const form = useForm<PlacementFormValues>({
@@ -158,18 +124,14 @@ export function DialogDemo({ application, axiosConfig }) {
     setIsLoadingComment(true);
 
     const commentData = {
-      comment_list: data.comment?.flatMap(
-        (comment) =>
-          comment.value.trim().charAt(0).toUpperCase() +
-          comment.value.trim().slice(1)
-      ),
+      applicationId: application.id,
+      comments: data.comments,
     };
 
     const API_URI = "http://localhost:8000";
-
     axios
       .put(
-        `${API_URI}/api/tutor/placement/application/review?id=${application.id}`,
+        `${API_URI}/api/tutor/placement/application/review`,
         commentData,
         axiosConfig
       )
@@ -209,7 +171,6 @@ export function DialogDemo({ application, axiosConfig }) {
 
   const updateStatus = async (status) => {
     const API_URI = "http://localhost:8000";
-
     axios
       .put(
         `${API_URI}/api/tutor/placement/application/status?id=${application.id}&status=${status}`,
@@ -337,27 +298,10 @@ export function DialogDemo({ application, axiosConfig }) {
                 </div>
               </div>
             </div>
-
-            <div className="grid grid-cols-12 gap-2">
-              <div className="col-span-12">
-                <div className="flex items-center pt-4 font-normal">
-                  <MdOutlineCalendarMonth className="mr-1 h-4 w-4 opacity-70" />{" "}
-                  <span className="text-xs text-muted-foreground">
-                    Created on {new Date(application.createdAt).toDateString()}
-                  </span>
-                </div>
-                <div className="flex items-center pt-1 font-normal">
-                  <MdOutlineEditCalendar className="mr-1 h-4 w-4 opacity-70" />{" "}
-                  <span className="text-xs text-muted-foreground">
-                    Updated on {new Date(application.updatedAt).toDateString()}
-                  </span>
-                </div>
-              </div>
-            </div>
           </DialogTitle>
         </DialogHeader>
 
-        <DialogDescription className="pt-5">
+        <DialogDescription>
           <ScrollArea className="rounded-md h-[610px]">
             <Form {...form}>
               <form className="space-y-8">
@@ -1840,87 +1784,76 @@ export function DialogDemo({ application, axiosConfig }) {
             </Form>
           </ScrollArea>
         </DialogDescription>
-        <DialogFooter>
-          <div className="text-left text-lg font-bold">
-            <span className="px-1 bg-red-300 mr-2"></span>
-            Comments
-            <Separator className="my-1" />
-          </div>
-          <Form {...commentForm}>
-            <form
-              onSubmit={commentForm.handleSubmit(onSubmitComment)}
-              className="space-y-4"
-            >
-              <FormField
-                control={commentForm.control}
-                name="comments"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Add your review comments here"
-                        className="min-h-[50px] flex-1 p-4 md:min-h-[100px] lg:min-h-[100px] resize-none"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
-              {/* <ScrollArea className="rounded-md h-[105px]">
-              <div className="pt-1 p-1">
-                <div>
-                  {fields.map((field, index) => (
-                    <FormField
-                      control={commentForm.control}
-                      key={field.id}
-                      name={`comment.${index}.value`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl className="mb-1">
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+        {/* <DialogFooter></DialogFooter> */}
+
+        <div className="text-left text-lg font-bold">
+          <span className="px-1 bg-red-300 mr-2"></span>
+          Comments
+          <Separator className="my-1" />
+        </div>
+        <Form {...commentForm}>
+          <form
+            onSubmit={commentForm.handleSubmit(onSubmitComment)}
+            className="space-y-4"
+          >
+            <FormField
+              control={commentForm.control}
+              name="comments"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Add your review comments here"
+                      className="min-h-[50px] flex-1 p-4 md:min-h-[100px] lg:min-h-[100px] resize-none"
+                      {...field}
                     />
-                  ))}
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="mt-2"
-                    onClick={() => append({ value: "" })}
-                  >
-                    Add more comment?
-                  </Button>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid grid-cols-12 gap-2">
+              <div className="col-span-6">
+                <div className="flex items-center font-normal">
+                  <MdOutlineCalendarMonth className="mr-1 h-4 w-4 opacity-70" />{" "}
+                  <span className="text-xs text-muted-foreground">
+                    Application created on{" "}
+                    {new Date(application.createdAt).toDateString()}
+                  </span>
+                </div>
+                <div className="flex items-center pt-1 font-normal">
+                  <MdOutlineEditCalendar className="mr-1 h-4 w-4 opacity-70" />{" "}
+                  <span className="text-xs text-muted-foreground">
+                    Application updated on{" "}
+                    {new Date(application.updatedAt).toDateString()}
+                  </span>
                 </div>
               </div>
-            </ScrollArea> */}
-
-              {/* Only allow sumbit when there is comment */}
-              {commentForm.watch("comments") && (
-                <div className="text-right">
-                  <Button disabled={isLoadingComment} type="submit">
-                    {isLoadingComment && (
-                      <>
-                        <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                        Hang on! Adding your comments...
-                      </>
-                    )}
-                    {!isLoadingComment && (
-                      <>
-                        <CheckCircle2Icon className="mr-2 h-4 w-4" />
-                        Submit comments
-                      </>
-                    )}
-                  </Button>
-                </div>
-              )}
-            </form>
-          </Form>
-        </DialogFooter>
+              <div className="col-span-6">
+                {commentForm.watch("comments") && (
+                  <div className="text-right">
+                    <Button disabled={isLoadingComment} type="submit">
+                      {isLoadingComment && (
+                        <>
+                          <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                          Hang on! Adding your comments...
+                        </>
+                      )}
+                      {!isLoadingComment && (
+                        <>
+                          <CheckCircle2Icon className="mr-2 h-4 w-4" />
+                          Add comment
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

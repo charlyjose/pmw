@@ -25,7 +25,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { DialogDemo } from "./dialog";
+import { DialogDemo } from "./application-dialog";
 
 const queryClient = new QueryClient();
 

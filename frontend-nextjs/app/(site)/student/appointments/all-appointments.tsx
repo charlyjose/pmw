@@ -35,16 +35,26 @@ import { MdOutlineEditCalendar } from "react-icons/md";
 import { toast } from "@/registry/new-york/ui/use-toast";
 
 export function AllAppointments() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [appointments, setAppointments] = useState([]);
 
   useEffect(() => {
-    // Validating client-side session
-    if (!session && session?.user?.role != PAGE_TYPE) {
+    // // Validating client-side session
+    // if (!session && session?.user?.role != PAGE_TYPE) {
+    //   router.push(UNAUTHORISED_REDIRECTION_LINK);
+    // }
+
+
+    // Auth check
+    if (status === "loading") return; // Do nothing while loading
+    if (!session) {
+      router.push(UNAUTHORISED_REDIRECTION_LINK);
+    } else if (session?.user?.role != PAGE_TYPE) {
       router.push(UNAUTHORISED_REDIRECTION_LINK);
     }
+
 
     const fetchData = async () => {
       setIsLoading(true);

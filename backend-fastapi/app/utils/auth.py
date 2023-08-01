@@ -8,14 +8,22 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
-
 from app.utils.exceptions import PMWHTTPException
 
-ACCESS_TOKEN_EXPIRE_SECONDS = float(os.environ.get("ACCESS_TOKEN_EXPIRE_SECONDS"))
-TOKEN_TYPE = os.environ.get("TOKEN_TYPE")
-JWT_ALGORITHM = os.environ.get("JWT_ALGORITHM")
-JWT_SECRET = os.environ.get("JWT_SECRET")
-JWT_ISSUER = os.environ.get("JWT_ISSUER")
+from dotenv import load_dotenv
+
+load_dotenv()
+ACCESS_TOKEN_EXPIRE_SECONDS = float(os.getenv("ACCESS_TOKEN_EXPIRE_SECONDS"))
+TOKEN_TYPE = os.getenv("TOKEN_TYPE")
+JWT_ALGORITHM = os.getenv("JWT_ALGORITHM")
+JWT_SECRET = os.getenv("JWT_SECRET")
+JWT_ISSUER = os.getenv("JWT_ISSUER")
+
+# ACCESS_TOKEN_EXPIRE_SECONDS = float(os.environ.get("ACCESS_TOKEN_EXPIRE_SECONDS"))
+# TOKEN_TYPE = os.environ.get("TOKEN_TYPE")
+# JWT_ALGORITHM = os.environ.get("JWT_ALGORITHM")
+# JWT_SECRET = os.environ.get("JWT_SECRET")
+# JWT_ISSUER = os.environ.get("JWT_ISSUER")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -35,6 +43,7 @@ class Token(BaseModel):
     access_token: str = None
     token_type: str = None
     expires_in: int = None
+    expires_at: int = None
 
 
 class JWTEncoder(BaseModel):
@@ -62,6 +71,8 @@ def encodeJWT(sub: str) -> Token:
         access_token=JWTEncoder(payload=payload, secret=JWT_SECRET, algorithm=JWT_ALGORITHM).encode(),
         token_type=TOKEN_TYPE,
         expires_in=ACCESS_TOKEN_EXPIRE_SECONDS,
+        # Calculate the expiration time of the token in epoch time : MATH: current time + expiration time in seconds
+        expires_at=int((datetime.now(tz=timezone.utc) + timedelta(seconds=ACCESS_TOKEN_EXPIRE_SECONDS)).timestamp()),
     )
     return token
 
@@ -110,8 +121,7 @@ class pyJWTDecodedUserId(JWTBearer):
             pyJWTdecoded: Union[bool, JWTPayload] = await super(pyJWTDecodedUserId, self).__call__(request)
             user_id = pyJWTdecoded.sub
             return user_id
-        except Exception as e:
-            print(e)
+        except Exception:
             raise PMWHTTPException(status_code=http_status.HTTP_403_FORBIDDEN, message="User not authenticated")
 
 

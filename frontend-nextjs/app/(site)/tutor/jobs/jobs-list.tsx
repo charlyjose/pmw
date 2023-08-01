@@ -17,6 +17,7 @@ import {
 
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Icons } from "@/components/icons";
+import { FrownIcon } from "lucide-react";
 
 import {
   Table,
@@ -97,7 +98,17 @@ function Jobs() {
           </div>
         </div>
       ) : status === "error" ? (
-        <div>Error: {error.message}</div>
+        <>
+          {/* <div>Error: {error.message}</div> */}
+          <div className="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed">
+            <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
+              <FrownIcon className="mr-2 w-20 h-20 text-red-600" />
+              <h3 className="mt-4 text-lg font-semibold">
+                Error fetching jobs. Please try again later.
+              </h3>
+            </div>
+          </div>
+        </>
       ) : (
         // `data` will either resolve to the latest page's data
         // or if fetching a new page, the last successful page's data

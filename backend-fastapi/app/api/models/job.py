@@ -34,6 +34,7 @@ class CleanedJobForUser(JobForm):
     - Removes the ownerId field for security reasons
     """
 
+    id: str
     createdAt: datetime
     updatedAt: datetime
 

@@ -16,6 +16,7 @@ import {
 } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Icons } from "@/components/icons";
+import { FrownIcon } from "lucide-react";
 
 import {
   Table,
@@ -55,7 +56,7 @@ async function fetchJobs(page = 1, token) {
 }
 
 function Jobs() {
-  const { data: session } = useSession();
+  const { data: session, status: sessionStatus } = useSession();
   const router = useRouter();
 
   const queryClient = useQueryClient();
@@ -71,8 +72,12 @@ function Jobs() {
 
   // Prefetch the next page!
   React.useEffect(() => {
-    // Validating client-side session
-    if (!session && session?.user?.role != PAGE_TYPE) {
+
+    // Auth check
+    if (sessionStatus === "loading") return; // Do nothing while loading
+    if (!session) {
+      router.push(UNAUTHORISED_REDIRECTION_LINK);
+    } else if (session?.user?.role != PAGE_TYPE) {
       router.push(UNAUTHORISED_REDIRECTION_LINK);
     }
 
@@ -96,7 +101,17 @@ function Jobs() {
           </div>
         </div>
       ) : status === "error" ? (
-        <div>Error: {error.message}</div>
+        <>
+          {/* <div>Error: {error.message}</div> */}
+          <div className="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed">
+            <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
+              <FrownIcon className="mr-2 w-20 h-20 text-lime-600" />
+              <h3 className="mt-4 text-lg font-semibold">
+                Error fetching jobs. Please try again later.
+              </h3>
+            </div>
+          </div>
+        </>
       ) : (
         // `data` will either resolve to the latest page's data
         // or if fetching a new page, the last successful page's data

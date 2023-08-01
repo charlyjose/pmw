@@ -67,10 +67,11 @@ import {
   CalendarCheckIcon,
   CalendarCheck2Icon,
 } from "lucide-react";
-import { FrownIcon } from "lucide-react";
 
 import { toast } from "@/registry/new-york/ui/use-toast";
 import { toast as hotToast } from "react-hot-toast";
+
+import { LocationSearch } from "./location-search/page";
 
 function sendResponse(appointmentId: string, response: string, config: any) {
   console.log(appointmentId, response, config);
@@ -98,24 +99,16 @@ function sendResponse(appointmentId: string, response: string, config: any) {
     });
 }
 
-export function AllAppointments() {
-  const { data: session, status } = useSession();
+export function VisitPlanning() {
+  const { data: session } = useSession();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [appointments, setAppointments] = useState([]);
   const [axiosConfig, setAxiosConfig] = useState({});
-  const [fetchError, setFetchError] = useState(false);
 
   useEffect(() => {
-    // // Validating client-side session
-    // if (!session && session?.user?.role != PAGE_TYPE) {
-    //   router.push(UNAUTHORISED_REDIRECTION_LINK);
-    // }
-    // Auth check
-    if (status === "loading") return; // Do nothing while loading
-    if (!session) {
-      router.push(UNAUTHORISED_REDIRECTION_LINK);
-    } else if (session?.user?.role != PAGE_TYPE) {
+    // Validating client-side session
+    if (!session && session?.user?.role != PAGE_TYPE) {
       router.push(UNAUTHORISED_REDIRECTION_LINK);
     }
 
@@ -159,7 +152,6 @@ export function AllAppointments() {
           });
         })
         .catch((e) => {
-          setFetchError(true);
           toast_variant = "destructive";
           toast_title = "Appointments";
           toast_description = "Error fetching your appointments";
@@ -179,46 +171,27 @@ export function AllAppointments() {
   }, []);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
-          <span className="px-1 bg-red-300 mr-2 "></span>
-          Future appointments
-          <Separator className="my-2" />
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="grid gap-1">
-        {isLoading && (
-          <>
-            <div className="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed">
-              <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
-                <Icons.spinner className="mr-2 w-20 h-20 text-red-600 animate-spin" />
-                <h3 className="mt-4 text-lg font-semibold">
-                  Fetching your appointments
-                </h3>
-              </div>
-            </div>
-          </>
-        )}
+    <div className="grid gap-2 grid-cols-12 md:grid-cols-2 lg:grid-cols-12">
+      <div className="col-span-9">
+        <LocationSearch
+        // organisationLocationGoogleMapsAddress={
+        //   setOrganisationLocationGoogleMapsAddress
+        // }
+        // organisationLocationGoogleMapsLat={
+        //   setOrganisationLocationGoogleMapsLat
+        // }
+        // organisationLocationGoogleMapsLng={
+        //   setOrganisationLocationGoogleMapsLng
+        // }
+        // searchAddress={organisationLocationGoogleMapsAddress}
+        // searchLat={organisationLocationGoogleMapsLat}
+        // searchLng={organisationLocationGoogleMapsLng}
+        // required
+        />
+      </div>
 
-        {!isLoading && !fetchError && (
-          <AppointmentsDisplay
-            appointments={appointments}
-            axiosConfig={axiosConfig}
-          />
-        )}
-        {!isLoading && fetchError && (
-          <div className="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed">
-            <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
-              <FrownIcon className="mr-2 w-20 h-20 text-red-600" />
-              <h3 className="mt-4 text-lg font-semibold">
-                Error fetching your appointments. Please try again later.
-              </h3>
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      <div className="col-span-3"></div>
+    </div>
   );
 }
 

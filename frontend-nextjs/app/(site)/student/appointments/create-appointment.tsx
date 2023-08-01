@@ -56,20 +56,32 @@ type MeetingFormValues = z.infer<typeof meetingFormSchema>;
 const defaultValues: Partial<MeetingFormValues> = {};
 
 export function CreateAppointment() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [slots, setSlots] = useState([]);
 
   useEffect(() => {
-    // Client side Auth check
-    if (
-      !session &&
-      session?.status !== "authenticated" &&
-      session?.user?.role != PAGE_TYPE
-    ) {
+    // // Client side Auth check
+    // if (
+    //   !session &&
+    //   session?.status !== "authenticated" &&
+    //   session?.user?.role != PAGE_TYPE
+    // ) {
+    //   router.push(UNAUTHORISED_REDIRECTION_LINK);
+    // }
+
+
+
+    // Auth check
+    if (status === "loading") return; // Do nothing while loading
+    if (!session) {
+      router.push(UNAUTHORISED_REDIRECTION_LINK);
+    } else if (session?.user?.role != PAGE_TYPE) {
       router.push(UNAUTHORISED_REDIRECTION_LINK);
     }
+
+
   }, []);
 
   const form = useForm<MeetingFormValues>({

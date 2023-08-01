@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/command";
 
 import { useLoadScript, GoogleMap, MarkerF } from "@react-google-maps/api";
+
 import { useMemo, useState } from "react";
 import usePlacesAutocomplete, {
   getGeocode,
@@ -49,7 +50,23 @@ export function LocationSearch(props: any) {
     () => ({
       disableDefaultUI: true,
       clickableIcons: true,
-      scrollwheel: false,
+      scrollwheel: true,
+      draggable: true,
+      zoomControl: true,
+      fullscreenControl: true,
+      mapTypeControl: true,
+      // streetViewControl: true,
+      zoomControlOptions: {
+        // position: google.maps.ControlPosition.RIGHT_CENTER,
+        position: 7.0,
+      },
+      mapTypeControlOptions: {
+        // position: google.maps.ControlPosition.LEFT_TOP,
+        position: 5.0,
+      },
+      // streetViewControlOptions: {
+      //   position: google.maps.ControlPosition.RIGHT_BOTTOM,
+      // },
     }),
     []
   );
@@ -103,7 +120,7 @@ export function LocationSearch(props: any) {
             zoom={14}
             center={mapCenter}
             mapTypeId={google.maps.MapTypeId.ROADMAP}
-            mapContainerStyle={{ width: "1200px", height: "430px" }}
+            mapContainerStyle={{ height: "570px", width: "100%" }}
             onLoad={(map) => console.log("Map Loaded")}
           >
             <MarkerF

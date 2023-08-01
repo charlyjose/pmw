@@ -121,7 +121,7 @@ async def get_placement_application(user_id: str = Depends(pyJWTDecodedUserId())
                         [application.id]
                     )
                 )
-                comments = next((comment.comments for comment in review_comments if comment.applicationId == application.id), None)
+                comments = next((comment.comments for comment in review_comments if comment.applicationId == application.id), "")
 
                 cleaned_applications = []
                 cleaned_application_for_user = CleanedPlacementApplicationWithCreaterAndReviewerNameAndComments(
@@ -177,7 +177,7 @@ async def get_placement_applications_for_tutor_by_department(
                 # From the list of users, get the user with the ownerId
                 studentLevel = next((user for user in users if user.id == application.ownerId), None).studentLevel
                 # From the list of review comments, get the review comments with the applicationId
-                comments = next((comment.comments for comment in review_comments if comment.applicationId == application.id), None)
+                comments = next((comment.comments for comment in review_comments if comment.applicationId == application.id), "")
 
                 cleaned_application_for_user = CleanedPlacementApplicationForTutor(
                     studentLevel=studentLevel, comments=comments, **application.dict()
