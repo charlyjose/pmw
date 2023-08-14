@@ -1,7 +1,7 @@
 import os
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, UploadFile
+from fastapi import APIRouter, Depends, UploadFile, File
 from fastapi import status as http_status
 from fastapi.encoders import jsonable_encoder
 from starlette.responses import FileResponse
@@ -9,37 +9,31 @@ from starlette.responses import FileResponse
 from app.api.auth import ValidateUserRole
 from app.api.models import action_status
 from app.api.models.auth import Role as UserRole
+from app.api.models.job_application import (
+    CleanedJobApplicationForUser,
+    JobApplicationForm,
+    JobApplicationInDB,
+    JobApplicationWithFile,
+    JobApplicationWithFileNameInDB,
+    JobApplicationWithoutFile,
+    JobFileType,
+    JobFiles,
+)
 from app.api.models.response import JSONResponseModel
 from app.pnp_helpers.auth import no_access_to_content_response
 from app.pnp_helpers.client_response import json_response
+from app.pnp_helpers.json_response_wrapper import default_response
 from app.pnp_helpers.user import user_not_found_response
 from app.utils.auth import pyJWTDecodedUserId
-from app.utils.reponse import ClientResponse
-from app.api.models.job_application import (
-    JobApplicationForm,
-    JobCVFileType,
-    JobApplicationInDB,
-    JobApplicationWithFileNameInDB,
-    JobApplicationWithFile,
-    JobApplicationWithoutFile,
-    CleanedJobApplicationForUser,
-)
-from app.pnp_helpers.json_response_wrapper import default_response
-
-from app.utils.db import job_application as job_application_db
 from app.utils.db import job as job_db
+from app.utils.db import job_application as job_application_db
+from app.utils.reponse import ClientResponse
+from typing import Any, Optional
 
 router = APIRouter()
 
 
 JOB_APPLICATION_FILE_PATH = "uploads/student/job/applications/users"
-
-
-async def read_application(id: str, name: str, email: str, fileType: str, cv: UploadFile) -> JobApplicationForm:
-    return JobApplicationForm(jobId=id, name=name, email=email, fileType=fileType, cv=cv)
-
-
-from typing import Optional, Any
 
 
 # Write file to disk
@@ -55,9 +49,27 @@ async def read_application_from_store(location: str):
         return file_object.read()
 
 
-async def add_new_application(ownerId: str, job_id: str, name: str, email: str, fileType: str, cvName: str) -> Optional[JobApplicationInDB]:
+async def add_new_application(
+    ownerId: str,
+    job_id: str,
+    name: str,
+    email: str,
+    cvFileType: str,
+    cvName: str,
+    clFileType: Optional[str] = None,
+    clName: Optional[str] = None,
+) -> Optional[JobApplicationInDB]:
     try:
-        application = JobApplicationInDB(ownerId=ownerId, jobId=job_id, name=name, email=email, fileType=fileType, cvName=cvName).dict()
+        application = JobApplicationInDB(
+            ownerId=ownerId,
+            jobId=job_id,
+            name=name,
+            email=email,
+            cvFileType=cvFileType,
+            cvName=cvName,
+            clFileType=clFileType,
+            clName=clName,
+        ).dict()
         return await job_application_db.create_new_application(application)
     except Exception as e:
         print(e)
@@ -75,12 +87,23 @@ async def check_application_exists(ownerId: str, job_id: str) -> bool:
         return False
 
 
+async def read_application(
+    id: str, name: str, email: str, cvFileType: str, cv: UploadFile, cl: Optional[UploadFile] = File(None), clFileType: Optional[str] = None
+) -> JobApplicationForm:
+    return JobApplicationForm(jobId=id, name=name, email=email, cvFileType=cvFileType, cv=cv, cl=cl, clFileType=clFileType)
+
+
 @router.post("/student/jobs/apply/job", summary="Add new job application", tags=["job_applications"])
 async def add_new_placement_application(
     user_id: str = Depends(pyJWTDecodedUserId()), application_form: JobApplicationForm = Depends(read_application)
 ):
+    # print("application_form", application_form)
+    # message = "Uploaded"
+    # return json_response(http_status=http_status.HTTP_200_OK, action_status=action_status.NO_ERROR, message=message)
+
     try:
         cv_name = application_form.cv.filename
+        cl_name = application_form.cl.filename if application_form.cl else None
         job_id = application_form.jobId
 
         # Check if application already exists
@@ -91,14 +114,27 @@ async def add_new_placement_application(
                 http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.DATA_NOT_CREATED, message=message
             )
 
-        # Save report file to disk
-        file_location = f"{JOB_APPLICATION_FILE_PATH}/{user_id}/{job_id}/{cv_name}"
+        # Save cv to disk
+        file_location = f"{JOB_APPLICATION_FILE_PATH}/{user_id}/{job_id}/CV/{cv_name}"
         file = application_form.cv.file
         await save_application_to_store(file_location, file)
 
+        # Save cover letter to disk
+        if application_form.cl:
+            file_location = f"{JOB_APPLICATION_FILE_PATH}/{user_id}/{job_id}/CL/{cl_name}"
+            file = application_form.cl.file
+            await save_application_to_store(file_location, file)
+
         # Save report data to database
         new_application = await add_new_application(
-            user_id, application_form.jobId, application_form.name, application_form.email, application_form.fileType, cvName=cv_name
+            user_id,
+            application_form.jobId,
+            application_form.name,
+            application_form.email,
+            application_form.cvFileType,
+            cvName=cv_name,
+            clName=cl_name,
+            clFileType=application_form.clFileType if application_form.cl else None,
         )
         if not new_application:
             message = "Something went wrong. Could not add application."
@@ -156,7 +192,7 @@ async def get_own_job_application(user_id: str = Depends(pyJWTDecodedUserId())) 
 
 
 @router.get("/student/jobs/applications/download", summary="Download application cv", tags=["job_applications"])
-async def download_placement_report(application_id: str, user_id: str = Depends(pyJWTDecodedUserId())) -> FileResponse:
+async def download_placement_report(application_id: str, file: JobFiles, user_id: str = Depends(pyJWTDecodedUserId())) -> FileResponse:
     if user_id:
         application = await job_application_db.get_application_by_id(application_id)
         if not application:
@@ -178,8 +214,18 @@ async def download_placement_report(application_id: str, user_id: str = Depends(
                 return ClientResponse(**response)()
             '''
 
-            # Get file path
-            file_path = f'{JOB_APPLICATION_FILE_PATH}/{application.ownerId}/{application.jobId}/{application.cvName}'
+            filename = application.cvName if file == JobFiles.CV else application.clName
+
+            file_path = f'{JOB_APPLICATION_FILE_PATH}/{application.ownerId}/{application.jobId}'
+            if file == JobFiles.CV:
+                file_path = f'{file_path}/CV/{application.cvName}'
+            elif file == JobFiles.CL:
+                file_path = f'{file_path}/CL/{application.clName}'
+            else:
+                message = "File not found"
+                return default_response(
+                    http_status=http_status.HTTP_404_NOT_FOUND, action_status=action_status.DATA_NOT_FOUND, message=message
+                )
 
             # Check if file exists
             if not os.path.exists(file_path):
@@ -192,8 +238,8 @@ async def download_placement_report(application_id: str, user_id: str = Depends(
             return FileResponse(
                 file_path,
                 media_type='application/octet-stream',
-                filename=application.cvName,
-                headers={"Content-Disposition": "attachment; filename=" + application.cvName},
+                filename=filename,
+                headers={"Content-Disposition": "attachment; filename=" + filename},
             )
         else:
             return no_access_to_content_response(message="No valid previlages to access this content")

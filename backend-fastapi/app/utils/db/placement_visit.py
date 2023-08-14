@@ -40,3 +40,35 @@ async def get_all_on_placement_in_a_region_under_a_tutor(tutor_id: str, region: 
     :return: List[PlacementStudents]
     '''
     return await prisma.placementstudents.find_many(where={"tutorId": tutor_id, "status": "ON_PLACEMENT", "region": region})
+
+
+# A helper function to get the placement data for a student
+async def get_placement_data_for_a_student(student_id: str) -> Optional[PlacementStudents]:
+    '''
+    A helper function to get the placement data for a student
+    :param student_id: str
+    :return: PlacementStudents
+    '''
+    return await prisma.placementstudents.find_unique(where={"userId": student_id})
+
+
+# A helper function to update an existing placement form
+async def update_application(applicationId: str, application: dict) -> Optional[PlacementStudents]:
+    '''
+    A helper function to update an existing placement form
+    :param applicationId: str
+    :param application: dict
+    :return: PlacementStudents
+    '''
+
+    return await prisma.placementstudents.update(where={"id": applicationId}, data=application)
+
+
+# A helper function to create a new placement form
+async def create_new_application(application: dict) -> Optional[PlacementStudents]:
+    '''
+    A helper function to create a new placement form
+    :param application: dict
+    :return: PlacementStudents
+    '''
+    return await prisma.placementstudents.create(application)

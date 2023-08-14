@@ -187,15 +187,17 @@ enum JobApplicationFileType {
 }
 
 model JobApplication {
-  id        String                 @id @default(auto()) @map("_id") @db.ObjectId
-  ownerId   String                 @db.ObjectId
-  owner     User                   @relation(fields: [ownerId], references: [id])
-  jobId     String                 @db.ObjectId
-  job       Job                    @relation(fields: [jobId], references: [id])
-  name      String
-  email     String
-  cvName   String
-  fileType JobApplicationFileType
+  id         String                  @id @default(auto()) @map("_id") @db.ObjectId
+  ownerId    String                  @db.ObjectId
+  owner      User                    @relation(fields: [ownerId], references: [id])
+  jobId      String                  @db.ObjectId
+  job        Job                     @relation(fields: [jobId], references: [id])
+  name       String
+  email      String
+  cvName     String
+  cvFileType JobApplicationFileType
+  clName     String?
+  clFileType JobApplicationFileType?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -375,6 +377,7 @@ enum PlacementVisitStatus {
 
 enum PlacementVisitRegion {
   LONDON
+  EASTERN
   SE
   SW
   WALES

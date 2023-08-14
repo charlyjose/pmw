@@ -5,7 +5,7 @@ from fastapi.encoders import jsonable_encoder
 from app.api.auth import ValidateUserRole
 from app.api.models import action_status
 from app.api.models.auth import Role as UserRole
-from app.api.models.placement_visit import PlacementVisitGeoLocationForUser, PlacementVisitForUser, PlacementVisitRegion
+from app.api.models.placement_visit import PlacementVisitForUser, PlacementVisitGeoLocationForUser, PlacementVisitRegion
 from app.api.models.response import JSONResponseModel
 from app.pnp_helpers.auth import no_access_to_content_response
 from app.pnp_helpers.json_response_wrapper import default_response

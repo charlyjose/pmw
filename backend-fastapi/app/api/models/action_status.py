@@ -1,6 +1,7 @@
 # More human readable status codes for API actions and responses to be used in the API
 
 NO_ERROR = "No Error"
+ERROR = "Error"
 UNAUTHORIZED = "Unauthorized"
 FORBIDDEN = "Forbidden"
 VALIDATION_ERROR = "Validation Error"

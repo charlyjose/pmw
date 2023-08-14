@@ -20,6 +20,7 @@ class PlacementVisitStatus(str, Enum):
 
 class PlacementVisitRegion(str, Enum):
     LONDON = "LONDON"
+    EASTERN = "EASTERN"
     SE = "SE"
     SW = "SW"
     WALES = "WALES"
@@ -40,30 +41,25 @@ class StudentDetails(BaseModel):
 
 
 class PlacementDetails(BaseModel):
-    status: StudentPlacementStatus
     startDate: datetime
     endDate: datetime
     roleTitle: str
     orgName: str
 
 
-class LocationDetails(BaseModel):
+class PlacementDetailsWithStatus(BaseModel):
+    status: StudentPlacementStatus
+
+
+class PlacementLocationDetails(BaseModel):
     address: str
     latitude: float
     longitude: float
 
 
-class PlacementVisitForUser(StudentDetails, PlacementDetails, LocationDetails):
+class PlacementVisitForUser(StudentDetails, PlacementDetails, PlacementDetailsWithStatus, PlacementLocationDetails):
     id: str
 
 
-# class PlacementVisitRegionDataForUser(StudentDetails):
-#     location: LocationDetails = None
-#     startDate: datetime = None
-
-
-class PlacementVisitGeoLocationForUser(BaseModel):
+class PlacementVisitGeoLocationForUser(PlacementLocationDetails):
     studentId: str = None
-    address: str = None
-    latitude: float = None
-    longitude: float = None

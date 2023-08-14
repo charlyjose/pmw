@@ -61,3 +61,14 @@ async def get_users_by_user_ids(user_ids: List[str]) -> List[User]:
     """
     users = await prisma.user.find_many(where={"id": {"in": user_ids}})
     return users if users else None
+
+
+# Helper function to update user status
+async def update_user_status(user_id: str, status: str) -> Optional[User]:
+    """
+    Helper function to update user status
+    :param user_id: str
+    :param status: str
+    :return user: User
+    """
+    return await prisma.user.update(where={"id": user_id}, data={"studentStatus": status})
