@@ -29,7 +29,8 @@ import { BsFiletypeDoc } from "react-icons/bs";
 import { BsFileEarmarkPdf } from "react-icons/bs";
 
 import { toast } from "@/registry/new-york/ui/use-toast";
-import { set } from "date-fns";
+
+import { ArrowUpRight, PlusSquare } from "lucide-react";
 
 export function MonthlyReports() {
   const { data: session } = useSession();
@@ -175,7 +176,10 @@ export function ReportsDisplay(props) {
           )}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {reports.map((report) => (
-              <Card className="transition-all hover:bg-accent hover:text-accent-foreground" key={report.id}>
+              <Card
+                className="transition-all hover:bg-accent hover:text-accent-foreground"
+                key={report.id}
+              >
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
                     <div className="text-sm font-normal">{report.title}</div>
@@ -184,9 +188,6 @@ export function ReportsDisplay(props) {
                         {report.month.replace("_", " ")}
                       </Badge>
                     </div>
-                    {/* <div className="text-sm font-medium">
-                      {report.report_name}
-                    </div> */}
                   </CardTitle>
                   {report.file_type === "PDF" ? (
                     <BsFileEarmarkPdf className="mr-1 w-8 h-8 text-lime-600" />
@@ -232,6 +233,22 @@ export function ReportsDisplay(props) {
                 </CardContent>
               </Card>
             ))}
+
+            <Link href="reports/new" className="text-right">
+              <Card className="transition-all bg-lime-50 hover:bg-accent hover:text-accent-foreground hover:bg-lime-100">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium"></CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-md font-medium text-center">
+                    <Button variant="link">
+                      <PlusSquare className="mr-1 h-4 w-4" />
+                      Add new report
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
           </div>
         </>
       );

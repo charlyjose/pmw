@@ -1,5 +1,6 @@
 import { Separator } from "@/registry/new-york/ui/separator";
 import { NewMonthlyReport } from "./new-monthly-report";
+import { PlacementStartDeclaration } from "./placement-start-declaration";
 
 export default function NewMonthlyReportPage() {
   return (
@@ -16,6 +17,9 @@ export default function NewMonthlyReportPage() {
       <Separator />
       <div className="p-2">
         <NewMonthlyReport />
+      </div>
+      <div className="p-2">
+        <PlacementStartDeclaration />
       </div>
     </div>
   );

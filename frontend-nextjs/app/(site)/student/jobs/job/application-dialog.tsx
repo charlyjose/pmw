@@ -27,6 +27,7 @@ import { Icons } from "@/components/icons";
 
 import { toast } from "@/registry/new-york/ui/use-toast";
 import { toast as hotToast } from "react-hot-toast";
+import { a } from "drizzle-orm/column.d-b7dc3bdb";
 
 const acceptedTypes = [
   "application/pdf",
@@ -75,11 +76,15 @@ export function JobApplicationDialog({ job, axiosConfig }) {
   const onFinish = (data: any) => {
     setIsLoading(true);
 
-    const applicationData = {
+    var applicationData = {
       name: data.name,
       email: data.email,
       cv: data.cv[0],
     };
+
+    if (data.cl) {
+      applicationData.cl = data.cl[0];
+    }
 
     function formatBytes(size) {
       var units = ["B", "KB", "MB", "GB", "TB"],
@@ -102,20 +107,29 @@ export function JobApplicationDialog({ job, axiosConfig }) {
       },
     };
 
-    const API_URI = "http://localhost:8000";
+    if (data.cl) {
+      file_details.cl = {
+        name: applicationData.cl.name,
+        size: `${formatBytes(applicationData.cl.size)}`,
+        type: acceptedFileTypesAliases[applicationData.cl.type],
+      };
+    }
 
     const formData = new FormData();
     formData.append("cv", applicationData.cv.originFileObj);
+    if (data.cl) {
+      formData.append("cl", applicationData.cl.originFileObj);
+    }
 
-    // Change axios header Content-Type to multipart/form-data
     axiosConfig.headers["Content-Type"] = "multipart/form-data";
 
+    const API_URI = "http://localhost:8000";
+    var url = `${API_URI}/api/student/jobs/apply/job?id=${job.id}&name=${applicationData.name}&email=${applicationData.email}&cvFileType=${file_details.cv.type}`;
+    if (data.cl) {
+      url += `&clFileType=${file_details.cl.type}`;
+    }
     axios
-      .post(
-        `${API_URI}/api/student/jobs/apply/job?id=${job.id}&name=${applicationData.name}&email=${applicationData.email}&fileType=${file_details.cv.type}`,
-        formData,
-        axiosConfig
-      )
+      .post(url, formData, axiosConfig)
       .then((response) => {
         toast({
           title: "File uploaded successfully",
@@ -227,6 +241,37 @@ export function JobApplicationDialog({ job, axiosConfig }) {
                 >
                   <Upload.Dragger
                     name="cv"
+                    maxCount={1}
+                    beforeUpload={validateUpload}
+                    multiple={false}
+                    showUploadList={true}
+                    // accept=".pdf"
+                  >
+                    <p className="ant-upload-drag-icon">
+                      <InboxOutlined />
+                    </p>
+                    <p className="ant-upload-text">
+                      Click or drag file to this area to upload
+                    </p>
+                  </Upload.Dragger>
+                </Form.Item>
+              </Form.Item>
+
+              <Form.Item label="Cover Letter" className="pt-3 font-medium">
+                <Form.Item
+                  name="cl"
+                  label="cl"
+                  valuePropName="fileList"
+                  getValueFromEvent={normFile}
+                  noStyle
+                  rules={[
+                    {
+                      required: false,
+                    },
+                  ]}
+                >
+                  <Upload.Dragger
+                    name="cl"
                     maxCount={1}
                     beforeUpload={validateUpload}
                     multiple={false}

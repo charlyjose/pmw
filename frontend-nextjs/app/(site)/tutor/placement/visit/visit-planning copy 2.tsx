@@ -14,9 +14,6 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 import moment from "moment";
 
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
-
 import {
   Form,
   FormControl,
@@ -47,8 +44,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
-  AlertDialogAction,
 } from "@/registry/new-york/ui/alert-dialog";
 import {
   DialogContent,
@@ -64,18 +59,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/registry/new-york/ui/dropdown-menu";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/registry/new-york/ui/popover";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/registry/new-york/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/registry/new-york/ui/button";
 import { Label } from "@/registry/new-york/ui/label";
 import { Switch } from "@/registry/new-york/ui/switch";
-import { Calendar } from "@/registry/new-york/ui/calendar";
 
 import {
   HoverCard,
@@ -112,23 +101,10 @@ export const visitScheduleFormSchema = z.object({
   region: z.string({
     required_error: "Region is required",
   }),
+
   locations: z.array(z.string()).refine((value) => value.some((item) => item), {
     message: "You have to select at least one item.",
   }),
-  date: z
-    .date({
-      required_error: "Visit date is required",
-    })
-    .refine(
-      (data) => {
-        const today = new Date();
-        const selectedDate = new Date(data);
-        return selectedDate >= today;
-      },
-      {
-        message: "Visit date must be in the future",
-      }
-    ),
 });
 
 type VisitScheduleFormValues = z.infer<typeof visitScheduleFormSchema>;
@@ -258,13 +234,6 @@ export function VisitPlanning() {
     }, 3000);
   };
 
-  function createItinerary(data: VisitScheduleFormValues) {
-    console.log("data: ", data);
-    console.log(data.date);
-    console.log(data.locations);
-    console.log(data.region);
-  }
-
   return (
     <div className="grid gap-4 grid-cols-12 md:grid-cols-2 lg:grid-cols-12">
       <div className="col-span-4">
@@ -278,10 +247,7 @@ export function VisitPlanning() {
           </CardHeader>
           <CardContent className="grid gap-1">
             <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(createItinerary)}
-                className="space-y-8"
-              >
+              <form className="space-y-8">
                 <div className="space-y-2">
                   <div className="w-[300px]">
                     <FormField
@@ -514,89 +480,19 @@ export function VisitPlanning() {
                 {viewMapButton && form.watch("locations")?.length > 0 ? (
                   <div className="grid grid-cols-2">
                     <div className="col-span-1">
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="outline">
-                            <LuClipboardList className="mr-2" />
-                            Prepare itinerary
-                          </Button>
-                        </AlertDialogTrigger>
+                      <Button
+                        variant="outline"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setUpMarkers();
+                          setViewMap(true);
+                        }}
+                      >
+                        <LuClipboardList className="mr-2" />
+                        Prepare itenary
+                      </Button>
 
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>
-                              Confirm your selections?
-                            </AlertDialogTitle>
-                            <AlertDialogDescription>
-                              <FormField
-                                control={form.control}
-                                name="date"
-                                render={({ field }) => (
-                                  <FormItem className="flex flex-col">
-                                    <FormLabel>Visit Date</FormLabel>
-                                    <Popover>
-                                      <PopoverTrigger asChild>
-                                        <FormControl>
-                                          <Button
-                                            variant={"outline"}
-                                            className={cn(
-                                              "w-[190px] pl-3 text-left font-normal",
-                                              !field.value &&
-                                                "text-muted-foreground"
-                                            )}
-                                          >
-                                            {field.value ? (
-                                              format(field.value, "PPP")
-                                            ) : (
-                                              <span>Pick a date</span>
-                                            )}
-                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                          </Button>
-                                        </FormControl>
-                                      </PopoverTrigger>
-                                      <PopoverContent
-                                        className="w-auto p-0"
-                                        align="start"
-                                      >
-                                        <Calendar
-                                          mode="single"
-                                          selected={field.value}
-                                          onSelect={field.onChange}
-                                          disabled={(date) =>
-                                            // Disable dates in the past
-                                            date < new Date()
-                                          }
-                                          initialFocus
-                                          required
-                                        />
-                                      </PopoverContent>
-                                    </Popover>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <Button
-                              type="submit"
-                              onClick={() => {
-                                toast({
-                                  title: "Placement Visit",
-                                  description: `Visit scheduled on ${new Date(
-                                    form.getValues().date
-                                  ).toDateString()}`,
-                                });
-                                createItinerary(form.getValues());
-                              }}
-                              disabled={!form.watch("date")}
-                            >
-                              Prepare itinerary
-                            </Button>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                      
                     </div>
                     <div className="col-span-1 text-right">
                       <Button

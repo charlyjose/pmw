@@ -122,7 +122,7 @@ export function JobDisplay(props) {
           <div className="pt-2 text-xl font-light">{job.company}</div>
 
           <div className="text-left pt-10">
-            <ScrollArea className="rounded-md h-[600px]">
+            <ScrollArea className="rounded-md h-[530px]">
               <ReactMarkdown
                 children={job.description}
                 remarkPlugins={[remarkGfm]}

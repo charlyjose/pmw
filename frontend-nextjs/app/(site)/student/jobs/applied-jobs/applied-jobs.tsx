@@ -39,7 +39,6 @@ import { BsFileEarmarkPdf } from "react-icons/bs";
 import { ArrowUpRight } from "lucide-react";
 
 import { toast } from "@/registry/new-york/ui/use-toast";
-import { set } from "date-fns";
 
 export function MonthlyReports() {
   const { data: session, status } = useSession();
@@ -63,7 +62,7 @@ export function MonthlyReports() {
     const fetchData = async () => {
       setIsLoading(true);
       var toast_variant = "default";
-      var toast_title = "Placement reports";
+      var toast_title = "Job Applications";
       var toast_description = "";
 
       var token = session?.token;
@@ -82,12 +81,10 @@ export function MonthlyReports() {
           if (e.data.data?.applications?.length > 0) {
             setApplication(e.data.data.applications);
             toast_variant = "default";
-            toast_title = "Job Applications";
-            toast_description = "Successfully fetched all your reports";
+            toast_description = "Successfully fetched applications";
           } else {
             toast_variant = "destructive";
-            toast_title = "Placement reports";
-            toast_description = "No reports found";
+            toast_description = "No applications found";
           }
           toast({
             variant: toast_variant,
@@ -108,7 +105,7 @@ export function MonthlyReports() {
 
       setTimeout(() => {
         setIsLoading(false);
-      }, 3000);
+      }, 2000);
     };
 
     setIsLoading(false);
@@ -142,23 +139,23 @@ export function ApplicationsDisplay(props) {
   const displayApplications = (props) => {
     const { applications, axiosConfig } = props;
 
-    function downloadFile(report) {
+    function downloadFile(
+      application_id: string,
+      fileType: string,
+      file_name: string
+    ) {
       var config = axiosConfig;
       delete config.headers["Content-Type"];
       config.responseType = "blob";
       config.headers["accept"] = "application/json";
 
-      var application_id = report.id;
-      var fileType = report.fileType;
-      var report_name = report.cvName;
-
       axios
         .get(
-          `${API_URI}/api/student/jobs/applications/download?application_id=${application_id}`,
+          `${API_URI}/api/student/jobs/applications/download?application_id=${application_id}&file=${fileType}`,
           config
         )
         .then((e) => {
-          saveAs(e.data, `${report_name}`);
+          saveAs(e.data, `${file_name}`);
           toast({
             variant: "default",
             title: "Placement reports",
@@ -178,16 +175,6 @@ export function ApplicationsDisplay(props) {
     if (applications.length > 0) {
       return (
         <>
-          {applications.length == 0 && (
-            <div className="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed">
-              <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
-                <FrownIcon className="mr-2 w-20 h-20 text-lime-600" />
-                <h3 className="mt-4 text-lg font-semibold">
-                  You have not submitted any reports yet.
-                </h3>
-              </div>
-            </div>
-          )}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {applications.map((application) => (
               <Card
@@ -201,17 +188,17 @@ export function ApplicationsDisplay(props) {
                       {application.company}
                     </div>
                   </CardTitle>
-                  {application.fileType === "PDF" ? (
+                  {application.cvFileType === "PDF" ? (
                     <BsFileEarmarkPdf className="mr-1 w-8 h-8 text-lime-600" />
                   ) : (
                     <></>
                   )}
-                  {application.fileType === "DOCX" ? (
+                  {application.cvFileType === "DOCX" ? (
                     <BsFiletypeDocx className="mr-1 w-8 h-8 text-lime-600" />
                   ) : (
                     <></>
                   )}{" "}
-                  {application.fileType === "DOC" ? (
+                  {application.cvFileType === "DOC" ? (
                     <BsFiletypeDoc className="mr-1 w-8 h-8 text-lime-600" />
                   ) : (
                     <></>
@@ -220,7 +207,7 @@ export function ApplicationsDisplay(props) {
 
                 <CardContent>
                   <div className="grid grid-cols-12 gap-2">
-                    <div className="col-span-8">
+                    <div className="col-span-5">
                       <div className="text-xs font-bold">
                         <Button variant="link" className="p-0 text-xs">
                           <ArrowUpRight className="mr-0 h-4 w-4" />
@@ -232,18 +219,44 @@ export function ApplicationsDisplay(props) {
                         </Button>
                       </div>
                     </div>
-                    <div className="col-span-4">
+                    <div className="col-span-7">
                       <div className="text-right text-xs font-medium hover:underline">
                         <Button
                           variant="link"
                           // className="pl-0 pr-1 text-xs"
                           className="pl-0 pr-1 text-xs"
-                          onClick={(e) => downloadFile(application)}
+                          onClick={(e) =>
+                            downloadFile(
+                              application.id,
+                              "CV",
+                              application.cvName
+                            )
+                          }
                         >
                           <ArrowDownToLineIcon className="mr-1 h-4 w-4" />
                           Download CV
                         </Button>
                       </div>
+
+                      {application.clName && application.clFileType && (
+                        <div className="text-right text-xs font-medium hover:underline">
+                          <Button
+                            variant="link"
+                            // className="pl-0 pr-1 text-xs"
+                            className="pl-0 pr-1 text-xs"
+                            onClick={(e) =>
+                              downloadFile(
+                                application.id,
+                                "CL",
+                                application.clName
+                              )
+                            }
+                          >
+                            <ArrowDownToLineIcon className="mr-1 h-4 w-4" />
+                            Download Cover Letter
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -269,16 +282,38 @@ export function ApplicationsDisplay(props) {
                         </div>
                         <div className="grid gap-1">
                           <div className="text-xs font-medium">
-                            <span className="font-bold">File Name: </span>
+                            <span className="font-bold">CV: </span>
                             {application.cvName}
                           </div>
                         </div>
                         <div className="grid gap-1">
                           <div className="text-xs font-medium">
-                            <span className="font-bold">File Type: </span>
-                            {application.fileType}
+                            <span className="font-bold">CV File Type: </span>
+                            {application.cvFileType}
                           </div>
                         </div>
+
+                        {application.clName && application.clFileType && (
+                          <>
+                            <div className="grid gap-1">
+                              <div className="text-xs font-medium">
+                                <span className="font-bold">
+                                  Cover Letter:{" "}
+                                </span>
+                                {application.clName}
+                              </div>
+                            </div>
+                            <div className="grid gap-1">
+                              <div className="text-xs font-medium">
+                                <span className="font-bold">
+                                  Cover Letter File Type:{" "}
+                                </span>
+                                {application.clFileType}
+                              </div>
+                            </div>
+                          </>
+                        )}
+
                         <div className="grid gap-1">
                           <div className="text-xs font-medium">
                             <div className="grid grid-cols-12 gap-1">
@@ -290,7 +325,7 @@ export function ApplicationsDisplay(props) {
                               <div className="col-span-4 text-right">
                                 <Badge variant="default" className="text-right">
                                   {moment(
-                                    application.createdAt,
+                                    new Date(application.createdAt),
                                     "YYYYMMDD"
                                   ).fromNow()}
                                 </Badge>
@@ -313,7 +348,7 @@ export function ApplicationsDisplay(props) {
           <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
             <FrownIcon className="mr-2 w-20 h-20 text-lime-600" />
             <h3 className="mt-4 text-lg font-semibold">
-              You have not submitted any reports yet.
+              You have not submitted any applications yet.
             </h3>
           </div>
         </div>
