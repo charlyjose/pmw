@@ -155,6 +155,11 @@ export function RoutePlanDialog({ locations, axiosConfig }) {
   const get_route_plan = async (unit: string) => {
     setRoutePlanIsLoading(true);
 
+    // Reset the route plans
+    setRoutePlan([]);
+    setRoutePlanSuggestion([]);
+
+
     const start_location = {
       address: address,
       coordinate: {
@@ -324,52 +329,58 @@ export function RoutePlanDialog({ locations, axiosConfig }) {
                         </div>
                       </div>
                       <div className="grid gap-1 transition-all hover:text-accent-foreground">
-                        <span className="text-md font-bold">
-                          Suggested Route Plan
-                          <span className="ml-3 text-sm font-medium">
-                            (Total Distance:{" "}
-                            {routePlanSuggestion.suggested_route_plan.total_distance.toFixed(
-                              2
-                            )}{" "}
-                            {routePlanSuggestion.suggested_route_plan.unit
-                              .charAt(0)
-                              .toUpperCase() +
-                              routePlanSuggestion.suggested_route_plan.unit
-                                .slice(1)
-                                .toLowerCase() +
-                              "s"}
-                            )
-                          </span>
-                        </span>
-
-                        {routePlanSuggestion.suggested_route_plan.cities.map(
-                          (location) => (
-                            <div className="grid gap-1">
-                              <span className="text-sm font-medium">
-                                {location.address}
+                        {routePlanSuggestion.length != 0 ? (
+                          <>
+                            <span className="text-md font-bold">
+                              Suggested Route Plan
+                              <span className="ml-3 text-sm font-medium">
+                                (Total Distance:{" "}
+                                {routePlanSuggestion.suggested_route_plan.total_distance.toFixed(
+                                  2
+                                )}{" "}
+                                {routePlanSuggestion.suggested_route_plan.unit
+                                  .charAt(0)
+                                  .toUpperCase() +
+                                  routePlanSuggestion.suggested_route_plan.unit
+                                    .slice(1)
+                                    .toLowerCase() +
+                                  "s"}
+                                )
                               </span>
-                              {/* <span className="text-xs font-light">
+                            </span>
+
+                            {routePlanSuggestion.suggested_route_plan.cities.map(
+                              (location) => (
+                                <div className="grid gap-1">
+                                  <span className="text-sm font-medium">
+                                    {location.address}
+                                  </span>
+                                  {/* <span className="text-xs font-light">
                                 ({location.coordinate.latitude},{" "}
                                 {location.coordinate.longitude})
                               </span> */}
-                            </div>
-                          )
-                        )}
+                                </div>
+                              )
+                            )}
 
-                        <div className="pt-2 text-left text-xs font-medium hover:underline">
-                          <Button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              setSelectedRoutePlan(
-                                routePlanSuggestion.suggested_route_plan
-                              );
-                              setShowAlert(true);
-                            }}
-                          >
-                            <LuClipboardList className="mr-2" />
-                            Proceed with suggested plan
-                          </Button>
-                        </div>
+                            <div className="pt-2 text-left text-xs font-medium hover:underline">
+                              <Button
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  setSelectedRoutePlan(
+                                    routePlanSuggestion.suggested_route_plan
+                                  );
+                                  setShowAlert(true);
+                                }}
+                              >
+                                <LuClipboardList className="mr-2" />
+                                Proceed with suggested plan
+                              </Button>
+                            </div>
+                          </>
+                        ) : (
+                          <></>
+                        )}
                       </div>
 
                       <AlertDialog open={showAlert} onOpenChange={setShowAlert}>
