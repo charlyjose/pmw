@@ -1,5 +1,5 @@
 import os
-from typing import Optional, Union
+from typing import Union
 
 from bson import ObjectId
 from fastapi import APIRouter, Depends
@@ -10,7 +10,7 @@ from prisma.models import Job
 from app.api.auth import ValidateUserRole
 from app.api.models import action_status
 from app.api.models.auth import Role as UserRole
-from app.api.models.job import CleanedJobForUser, CleanedJobWithCreaterName, JobForm, JobFunction, JobInDB, JobIndustry
+from app.api.models.job import CleanedJobForUser, CleanedJobWithCreaterName, JobForm, JobInDB
 from app.api.models.response import JSONResponseModel
 from app.pnp_helpers.auth import no_access_to_content_response
 from app.pnp_helpers.client_response import json_response
@@ -73,31 +73,14 @@ async def create_new_job(user_id: str = Depends(pyJWTDecodedUserId()), jobForm: 
 
 
 @router.get("/jobs", summary="View jobs", tags=["jobs"])
-async def get_all_jobs_paginated(
-    page: int = 1,
-    industry: Optional[JobIndustry] = None,
-    function: Optional[JobFunction] = None,
-    user_id: str = Depends(pyJWTDecodedUserId()),
-):
-    print(industry)
-    print(function)
-
+async def get_all_jobs_paginated(page: int = 1, user_id: str = Depends(pyJWTDecodedUserId())):
     if user_id:
         # Page nmber should be greater than 0
         if page > 0:
             skip = (page - 1) * 10
             take = 10
-
-            conditions = {}
-            if industry:
-                conditions["industry"] = industry
-            if function:
-                conditions["function"] = function
-
-            print(conditions)
-
             # Get paginated jobs from the database
-            jobs = await job_db.get_all_jobs_paginated(skip=skip, take=take, conditions=conditions)
+            jobs = await job_db.get_all_jobs_paginated(skip=skip, take=take)
 
             job_list = []
             for job in jobs:
@@ -109,9 +92,6 @@ async def get_all_jobs_paginated(
             hasMore = len(jobs) == 10
 
             data = {"jobs": job_list, "hasMore": hasMore}
-
-            print(data)
-
             message = "Jobs fetched"
             response = json_response(
                 http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_FETCHED, message=message, data=data
@@ -125,41 +105,6 @@ async def get_all_jobs_paginated(
             return ClientResponse(**response)()
     else:
         return user_not_found_response()
-
-
-# @router.get("/jobs", summary="View jobs", tags=["jobs"])
-# async def get_all_jobs_paginated(page: int = 1, user_id: str = Depends(pyJWTDecodedUserId())):
-#     if user_id:
-#         # Page nmber should be greater than 0
-#         if page > 0:
-#             skip = (page - 1) * 10
-#             take = 10
-#             # Get paginated jobs from the database
-#             jobs = await job_db.get_all_jobs_paginated(skip=skip, take=take)
-
-#             job_list = []
-#             for job in jobs:
-#                 cleaned_job_for_user = CleanedJobForUser(**job.dict()).dict()
-#                 json_compatible_cleaned_job = jsonable_encoder(cleaned_job_for_user)
-#                 job_list.append(json_compatible_cleaned_job)
-
-#             # Set hasMore to true if there are more jobs to be fetched
-#             hasMore = len(jobs) == 10
-
-#             data = {"jobs": job_list, "hasMore": hasMore}
-#             message = "Jobs fetched"
-#             response = json_response(
-#                 http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_FETCHED, message=message, data=data
-#             )
-#             return ClientResponse(**response)()
-#         else:
-#             message = "Page number should be greater than 0"
-#             response = json_response(
-#                 http_status=http_status.HTTP_204_NO_CONTENT, action_status=action_status.DATA_NOT_FOUND, message=message
-#             )
-#             return ClientResponse(**response)()
-#     else:
-#         return user_not_found_response()
 
 
 # Get a single job by id

@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import Enum
+from typing import List
 
 from pydantic import BaseModel
 
@@ -63,3 +64,14 @@ class PlacementVisitForUser(StudentDetails, PlacementDetails, PlacementDetailsWi
 
 class PlacementVisitGeoLocationForUser(PlacementLocationDetails):
     studentId: str = None
+
+
+class PlacementVisitItinerary(BaseModel):
+    studentId: List[str]
+    region: PlacementVisitRegion
+    visitDate: datetime
+
+
+class PlacementVisitItineraryInDB(PlacementVisitItinerary):
+    tutorId: str
+    visited: bool = False

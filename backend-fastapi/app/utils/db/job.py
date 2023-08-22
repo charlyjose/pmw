@@ -25,14 +25,28 @@ async def get_all_jobs_from_db() -> List[Job]:
 
 
 # A helper function to get all jobs from the database with pagination
-async def get_all_jobs_paginated(skip: int, take: int = 10) -> List[Job]:
+async def get_all_jobs_paginated(skip: int, take: int = 10, conditions: dict = None) -> List[Job]:
     '''
     A helper function to get all appointments from the database
     :param skip: int
     :param take: int
     :return: List[Job]
     '''
-    return await prisma.job.find_many(skip=skip, take=take)
+    if conditions is None:
+        return await prisma.job.find_many(skip=skip, take=take)
+    else:
+        return await prisma.job.find_many(skip=skip, take=take, where=conditions)
+
+
+# # A helper function to get all jobs from the database with pagination
+# async def get_all_jobs_paginated(skip: int, take: int = 10) -> List[Job]:
+#     '''
+#     A helper function to get all appointments from the database
+#     :param skip: int
+#     :param take: int
+#     :return: List[Job]
+#     '''
+#     return await prisma.job.find_many(skip=skip, take=take)
 
 
 # # A helper function to get a single job by id from the database

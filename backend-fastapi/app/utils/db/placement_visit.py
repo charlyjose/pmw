@@ -33,13 +33,17 @@ async def get_geo_lat_lng_location_for_all_placement_applications_under_a_review
 
 
 # A helper function to get all the student detils who are ON_PLACEMENT in a region for a placement visit under a tutor
-async def get_all_on_placement_in_a_region_under_a_tutor(tutor_id: str, region: str) -> Optional[List[PlacementStudents]]:
+async def get_all_on_placement_in_a_region_under_a_tutor_with_pending_visit(
+    tutor_id: str, region: str
+) -> Optional[List[PlacementStudents]]:
     '''
     A helper function to get all the student detils who are ON_PLACEMENT in a region for a placement visit under a tutor
     :param tutor_id: str
     :return: List[PlacementStudents]
     '''
-    return await prisma.placementstudents.find_many(where={"tutorId": tutor_id, "status": "ON_PLACEMENT", "region": region})
+    return await prisma.placementstudents.find_many(
+        where={"tutorId": tutor_id, "status": "ON_PLACEMENT", "region": region, "visitStatus": "PENDING"}
+    )
 
 
 # A helper function to get the placement data for a student
@@ -72,3 +76,13 @@ async def create_new_application(application: dict) -> Optional[PlacementStudent
     :return: PlacementStudents
     '''
     return await prisma.placementstudents.create(application)
+
+
+# A helper function to get all the placement applications for given application ids
+async def get_placement_applications_for_given_application_ids(application_ids: List[str]) -> Optional[List[PlacementStudents]]:
+    '''
+    A helper function to get all the placement applications for given application ids
+    :param application_ids: List[str]
+    :return: List[PlacementStudents]
+    '''
+    return await prisma.placementstudents.find_many(where={"id": {"in": application_ids}})

@@ -11,30 +11,6 @@ class JobMode(str, Enum):
     OFFICE = "OFFICE"
 
 
-class JobIndustry(str, Enum):
-    SOFTWARE_DEVELOPMENT = "SOFTWARE_DEVELOPMENT"
-    FINANCE = "FINANCE"
-    CONSULTING = "CONSULTING"
-    HEALTHCARE = "HEALTHCARE"
-    EDUCATION = "EDUCATION"
-    GOVERNMENT = "GOVERNMENT"
-    RETAIL = "RETAIL"
-    OTHER = "OTHER"
-
-
-class JobFunction(str, Enum):
-    INFORMATION_TECHNOLOGY = "INFORMATION_TECHNOLOGY"
-    ENGINEERING = "ENGINEERING"
-    FINANCE = "FINANCE"
-    CONSULTING = "CONSULTING"
-    SALES = "SALES"
-    MARKETING = "MARKETING"
-    BUSINESS_DEVELOPMENT = "BUSINESS_DEVELOPMENT"
-    ANALYST = "ANALYST"
-    MANUFACTURING = "MANUFACTURING"
-    OTHER = "OTHER"
-
-
 # Job model from submitted json data
 class JobForm(BaseModel):
     role: str
@@ -44,8 +20,6 @@ class JobForm(BaseModel):
     mode: JobMode
     location: List[str]
     deadline: datetime
-    industry: JobIndustry = JobIndustry.OTHER
-    function: JobFunction = JobFunction.OTHER
     link: AnyHttpUrl
 
 

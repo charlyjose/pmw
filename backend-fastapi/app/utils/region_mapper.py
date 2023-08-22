@@ -4,37 +4,49 @@ from typing import Optional
 
 from shapely.geometry import Point, shape
 
+from app.api.models.coordinate import Coordinate
+
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
-def check_coordinate_in_feature(coordinate, geojson_file):
+def get_region_in_geoJSON(coordinate, geoJson_data) -> Optional[str]:
     """
     Check if a given coordinate falls under a feature in a GeoJSON file.
 
     Parameters:
         coordinate: tuple (latitude, longitude) representing the coordinate to check.
-        geojson_file: str, path to the GeoJSON file containing features.
+        geoJson_data: GeoJSON data containing features.
 
     Returns:
-        bool: True if the coordinate falls under any feature, False otherwise.
+        bool: Region (str) if the coordinate falls under any feature, None otherwise.
     """
-    # Load GeoJSON data
-    with open(geojson_file, 'r') as f:
-        data = json.load(f)
 
-    # Create a point geometry from the coordinate
-    point = Point(coordinate[::-1])  # GeoJSON uses (longitude, latitude) order
+    point = Point(coordinate)
 
-    # Iterate through features and check if the coordinate is within any of them
-    for feature in data['features']:
+    # If the coordinate is within any of the features, return the name of the feature
+    for feature in geoJson_data['features']:
         polygon = shape(feature['geometry'])
         if polygon.contains(point):
             return feature['properties']['EER13NM']
     return None
 
 
-# Example usage:
-def get_region(coordinate: tuple) -> Optional[str]:
-    geojson_file_path = f"{ROOT_DIR}/maps/gb_geoJSON_eer.json"  # Replace with the actual file path
-    region = check_coordinate_in_feature(coordinate, geojson_file_path)
-    return region
+def get_region(coordinate: Coordinate) -> Optional[str]:
+    """
+    Get a UK region from a geo coordinate.
+
+    Parameters:
+        coordinate: Coordinate object containing latitude and longitude.
+
+    Returns:
+        bool: Region (str) if the coordinate falls under any feature, None otherwise.
+
+    """
+
+    coordinate_tuple = (coordinate.longitude, coordinate.latitude)
+
+    geojson_file_path = f"{ROOT_DIR}/maps/gb_geoJSON_eer.json"
+    with open(geojson_file_path, 'r') as f:
+        geoJson_data = json.load(f)
+
+    return get_region_in_geoJSON(coordinate_tuple, geoJson_data)

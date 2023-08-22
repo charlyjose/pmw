@@ -1,11 +1,13 @@
 from fastapi import APIRouter, Depends
 from fastapi import status as http_status
+from fastapi.encoders import jsonable_encoder
 
 from app.api.auth import ValidateUserRole
 from app.api.models import action_status
 from app.api.models.auth import Role as UserRole
 from app.api.models.auth import StudentStatus as student_status
-from app.api.models.placement_students import PlacementStudentForm, PlacementStudentInDB, CleanedPlacementStudent
+from app.api.models.coordinate import Coordinate
+from app.api.models.placement_students import CleanedPlacementStudent, PlacementStudentForm, PlacementStudentInDB
 from app.api.models.placement_visit import PlacementVisitRegion as regions
 from app.pnp_helpers.auth import no_access_to_content_response
 from app.pnp_helpers.json_response_wrapper import default_response
@@ -15,7 +17,6 @@ from app.utils.db import placement_tutor as placement_tutor_db
 from app.utils.db import placement_visit as placement_visit_db
 from app.utils.db import user as user_db
 from app.utils.region_mapper import get_region
-from fastapi.encoders import jsonable_encoder
 
 router = APIRouter()
 
@@ -40,7 +41,7 @@ async def add_placement_declaration(
         if not tutor_id:
             return default_response(http_status.HTTP_404_NOT_FOUND, action_status.ERROR, "Placement tutor not found")
 
-        coordinate = (placement_start_form.latitude, placement_start_form.longitude)
+        coordinate = Coordinate(longitude=placement_start_form.longitude, latitude=placement_start_form.latitude)
         region = get_region(coordinate)
 
         if not region:

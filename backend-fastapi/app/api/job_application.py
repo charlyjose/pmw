@@ -1,7 +1,7 @@
 import os
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, UploadFile, File
+from fastapi import APIRouter, Depends, File, UploadFile
 from fastapi import status as http_status
 from fastapi.encoders import jsonable_encoder
 from starlette.responses import FileResponse
@@ -16,8 +16,8 @@ from app.api.models.job_application import (
     JobApplicationWithFile,
     JobApplicationWithFileNameInDB,
     JobApplicationWithoutFile,
-    JobFileType,
     JobFiles,
+    JobFileType,
 )
 from app.api.models.response import JSONResponseModel
 from app.pnp_helpers.auth import no_access_to_content_response
@@ -28,7 +28,6 @@ from app.utils.auth import pyJWTDecodedUserId
 from app.utils.db import job as job_db
 from app.utils.db import job_application as job_application_db
 from app.utils.reponse import ClientResponse
-from typing import Any, Optional
 
 router = APIRouter()
 
@@ -94,7 +93,7 @@ async def read_application(
 
 
 @router.post("/student/jobs/apply/job", summary="Add new job application", tags=["job_applications"])
-async def add_new_placement_application(
+async def add_new_job_application(
     user_id: str = Depends(pyJWTDecodedUserId()), application_form: JobApplicationForm = Depends(read_application)
 ):
     # print("application_form", application_form)
