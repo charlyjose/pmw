@@ -1,5 +1,5 @@
 import { Separator } from "@/registry/new-york/ui/separator";
-import { JobsList } from "./jobs-list";
+import { App } from "./jobs-filter";
 
 export default function Jobs() {
   return (
@@ -14,7 +14,7 @@ export default function Jobs() {
         </p>
       </div>
       <Separator />
-      <JobsList />
+      <App />
     </div>
   );
 }

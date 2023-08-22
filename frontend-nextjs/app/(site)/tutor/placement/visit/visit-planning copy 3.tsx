@@ -108,8 +108,6 @@ import { toast as hotToast } from "react-hot-toast";
 
 import { LocationSearch } from "./location-search/page";
 
-import { RoutePlanDialog } from "./route-plan-dialog";
-
 export const visitScheduleFormSchema = z.object({
   region: z.string({
     required_error: "Region is required",
@@ -148,12 +146,6 @@ export function VisitPlanning() {
   const [regionData, setRegionData] = useState([]);
   const [viewMapButton, setViewMapButton] = useState(false);
   const [viewMap, setViewMap] = useState(false);
-
-
-  const [routePlan, setRoutePlan] = useState([]);
-  const [routePlanSuggestion, setRoutePlanSuggestion] = useState([]);
-  const [loadRoutePlan, setLoadRoutePlan] = useState(false);
-  const [routePlanIsLoading, setRoutePlanIsLoading] = useState(false);
 
   const form = useForm<VisitScheduleFormValues>({
     resolver: zodResolver(visitScheduleFormSchema),
@@ -200,91 +192,9 @@ export function VisitPlanning() {
     setAxiosConfig(config);
   }, []);
 
-  const get_route_plan = async (unit: string, data, start_location) => {
-    setRoutePlanIsLoading(true);
-
-    console.log(data);
-
-    // {
-    //   "placement_ids": [
-    //   "64c769fa9539ca98a6ece70c",
-    //   "64c76e789539ca98a6ece718",
-    //   "64d61cc9e742253cd316185f"
-    // ],
-    //   "start_location": {
-    //     "address": "Leicester, UK",
-    //     "coordinate": {
-    //       "longitude": -1.1330789,
-    //       "latitude": 52.6361398
-    //     }
-    //   }
-    // }
-
-    const routeData = {
-      placement_ids: data.locations,
-      start_location: start_location,
-    };
-
-    var toast_variant = "default";
-    var toast_title = "Route Plan";
-    var toast_description = "";
-
-    const API_URI = "http://localhost:8000";
-    await axios
-      .post(
-        `${API_URI}/api/tutor/placement/visit/route-plan?unit=${unit}`,
-        routeData,
-        axiosConfig
-      )
-      .then((e) => {
-        let data = e.data.data.route_plan;
-        let route_plan = data.route_plan;
-        let route_plan_suggestion = data.route_plan_suggestion;
-
-        console.log("route_plan: ", route_plan);
-        console.log("route_plan_suggestion: ", route_plan_suggestion);
-
-        // Check if the route plan object is not NULL
-        if (data != null) {
-          // Check if the route plan is not NULL
-          if (route_plan != null) {
-            setRoutePlan(route_plan);
-            setLoadRoutePlan(true);
-
-            toast_variant = "default";
-            toast_description = "Successfully fetched route plan";
-          }
-          if (route_plan_suggestion != null) {
-            setRoutePlanSuggestion(route_plan_suggestion);
-          }
-        } else {
-          toast_variant = "destructive";
-          toast_description = "Could not fetch route plan";
-        }
-
-        toast({
-          variant: toast_variant,
-          title: toast_title,
-          description: toast_description,
-        });
-      })
-      .catch((e) => {
-        toast_variant = "destructive";
-        toast_description = "Error fetching route plan";
-        toast({
-          variant: toast_variant,
-          title: toast_title,
-          description: toast_description,
-        });
-      });
-
-    setTimeout(() => {
-      setRoutePlanIsLoading(false);
-    }, 3000);
-  };
-
   const fetchRegionData = async (region: string) => {
-    setIsLoading(true);
+    console.log("region: ", region);
+
     // Reset form values
     form.setValue("locations", [""]);
 
@@ -313,6 +223,7 @@ export function VisitPlanning() {
       .then((e) => {
         let placements = e.data.data.placements;
         if (placements?.length > 0) {
+          console.log("placements: ", placements);
           setMarkers(placements);
 
           setRegionData(placements);
@@ -556,17 +467,20 @@ export function VisitPlanning() {
                                                     className="mr-1"
                                                     variant={
                                                       moment(
-                                                        placement.startDate,
+                                                        placement.endDate,
                                                         "YYYYMMDD"
                                                       ).isBefore(
-                                                        // If the placement has started for 3 months
-                                                        moment().subtract(
+                                                        moment().add(
                                                           3,
                                                           "months"
                                                         )
-                                                      )
-                                                        ? "destructive"
-                                                        : "secondary"
+                                                      ) ||
+                                                      moment(
+                                                        placement.endDate,
+                                                        "YYYYMMDD"
+                                                      ).isBefore(moment())
+                                                        ? "secondary"
+                                                        : "destructive"
                                                     }
                                                   >
                                                     started{" "}
@@ -600,12 +514,7 @@ export function VisitPlanning() {
                 {viewMapButton && form.watch("locations")?.length > 0 ? (
                   <div className="grid grid-cols-2">
                     <div className="col-span-1">
-                      <RoutePlanDialog
-                        locations={form.getValues("locations")}
-                        axiosConfig={axiosConfig}
-                      />
-
-                      {/* <AlertDialog>
+                      <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button variant="outline">
                             <LuClipboardList className="mr-2" />
@@ -618,24 +527,7 @@ export function VisitPlanning() {
                             <AlertDialogTitle>
                               Confirm your selections?
                             </AlertDialogTitle>
-                            <AlertDialogDescription> */}
-
-                      {/* <Button
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  get_route_plan("MILE", form.getValues(), {
-                                    address: "Leicester, UK",
-                                    coordinate: {
-                                      longitude: -1.1330789,
-                                      latitude: 52.6361398,
-                                    },
-                                  });
-                                }}
-                              >
-                                Load Route Plan
-                              </Button> */}
-
-                      {/* 
+                            <AlertDialogDescription>
                               <FormField
                                 control={form.control}
                                 name="date"
@@ -676,16 +568,14 @@ export function VisitPlanning() {
                                           }
                                           initialFocus
                                           required
-                                        />                                      
+                                        />
                                       </PopoverContent>
                                     </Popover>
                                     <FormMessage />
                                   </FormItem>
                                 )}
                               />
- */}
-
-                      {/* </AlertDialogDescription>
+                            </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -706,7 +596,7 @@ export function VisitPlanning() {
                             </Button>
                           </AlertDialogFooter>
                         </AlertDialogContent>
-                      </AlertDialog> */}
+                      </AlertDialog>
                     </div>
                     <div className="col-span-1 text-right">
                       <Button

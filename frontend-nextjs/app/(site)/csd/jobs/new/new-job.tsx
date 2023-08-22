@@ -90,8 +90,6 @@ export function NewJob() {
   function onSubmit(data: JobFormValues) {
     setIsLoading(true);
 
-    console.log(data);
-
     const jobData = {
       role: data.role.charAt(0).toUpperCase() + data.role.slice(1),
       company: data.company.charAt(0).toUpperCase() + data.company.slice(1),
@@ -104,10 +102,11 @@ export function NewJob() {
           location.value.trim().slice(1)
       ),
       deadline: data.deadline,
+      industry: data.industry,
+      function: data.function,
       link: data.link,
     };
 
-    console.log(jobData);
     const API_URI = "http://localhost:8000";
     var token = session?.token;
     const config = {
@@ -121,7 +120,7 @@ export function NewJob() {
       .post(`${API_URI}/api/jobs`, jobData, config)
       .then((e) => {
         const toast_variant = "default";
-        const toast_title = "Your appointment details:";
+        const toast_title = "Job details:";
         const toast_description = (
           <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
             <code className="text-white">
@@ -209,7 +208,7 @@ export function NewJob() {
                       <FormControl>
                         <Textarea
                           placeholder="A good job description motivates students to apply"
-                          className="min-h-[400px] flex-1 p-4 md:min-h-[600px] lg:min-h-[600px]"
+                          className="min-h-[400px] flex-1 p-4 md:min-h-[625px] lg:min-h-[625px]"
                           {...field}
                         />
                       </FormControl>
@@ -261,6 +260,100 @@ export function NewJob() {
                               <SelectItem value="REMOTE">Remote</SelectItem>
                               <SelectItem value="HYBRID">Hybrid</SelectItem>
                               <SelectItem value="OFFICE">Office</SelectItem>
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="pt-3">
+                  <FormField
+                    control={form.control}
+                    name="industry"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Industry</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Job Industry" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectItem value="SOFTWARE_DEVELOPMENT">
+                                Software Development
+                              </SelectItem>
+                              <SelectItem value="FINANCE">Finance</SelectItem>
+                              <SelectItem value="CONSULTING">
+                                Consulting
+                              </SelectItem>
+                              <SelectItem value="HEALTHCARE">
+                                Healthcare
+                              </SelectItem>
+                              <SelectItem value="EDUCATION">
+                                Education
+                              </SelectItem>
+                              <SelectItem value="GOVERNMENT">
+                                Government
+                              </SelectItem>
+                              <SelectItem value="RETAIL">Retail</SelectItem>
+                              <SelectItem value="OTHER">Other</SelectItem>
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="pt-3">
+                  <FormField
+                    control={form.control}
+                    name="function"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Job Function</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Job Function" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectItem value="INFORMATION_TECHNOLOGY">
+                                Information Technology
+                              </SelectItem>
+                              <SelectItem value="ENGINEERING">
+                                Engineering
+                              </SelectItem>
+                              <SelectItem value="FINANCE">Finance</SelectItem>
+                              <SelectItem value="CONSULTING">
+                                Consulting
+                              </SelectItem>
+                              <SelectItem value="SALES">Sales</SelectItem>
+                              <SelectItem value="MARKETING">
+                                Marketing
+                              </SelectItem>
+                              <SelectItem value="BUSINESS_DEVELOPMENT">
+                                Business Development
+                              </SelectItem>
+                              <SelectItem value="ANALYST">Analyst</SelectItem>
+                              <SelectItem value="MANUFACTURING">
+                                Manufacturing
+                              </SelectItem>
+                              <SelectItem value="OTHER">Other</SelectItem>
                             </SelectGroup>
                           </SelectContent>
                         </Select>

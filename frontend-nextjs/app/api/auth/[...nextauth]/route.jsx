@@ -39,7 +39,9 @@ export const authOptions = {
                     return axios.get(`${API_URI}/api/users/me`, config)
                 }).catch((err) => {
                     if (err.code === 'ECONNREFUSED') throw new Error('Could not authenticate. Service is offline')
-                    else throw new Error('An unexpected error occurred')
+                    else if (err.response.status === 401) throw new Error(err.response.data.message)
+                    else
+                        throw new Error('An unexpected error occurred')
                 })
 
                 user = await res.data.data

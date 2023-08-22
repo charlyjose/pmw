@@ -50,7 +50,7 @@ export function DialogDemo({ form }) {
       <DialogTrigger asChild>
         <Button className="w-full">
           <ArrowUpRight className="mr-2 h-4 w-4" />
-          <div className="text-right font-normal hover:underline">Preview</div>
+          <div className="text-right font-normal">Preview</div>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[900px]">
@@ -59,7 +59,9 @@ export function DialogDemo({ form }) {
         job.description ||
         job.salary ||
         job.deadline ||
-        job.mode ? (
+        job.mode ||
+        job.industry ||
+        job.function ? (
           <>
             <DialogHeader>
               <DialogTitle>
@@ -85,7 +87,12 @@ export function DialogDemo({ form }) {
               )}
             </DialogHeader>
 
-            {job.salary || job.deadline || job.mode || job.link ? (
+            {job.salary ||
+            job.deadline ||
+            job.mode ||
+            job.industry ||
+            job.function ||
+            job.link ? (
               <>
                 <div className="text-left text-lg font-bold">
                   <span className="px-1 bg-purple-300 mr-2 "></span>
@@ -173,6 +180,56 @@ export function DialogDemo({ form }) {
                     </TooltipProvider>
                   ) : (
                     <></>
+                  )}
+
+                  {job.industry ? (
+                    <div className="grid gap-1">
+                      <div className="text-xs font-light">
+                        <span className="px-1 bg-purple-300 mr-2"></span>
+                        INDUSTRY
+                      </div>
+                      <div className="text-sm font-normal">
+                        <span>
+                          {job.industry
+                            .replace(/_/g, " ")
+                            .trim()
+                            .charAt(0)
+                            .toUpperCase() +
+                            job.industry
+                              .replace(/_/g, " ")
+                              .trim()
+                              .slice(1)
+                              .toLowerCase()}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div></div>
+                  )}
+
+                  {job.function ? (
+                    <div className="grid gap-1">
+                      <div className="text-xs font-light">
+                        <span className="px-1 bg-purple-300 mr-2"></span>
+                        JOB FUNCTION
+                      </div>
+                      <div className="text-sm font-normal">
+                        <span>
+                          {job.function
+                            .replace(/_/g, " ")
+                            .trim()
+                            .charAt(0)
+                            .toUpperCase() +
+                            job.function
+                              .replace(/_/g, " ")
+                              .trim()
+                              .slice(1)
+                              .toLowerCase()}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div></div>
                   )}
                 </div>
               </>

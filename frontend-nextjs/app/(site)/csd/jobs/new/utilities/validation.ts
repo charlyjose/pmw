@@ -42,6 +42,12 @@ export const jobFormSchema = z.object({
     }, {
         message: "Application deadline must be in the future",
     }),
+    industry: z.string({
+        required_error: "Industry is required",
+    }),
+    function: z.string({
+        required_error: "Job function is required",
+    }),
     link: z.string({
         required_error: "Job link is required",
     }).url(),
