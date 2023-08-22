@@ -67,11 +67,16 @@ class PlacementVisitGeoLocationForUser(PlacementLocationDetails):
 
 
 class PlacementVisitItinerary(BaseModel):
-    studentId: List[str]
+    placementId: List[str]
     region: PlacementVisitRegion
     visitDate: datetime
 
 
-class PlacementVisitItineraryInDB(PlacementVisitItinerary):
+class RoutePlanDetails(BaseModel):
+    totalDistance: float = None
+    unit: str = None
+
+
+class PlacementVisitItineraryInDB(PlacementVisitItinerary, RoutePlanDetails):
     tutorId: str
-    visited: bool = False
+    completed: bool = False

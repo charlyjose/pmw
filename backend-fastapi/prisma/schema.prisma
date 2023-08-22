@@ -437,14 +437,21 @@ model PlacementStudents {
   updatedAt   DateTime               @updatedAt
 }
 
+enum DistanceUnit {
+  MILE
+  KM
+}
+
 model PlacementVisitItinerary {
-  id        String               @id @default(auto()) @map("_id") @db.ObjectId
-  tutorId   String               @unique @db.ObjectId
-  user      User                 @relation(fields: [tutorId], references: [id])
-  studentId String[]             @db.ObjectId
-  visitDate DateTime
-  region    PlacementVisitRegion
-  visited   Boolean              @default(false)
-  createdAt DateTime             @default(now())
-  updatedAt DateTime             @updatedAt
+  id            String               @id @default(auto()) @map("_id") @db.ObjectId
+  tutorId       String               @db.ObjectId
+  user          User                 @relation(fields: [tutorId], references: [id])
+  placementId   String[]             @db.ObjectId
+  region        PlacementVisitRegion
+  visitDate     DateTime
+  completed     Boolean              @default(false)
+  totalDistance Float
+  unit          DistanceUnit
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
 }

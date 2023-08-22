@@ -86,3 +86,14 @@ async def get_placement_applications_for_given_application_ids(application_ids: 
     :return: List[PlacementStudents]
     '''
     return await prisma.placementstudents.find_many(where={"id": {"in": application_ids}})
+
+
+# A helper function to change the visit status for a list of placement applications
+async def change_visit_status_for_placement_applications(placement_ids: List[str], visit_status: str) -> Optional[List[PlacementStudents]]:
+    '''
+    A helper function to change the visit status for a list of placement applications
+    :param placement_ids: List[str]
+    :param visit_status: str
+    :return: List[PlacementStudents]
+    '''
+    return await prisma.placementstudents.update_many(where={"id": {"in": placement_ids}}, data={"visitStatus": visit_status})

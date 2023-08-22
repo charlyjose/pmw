@@ -51,7 +51,7 @@ class RoutePlan(BaseModel):
         unit: Unit of the distance.
     """
 
-    cities: List[RoutePlanCity]
+    cities: List[City]
     total_distance: float
     unit: Unit
 
@@ -71,7 +71,18 @@ class StartLocation(PlacementVisitLocations):
     pass
 
 
+
+class VisitPlanCity(RoutePlanCity):
+    cities: List[RoutePlanCity]
+    total_distance: float
+    unit: Unit
+
 class VisitPlan(BaseModel):
-    route_plan: RoutePlan
+    route_plan: VisitPlanCity
     visit_date: str
 
+# placement_id
+# address
+# coordinate
+# distance
+# id

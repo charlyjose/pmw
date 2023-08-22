@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends
 from fastapi import status as http_status
@@ -12,6 +12,7 @@ from app.api.models.placement_visit import (
     PlacementVisitGeoLocationForUser,
     PlacementVisitItinerary,
     PlacementVisitRegion,
+    PlacementVisitItineraryInDB,
 )
 from app.api.models.response import JSONResponseModel
 from app.api.models.route_plan import PlacementVisitLocations, Unit, Coordinate, StartLocation, VisitPlan
@@ -22,6 +23,9 @@ from app.utils.auth import pyJWTDecodedUserId
 from app.utils.db import placement_visit as placement_visit_db
 from app.utils.db import user as user_db
 from app.utils.route_planner import get_route_plan
+
+
+from app.utils.db import placement_visit_itinerary as placement_visit_itinerary_db
 
 router = APIRouter()
 
@@ -40,7 +44,6 @@ async def get_geo_location_for_all_placement_applications_under_a_tutor(user_id:
     # Check if the user is a tutor
     roles = [UserRole.TUTOR]
     if not await ValidateUserRole(user_id, roles)():
-        print("User is not a tutor")
         return no_access_to_content_response()
 
     # Get the geo location for all the placement applications under a tutor
@@ -54,7 +57,6 @@ async def get_geo_location_for_all_placement_applications_under_a_tutor(user_id:
             latitude=location.organisationLocationGoogleMapsLat,
             longitude=location.organisationLocationGoogleMapsLng,
         ).dict()
-        print(geo_location_for_user)
         json_compatiable_geo_location_for_user = jsonable_encoder(geo_location_for_user)
         geo_location_list.append(json_compatiable_geo_location_for_user)
 
@@ -79,7 +81,6 @@ async def get_region_data(tutor_id: str = Depends(pyJWTDecodedUserId()), region:
     # Check if the user is a tutor
     roles = [UserRole.TUTOR]
     if not await ValidateUserRole(tutor_id, roles)():
-        print("User is not a tutor")
         return no_access_to_content_response()
 
     # Check if the region is valid
@@ -137,7 +138,11 @@ async def get_region_data(tutor_id: str = Depends(pyJWTDecodedUserId()), region:
 # Create a route plan for placement visit
 @router.post("/tutor/placement/visit/route-plan", summary="Create a route plan for placement visit", tags=["placement_visit"])
 async def create_route_plan_for_placement_visit(
-    placement_ids: List[str], start_location: StartLocation, unit: str = Unit.KM, tutor_id: str = Depends(pyJWTDecodedUserId())
+    placement_ids: List[str],
+    start_location: StartLocation,
+    unit: str = Unit.KM,
+    recommendations: Optional[bool] = True,
+    tutor_id: str = Depends(pyJWTDecodedUserId()),
 ):
     if not tutor_id:
         return user_not_found_response()
@@ -155,7 +160,8 @@ async def create_route_plan_for_placement_visit(
         placement_visit_locations.append(placement_visit_location)
 
     # Get route plan
-    route_plan = get_route_plan(placement_visit_locations, unit=unit, recommendations=True)
+    route_plan = get_route_plan(placement_visit_locations, unit=unit, recommendations=recommendations)
+
     json_compatiable_route_plan = jsonable_encoder(route_plan)
     message = "Route plan created"
     data = {"route_plan": json_compatiable_route_plan}
@@ -163,13 +169,59 @@ async def create_route_plan_for_placement_visit(
 
 
 # Confirm placement visit
-# Takes: Route plan, visitDate, visit date
+# Takes: Visit plan, visitDate, visit date
 @router.post("/tutor/placement/visit/route-plan/confirm", summary="Confirm placement visit", tags=["placement_visit"])
 async def confirm_placement_visit(visit_plan: VisitPlan, tutor_id: str = Depends(pyJWTDecodedUserId())):
     if not tutor_id:
         return user_not_found_response()
 
-    
+    placement_ids = [city.placement_id for city in visit_plan.route_plan.cities[1:-1]]
 
-    message = "Placement visit confirmed"
+    # Get placement visit itenerary for a tutor
+    placement_visit_itinerary = await placement_visit_itinerary_db.get_placement_visit_itinerary_exists_for_a_tutor_id(tutor_id=tutor_id)
+    placement_ids_in_itenerary_list = [placement.placementId for placement in placement_visit_itinerary]
+
+    # Check if placement ids as a whole list are already in placement_ids_in_itenerary_list
+    already_in_itinerary = placement_ids in placement_ids_in_itenerary_list
+
+    if already_in_itinerary:
+        message = "Placement visit already exists"
+        return default_response(
+            http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.DATA_ALREADY_EXISTS, message=message
+        )
+
+    # Get the region from DB for all the placements in the visit plan and skip first and last location
+    placement_details = await placement_visit_db.get_placement_applications_for_given_application_ids(placement_ids)
+    regions = [placement.region for placement in placement_details]
+
+    # Check if all the placements are in the same region
+    if not all(region == regions[0] for region in regions):
+        message = "Placements are not in the same region"
+        return default_response(http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.INVALID_INPUT, message=message)
+
+    # Prepare the placement visit itinerary
+    placement_visit_itinerary = PlacementVisitItineraryInDB(
+        placementId=placement_ids,
+        region=regions[0],
+        visitDate=visit_plan.visit_date,
+        tutorId=tutor_id,
+        totalDistance=visit_plan.route_plan.total_distance,
+        unit=visit_plan.route_plan.unit,
+    )
+
+    # Create a placement visit itinerary
+    visit_itinerary = await placement_visit_itinerary_db.create_placement_visit_itinerary(placement_visit_itinerary.dict())
+    if not visit_itinerary:
+        message = "Failed to create placement visit itinerary"
+        return default_response(http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.UNKNOWN_ERROR, message=message)
+
+    # Change the visit status of each placement student to SCHEDULED
+    placement_student_visit_status_update = await placement_visit_db.change_visit_status_for_placement_applications(
+        placement_ids=placement_ids, visit_status="SCHEDULED"
+    )
+    if not placement_student_visit_status_update:
+        message = "Failed to update placement visit status"
+        return default_response(http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.UNKNOWN_ERROR, message=message)
+
+    message = "Placement visit confirmed. Itinerary created"
     return default_response(http_status=http_status.HTTP_200_OK, action_status=action_status.NO_ERROR, message=message)

@@ -94,9 +94,14 @@ def prepare_suggestion(route_plan, unit: Unit) -> RoutePlanSuggestion:
         total_time += total_road_time + average_time_spent_at_each_location
 
         if total_time <= 8:
-            recommended_plan.append(city)
+            # If the location is not the last location
+            if city.id != len(route_plan.cities) - 1:
+                recommended_plan.append(city)
         else:
             break
+
+    print("Recommended Plan")
+    print(recommended_plan)
 
     # Add the last city
     recommended_plan.append(route_plan.cities[-1])
