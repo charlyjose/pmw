@@ -88,7 +88,7 @@ export function UserAuthForm() {
           setIsLoading(false);
           toast.success("Account created!");
           router.push("/signin");
-        }, 3000);
+        }, 1000);
       })
       .catch((e) => {
         console.log(e.response.data);
@@ -97,7 +97,7 @@ export function UserAuthForm() {
 
     setTimeout(() => {
       setIsLoading(false);
-    }, 3000);
+    }, 1000);
   }
 
   return (

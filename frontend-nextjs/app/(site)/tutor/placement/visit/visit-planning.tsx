@@ -280,7 +280,7 @@ export function VisitPlanning() {
 
     setTimeout(() => {
       setRoutePlanIsLoading(false);
-    }, 3000);
+    }, 1000);
   };
 
   const fetchRegionData = async (region: string) => {
@@ -344,7 +344,7 @@ export function VisitPlanning() {
 
     setTimeout(() => {
       setIsLoading(false);
-    }, 3000);
+    }, 1000);
   };
 
   function createItinerary(data: VisitScheduleFormValues) {

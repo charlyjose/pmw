@@ -105,7 +105,7 @@ export function AllAppointments() {
       setTimeout(() => {
         setIsLoading(false);
         // router.push("/student/appointments")
-      }, 3000);
+      }, 1000);
     };
 
     fetchData();

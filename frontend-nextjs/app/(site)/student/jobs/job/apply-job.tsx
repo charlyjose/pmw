@@ -90,7 +90,7 @@ export function ApplyJob() {
       setTimeout(() => {
         setIsLoading(false);
         // router.push("/student/jobs")
-      }, 3000);
+      }, 1000);
     };
 
     fetchJob();

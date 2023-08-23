@@ -40,7 +40,7 @@ export function CopyButton({
   React.useEffect(() => {
     setTimeout(() => {
       setHasCopied(false)
-    }, 2000)
+    }, 1000)
   }, [hasCopied])
 
   return (
@@ -94,7 +94,7 @@ export function CopyWithClassNames({
   React.useEffect(() => {
     setTimeout(() => {
       setHasCopied(false)
-    }, 2000)
+    }, 1000)
   }, [hasCopied])
 
   const copyToClipboard = React.useCallback((value: string) => {
@@ -149,7 +149,7 @@ export function CopyNpmCommandButton({
   React.useEffect(() => {
     setTimeout(() => {
       setHasCopied(false)
-    }, 2000)
+    }, 1000)
   }, [hasCopied])
 
   const copyCommand = React.useCallback(

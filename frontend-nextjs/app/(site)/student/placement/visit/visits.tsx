@@ -191,7 +191,6 @@ export function ApplicationsDisplay(props) {
     if (applications.length > 0) {
       return (
         <>
-          {/* <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"> */}
           {applications.map((placement) => (
             <div className="pb-2">
               <Card
@@ -220,7 +219,7 @@ export function ApplicationsDisplay(props) {
                   </CardTitle>
 
                   <div className="flex items-center space-x-2">
-                    <Switch
+                    {/* <Switch
                       id="STATUS"
                       defaultChecked={visitCompleted}
                       onCheckedChange={(e) => {
@@ -240,7 +239,7 @@ export function ApplicationsDisplay(props) {
                       ) : (
                         <span>Confirm Visit</span>
                       )}
-                    </Label>
+                    </Label> */}
                     {placement.placements[0].visitStatus === "PENDING" ? (
                       <Badge variant="secondary" className="font-bold text-md">
                         <span className="text-yellow-600">Pending</span>
@@ -270,15 +269,6 @@ export function ApplicationsDisplay(props) {
                 </CardHeader>
 
                 <CardContent>
-                  <div className="grid grid-cols-12 gap-2">
-                    <div className="col-span-5">
-                      <div className="text-xs font-bold"></div>
-                    </div>
-                    <div className="col-span-7">
-                      <div className="text-right text-xs font-medium hover:underline"></div>
-                    </div>
-                  </div>
-
                   <Accordion type="single" collapsible className="w-full">
                     <AccordionItem value={placement.id}>
                       <AccordionTrigger className="text-right text-sm font-normal transition-all hover:bg-accent hover:text-accent-foreground hover:no-underline">
@@ -316,7 +306,6 @@ export function ApplicationsDisplay(props) {
               </Card>
             </div>
           ))}
-          {/* </div> */}
         </>
       );
     } else {

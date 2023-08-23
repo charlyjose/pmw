@@ -92,7 +92,7 @@ function sendResponse(appointmentId: string, response: string, config: any) {
 
       setTimeout(() => {
         window.location.reload();
-      }, 3000);
+      }, 1000);
     })
     .catch(() => {
       toast({ variant: "destructive", title: "Something went wrong!" });
@@ -164,7 +164,7 @@ export function VisitPlanning() {
 
       setTimeout(() => {
         setIsLoading(false);
-      }, 3000);
+      }, 1000);
     };
 
     fetchData();

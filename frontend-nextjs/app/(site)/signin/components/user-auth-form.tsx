@@ -74,7 +74,7 @@ export function UserAuthForm() {
 
     setTimeout(() => {
       setIsLoading(false);
-    }, 3000);
+    }, 1000);
   }
 
   return (

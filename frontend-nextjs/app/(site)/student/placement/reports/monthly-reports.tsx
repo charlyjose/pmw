@@ -97,7 +97,7 @@ export function MonthlyReports() {
 
       setTimeout(() => {
         setIsLoading(false);
-      }, 3000);
+      }, 1000);
     };
 
     setIsLoading(false);
