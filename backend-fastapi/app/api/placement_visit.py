@@ -414,7 +414,6 @@ async def change_the_status_of_the_placement_visit_itinerary(id: str, status: bo
 
     # Get placement Ids from the placement visit itinerary
     placement_ids = placement_visit_itinerary.placementId
-    print(placement_ids)
 
     # Change the visit status of each placement student to COMPLETED
     placement_student_visit_status_update = await placement_visit_db.change_visit_status_for_placement_applications(
@@ -453,7 +452,6 @@ async def change_the_status_of_the_placement_visit_itinerary(id: str, status: bo
 
     # Get placement Ids from the placement visit itinerary
     placement_ids = placement_visit_itinerary.placementId
-    print(placement_ids)
 
     # Change the visit status of each placement student to COMPLETED
     placement_student_visit_status_update = await placement_visit_db.change_visit_status_for_placement_applications(

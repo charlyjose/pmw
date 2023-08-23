@@ -43,14 +43,10 @@ async def get_all_user_data(user_id: str = Depends(pyJWTDecodedUserId())):
                 cleaned_user_data = CleanedUserData(**user.dict()).dict()
                 user_list["users"].append(cleaned_user_data)
 
-            print(user_list)
-
             message = "Users data"
             response = json_response(
                 http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_FETCHED, message=message, data=user_list
             )
-
-            print(response)
 
             return ClientResponse(**response)()
 

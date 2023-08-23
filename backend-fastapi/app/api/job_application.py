@@ -71,7 +71,6 @@ async def add_new_application(
         ).dict()
         return await job_application_db.create_new_application(application)
     except Exception as e:
-        print(e)
         return None
 
 
@@ -96,10 +95,6 @@ async def read_application(
 async def add_new_job_application(
     user_id: str = Depends(pyJWTDecodedUserId()), application_form: JobApplicationForm = Depends(read_application)
 ):
-    # print("application_form", application_form)
-    # message = "Uploaded"
-    # return json_response(http_status=http_status.HTTP_200_OK, action_status=action_status.NO_ERROR, message=message)
-
     try:
         cv_name = application_form.cv.filename
         cl_name = application_form.cl.filename if application_form.cl else None
@@ -145,8 +140,6 @@ async def add_new_job_application(
         response = json_response(http_status=http_status.HTTP_200_OK, action_status=action_status.NO_ERROR, message=message)
         return ClientResponse(**response)()
     except Exception as e:
-        print(e)
-
         message = "Something went wrong"
         return default_response(
             http_status=http_status.HTTP_500_INTERNAL_SERVER_ERROR, action_status=action_status.DATA_NOT_CREATED, message=message

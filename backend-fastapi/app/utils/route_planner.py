@@ -100,9 +100,6 @@ def prepare_suggestion(route_plan, unit: Unit) -> RoutePlanSuggestion:
         else:
             break
 
-    print("Recommended Plan")
-    print(recommended_plan)
-
     # Add the last city
     recommended_plan.append(route_plan.cities[-1])
     # Change the id of the last city

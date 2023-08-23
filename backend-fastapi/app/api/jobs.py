@@ -79,9 +79,6 @@ async def get_all_jobs_paginated(
     function: Optional[JobFunction] = None,
     user_id: str = Depends(pyJWTDecodedUserId()),
 ):
-    print(industry)
-    print(function)
-
     if user_id:
         # Page nmber should be greater than 0
         if page > 0:

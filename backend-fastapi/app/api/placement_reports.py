@@ -42,7 +42,6 @@ async def read_report_from_store(location: str):
 
 
 async def add_new_report(ownerId: str, title: str, month: str, file_type: str, report_name: str) -> Optional[ReportInDB]:
-    print(ownerId, title, month, file_type, report_name)
     try:
         report = ReportInDB(ownerId=ownerId, title=title, month=month, file_type=file_type, report_name=report_name).dict()
         return await placement_report_db.create_new_report(report)
