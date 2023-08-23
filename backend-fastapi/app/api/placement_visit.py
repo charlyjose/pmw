@@ -427,3 +427,42 @@ async def change_the_status_of_the_placement_visit_itinerary(id: str, status: bo
     return default_response(
         http_status=http_status.HTTP_200_OK, action_status=action_status.NO_ERROR, message="Placement visit itinerary status changed"
     )
+
+
+
+
+
+# Change the status of the placement visit itinerary
+@router.put(
+    "/student/placement/visit/itinerary/status", summary="Change the status of the placement visit itinerary", tags=["placement_visit"]
+)
+async def change_the_status_of_the_placement_visit_itinerary(id: str, status: bool, tutor_id: str = Depends(pyJWTDecodedUserId())):
+    roles = [UserRole.TUTOR]
+    valid_user_role = await ValidateUserRole(tutor_id, roles)()
+    if not valid_user_role:
+        return no_access_to_content_response()
+
+    # Check if the placement visit itinerary exists
+    placement_visit_itinerary = await placement_visit_itinerary_db.get_placement_visit_itinerary_by_id(id=id)
+    if not placement_visit_itinerary:
+        message = "Placement visit itinerary not found"
+        return default_response(http_status=http_status.HTTP_404_NOT_FOUND, action_status=action_status.DATA_NOT_FOUND, message=message)
+
+    # Change the status of the placement visit itinerary
+    placement_visit_itinerary = await placement_visit_itinerary_db.change_placement_visit_itinerary_status(id=id, status=status)
+
+    # Get placement Ids from the placement visit itinerary
+    placement_ids = placement_visit_itinerary.placementId
+    print(placement_ids)
+
+    # Change the visit status of each placement student to COMPLETED
+    placement_student_visit_status_update = await placement_visit_db.change_visit_status_for_placement_applications(
+        placement_ids=placement_ids, visit_status="COMPLETED"
+    )
+    if not placement_student_visit_status_update:
+        message = "Failed to update placement visit status"
+        return default_response(http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.UNKNOWN_ERROR, message=message)
+
+    return default_response(
+        http_status=http_status.HTTP_200_OK, action_status=action_status.NO_ERROR, message="Placement visit itinerary status changed"
+    )
