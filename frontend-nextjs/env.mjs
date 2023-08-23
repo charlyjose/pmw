@@ -1,5 +1,5 @@
-import { createEnv } from "@t3-oss/env-nextjs"
-import { z } from "zod"
+import { createEnv } from "@t3-oss/env-nextjs";
+import { z } from "zod";
 
 export const env = createEnv({
   /**
@@ -32,7 +32,7 @@ export const env = createEnv({
    */
   runtimeEnv: {
     NEXT_PUBLIC_GOOGLE_MAPS_KEY: process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY,
-    BACKEND_API_URL: process.env.BACKEND_API_URL,
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
     MONGO_DATABASE_URL: process.env.MONGO_DATABASE_URL,
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
@@ -50,4 +50,4 @@ export const env = createEnv({
    * This is especially useful for Docker builds.
    */
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,
-})
+});

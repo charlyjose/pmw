@@ -74,7 +74,7 @@ import { toast as hotToast } from "react-hot-toast";
 function sendResponse(appointmentId: string, response: string, config: any) {
   axios
     .post(
-      `http://localhost:8000/api/appointments/response?id=${appointmentId}&status=${response.toUpperCase()}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/appointments/response?id=${appointmentId}&status=${response.toUpperCase()}`,
       {},
       config
     )
@@ -114,7 +114,7 @@ export function AllAppointments() {
       var toast_title = "Appointments";
       var toast_description = "";
 
-      const API_URI = "http://localhost:8000";
+      const API_URI = process.env.NEXT_PUBLIC_API_URL as string;
       var token = session?.token;
       const config = {
         headers: {

@@ -123,7 +123,7 @@ export function JobApplicationDialog({ job, axiosConfig }) {
 
     axiosConfig.headers["Content-Type"] = "multipart/form-data";
 
-    const API_URI = "http://localhost:8000";
+    const API_URI = process.env.NEXT_PUBLIC_API_URL as string;
     var url = `${API_URI}/api/student/jobs/apply/job?id=${job.id}&name=${applicationData.name}&email=${applicationData.email}&cvFileType=${file_details.cv.type}`;
     if (data.cl) {
       url += `&clFileType=${file_details.cl.type}`;

@@ -128,7 +128,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
       comments: data.comments,
     };
 
-    const API_URI = "http://localhost:8000";
+    const API_URI = process.env.NEXT_PUBLIC_API_URL as string;
     axios
       .put(
         `${API_URI}/api/tutor/placement/application/review`,
@@ -170,7 +170,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
   }
 
   const updateStatus = async (status) => {
-    const API_URI = "http://localhost:8000";
+    const API_URI = process.env.NEXT_PUBLIC_API_URL as string;
     axios
       .put(
         `${API_URI}/api/tutor/placement/application/status?id=${application.id}&status=${status}`,

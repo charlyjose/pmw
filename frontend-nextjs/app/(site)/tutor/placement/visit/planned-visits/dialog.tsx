@@ -49,7 +49,7 @@ export function DialogDemo({ itinerary, axiosConfig }) {
   const [visitCompleted, setVisitCompleted] = useState(itinerary.completed);
 
   const updateCompleteVisitStatus = async (status) => {
-    const API_URI = "http://localhost:8000";
+    const API_URI = process.env.NEXT_PUBLIC_API_URL as string;
     axios
       .put(
         `${API_URI}/api/tutor/placement/visit/itinerary/status?id=${itinerary.id}&status=${status}`,

@@ -93,7 +93,7 @@ export function CreateAppointment() {
   // Fetch the available slots for a given date
   function fetchSlots(date: Date) {
     axios
-      .get(`http://localhost:8000/api/appointments/slots?date=${date}`, {
+      .get(`${process.env.NEXT_PUBLIC_API_URL}/api/appointments/slots?date=${date}`, {
         headers: {
           "Content-Type": `application/json`,
           Authorization: `Bearer ${session?.token}`,
@@ -124,7 +124,7 @@ export function CreateAppointment() {
       time: data.time,
     };
 
-    const API_URI = "http://localhost:8000";
+    const API_URI = process.env.NEXT_PUBLIC_API_URL as string;
     var token = session?.token;
     const config = {
       headers: {

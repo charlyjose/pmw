@@ -80,7 +80,7 @@ export function UserAuthForm() {
 
     const signupData = { ...data };
 
-    const API_URI = "http://localhost:8000";
+    const API_URI = process.env.NEXT_PUBLIC_API_URL as string;
     axios
       .post(`${API_URI}/api/auth/signup`, signupData)
       .then((e) => {

@@ -57,7 +57,7 @@ export function ApplyJob() {
       var toast_title = "Job";
       var toast_description = "";
 
-      const API_URI = "http://localhost:8000";
+      const API_URI = process.env.NEXT_PUBLIC_API_URL as string;
       await axios
         .get(`${API_URI}/api/jobs/${jobId}`, axiosConfig)
         .then((e) => {

@@ -24,7 +24,7 @@ export const authOptions = {
                 var user = null;
 
                 // Get access token from API
-                const API_URI = "http://localhost:8000";
+                const API_URI = process.env.NEXT_PUBLIC_API_URL;
                 const res = await axios.post(`${API_URI}/api/auth/token`, {
                     email: credentials?.email,
                     password: credentials?.password,

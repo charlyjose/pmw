@@ -121,7 +121,7 @@ export function RoutePlanDialog({ locations, axiosConfig }) {
       route_plan: selectedRoutePlan,
     };
 
-    const API_URI = "http://localhost:8000";
+    const API_URI = process.env.NEXT_PUBLIC_API_URL as string;
     await axios
       .post(
         `${API_URI}/api/tutor/placement/visit/route-plan/confirm`,
@@ -177,7 +177,7 @@ export function RoutePlanDialog({ locations, axiosConfig }) {
     var toast_title = "Route Plan";
     var toast_description = "";
 
-    const API_URI = "http://localhost:8000";
+    const API_URI = process.env.NEXT_PUBLIC_API_URL as string;
     await axios
       .post(
         `${API_URI}/api/tutor/placement/visit/route-plan?unit=${unit}`,

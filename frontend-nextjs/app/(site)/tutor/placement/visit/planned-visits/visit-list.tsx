@@ -48,7 +48,7 @@ async function fetchJobs(page = 1, token) {
     },
   };
 
-  const API_URI = "http://localhost:8000";
+  const API_URI = process.env.NEXT_PUBLIC_API_URL as string;
   const { data } = await (
     await axios.get(
       `${API_URI}/api/tutor/placement/visit/itinerary?page=${page + 1}`,
@@ -74,7 +74,6 @@ function Jobs() {
     },
   };
 
-  
   const { status, data, error, isFetching, isPreviousData } = useQuery({
     queryKey: ["placement_visit_itinerary", page, token],
     queryFn: () => fetchJobs(page, token),
@@ -188,7 +187,10 @@ function Jobs() {
                   </TableCell>
 
                   <TableCell className="font-light">
-                    <DialogDemo itinerary={itinerary} axiosConfig={axiosConfig} />
+                    <DialogDemo
+                      itinerary={itinerary}
+                      axiosConfig={axiosConfig}
+                    />
                   </TableCell>
                 </TableRow>
               ))}

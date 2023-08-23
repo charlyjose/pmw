@@ -62,7 +62,7 @@ export function AllAppointments() {
       var toast_title = "Appointments";
       var toast_description = "";
 
-      const API_URI = "http://localhost:8000";
+      const API_URI = process.env.NEXT_PUBLIC_API_URL as string;
       var token = session?.token;
       const config = {
         headers: {

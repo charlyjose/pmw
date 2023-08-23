@@ -2,7 +2,7 @@
 
 const PAGE_TYPE = "STUDENT";
 const UNAUTHORISED_REDIRECTION_LINK = "/signin?callbackUrl=/protected/server";
-const API_URI = "http://localhost:8000";
+const API_URI = process.env.NEXT_PUBLIC_API_URL as string;
 
 import React from "react";
 import { useEffect } from "react";
@@ -147,7 +147,7 @@ export function ApplicationsDisplay(props) {
     );
 
     const updateCompleteVisitStatus = async (status, placement_id) => {
-      const API_URI = "http://localhost:8000";
+      const API_URI = process.env.NEXT_PUBLIC_API_URL as string;
       axios
         .put(
           `${API_URI}/api/student/placement/visit/itinerary/status?id=${placement_id}&status=${status}`,

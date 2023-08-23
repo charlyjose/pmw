@@ -69,7 +69,7 @@ async function fetchJobs(page = 1, token, filterQuery) {
 
   console.log("Filter: ", filterQuery);
 
-  const API_URI = "http://localhost:8000";
+  const API_URI = process.env.NEXT_PUBLIC_API_URL as string;
   let url = `${API_URI}/api/jobs?page=${page + 1}`;
   if (filterQuery != "") {
     url = url + filterQuery;

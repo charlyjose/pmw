@@ -2,7 +2,7 @@
 
 const PAGE_TYPE = "STUDENT";
 const UNAUTHORISED_REDIRECTION_LINK = "/signin?callbackUrl=/protected/server";
-const API_URI = "http://localhost:8000";
+const API_URI = process.env.NEXT_PUBLIC_API_URL as string;
 
 import React from "react";
 import { useEffect } from "react";

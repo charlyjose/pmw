@@ -140,7 +140,7 @@ export function PlacementStartDeclaration() {
       var toast_title = "Placement Start Declaration";
       var toast_description = "";
 
-      const API_URI = "http://localhost:8000";
+      const API_URI = process.env.NEXT_PUBLIC_API_URL as string;
       var token = session?.token;
       const config = {
         headers: {
@@ -208,7 +208,7 @@ export function PlacementStartDeclaration() {
       longitude: organisationLocationGoogleMapsLng,
     };
 
-    const API_URI = "http://localhost:8000";
+    const API_URI = process.env.NEXT_PUBLIC_API_URL as string;
     var token = session?.token;
     const config = {
       headers: {
