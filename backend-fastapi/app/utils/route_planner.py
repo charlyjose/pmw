@@ -8,8 +8,8 @@ from app.api.models.route_plan import (
     RoutePlan,
     RoutePlanCity,
     RoutePlanSuggestion,
-    Unit,
     RoutePlanWithSuggestion,
+    Unit,
 )
 
 

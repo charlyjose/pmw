@@ -4,7 +4,7 @@ from typing import List
 
 from pydantic import BaseModel
 
-from app.api.models.route_plan import Unit, City
+from app.api.models.route_plan import City, Unit
 
 
 class StudentPlacementStatus(str, Enum):

@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Optional, Any
+from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -74,4 +74,3 @@ class StartLocation(PlacementVisitLocations):
 class VisitPlan(BaseModel):
     route_plan: RoutePlan
     visit_date: str
-

@@ -58,4 +58,3 @@ async def get_placement_visit_itinerary_by_id(id: str) -> Optional[PlacementVisi
     :return: PlacementVisitItinerary
     '''
     return await prisma.placementvisititinerary.find_unique(where={"id": id})
-

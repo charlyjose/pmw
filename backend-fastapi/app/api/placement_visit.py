@@ -10,26 +10,22 @@ from app.api.models.auth import Role as UserRole
 from app.api.models.placement_visit import (
     PlacementVisitForUser,
     PlacementVisitGeoLocationForUser,
-    PlacementVisitItinerary,
-    PlacementVisitRegion,
-    PlacementVisitItineraryInDB,
-    PlacementVisitItineraryForTutor,
-    PlacementVisitWithVisitStatus,
-    RoutePlanForVisitInDB,
     PlacementVisitItineraryForStudent,
+    PlacementVisitItineraryForTutor,
+    PlacementVisitItineraryInDB,
+    PlacementVisitRegion,
+    PlacementVisitWithVisitStatus,
 )
 from app.api.models.response import JSONResponseModel
-from app.api.models.route_plan import PlacementVisitLocations, Unit, Coordinate, StartLocation, VisitPlan
+from app.api.models.route_plan import Coordinate, PlacementVisitLocations, StartLocation, Unit, VisitPlan
 from app.pnp_helpers.auth import no_access_to_content_response
 from app.pnp_helpers.json_response_wrapper import default_response
 from app.pnp_helpers.user import user_not_found_response
 from app.utils.auth import pyJWTDecodedUserId
 from app.utils.db import placement_visit as placement_visit_db
+from app.utils.db import placement_visit_itinerary as placement_visit_itinerary_db
 from app.utils.db import user as user_db
 from app.utils.route_planner import get_route_plan
-
-
-from app.utils.db import placement_visit_itinerary as placement_visit_itinerary_db
 
 router = APIRouter()
 
@@ -428,14 +424,11 @@ async def change_the_status_of_the_placement_visit_itinerary(id: str, status: bo
     )
 
 
-
-
-
 # Change the status of the placement visit itinerary
 @router.put(
     "/student/placement/visit/itinerary/status", summary="Change the status of the placement visit itinerary", tags=["placement_visit"]
 )
-async def change_the_status_of_the_placement_visit_itinerary(id: str, status: bool, tutor_id: str = Depends(pyJWTDecodedUserId())):
+async def change_the_status_of_the_placement_student_visit_itinerary(id: str, status: bool, tutor_id: str = Depends(pyJWTDecodedUserId())):
     roles = [UserRole.TUTOR]
     valid_user_role = await ValidateUserRole(tutor_id, roles)()
     if not valid_user_role:

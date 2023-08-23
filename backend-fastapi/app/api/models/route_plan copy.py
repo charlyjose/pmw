@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Optional, Any
+from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -71,15 +71,16 @@ class StartLocation(PlacementVisitLocations):
     pass
 
 
-
 class VisitPlanCity(RoutePlanCity):
     cities: List[RoutePlanCity]
     total_distance: float
     unit: Unit
 
+
 class VisitPlan(BaseModel):
     route_plan: VisitPlanCity
     visit_date: str
+
 
 # placement_id
 # address

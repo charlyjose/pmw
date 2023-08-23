@@ -1,4 +1,3 @@
-import os
 from typing import Union
 
 from bson import ObjectId

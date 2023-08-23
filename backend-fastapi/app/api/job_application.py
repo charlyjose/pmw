@@ -9,16 +9,7 @@ from starlette.responses import FileResponse
 from app.api.auth import ValidateUserRole
 from app.api.models import action_status
 from app.api.models.auth import Role as UserRole
-from app.api.models.job_application import (
-    CleanedJobApplicationForUser,
-    JobApplicationForm,
-    JobApplicationInDB,
-    JobApplicationWithFile,
-    JobApplicationWithFileNameInDB,
-    JobApplicationWithoutFile,
-    JobFiles,
-    JobFileType,
-)
+from app.api.models.job_application import CleanedJobApplicationForUser, JobApplicationForm, JobApplicationInDB, JobFiles
 from app.api.models.response import JSONResponseModel
 from app.pnp_helpers.auth import no_access_to_content_response
 from app.pnp_helpers.client_response import json_response
@@ -70,7 +61,7 @@ async def add_new_application(
             clName=clName,
         ).dict()
         return await job_application_db.create_new_application(application)
-    except Exception as e:
+    except Exception:
         return None
 
 
@@ -139,7 +130,7 @@ async def add_new_job_application(
         message = "Application added"
         response = json_response(http_status=http_status.HTTP_200_OK, action_status=action_status.NO_ERROR, message=message)
         return ClientResponse(**response)()
-    except Exception as e:
+    except Exception:
         message = "Something went wrong"
         return default_response(
             http_status=http_status.HTTP_500_INTERNAL_SERVER_ERROR, action_status=action_status.DATA_NOT_CREATED, message=message
