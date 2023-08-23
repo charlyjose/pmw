@@ -49,8 +49,6 @@ export function DialogDemo({ itinerary, axiosConfig }) {
   const [visitCompleted, setVisitCompleted] = useState(itinerary.completed);
 
   const updateCompleteVisitStatus = async (status) => {
-    console.log("Updating visit status to: " + status);
-
     const API_URI = "http://localhost:8000";
     axios
       .put(

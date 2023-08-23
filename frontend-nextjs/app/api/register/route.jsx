@@ -6,8 +6,6 @@ export async function POST(request){
     const body = await request.json();
     const { first_name, last_name, role, department, email, password } = body;
 
-    console.log(body)
-
     if(!first_name || !last_name || !role || !department || !email || !password) {
         return new NextResponse('Missing Fields', { status: 400 })
     }

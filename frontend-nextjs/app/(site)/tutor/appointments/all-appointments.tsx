@@ -73,8 +73,6 @@ import { toast } from "@/registry/new-york/ui/use-toast";
 import { toast as hotToast } from "react-hot-toast";
 
 function sendResponse(appointmentId: string, response: string, config: any) {
-  console.log(appointmentId, response, config);
-
   axios
     .post(
       `http://localhost:8000/api/appointments/response?id=${appointmentId}&status=${response.toUpperCase()}`,

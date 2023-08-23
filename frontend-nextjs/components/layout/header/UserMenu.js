@@ -19,7 +19,6 @@ const UserMenu = () => {
     }
   },[buttonOutsideClick])
   
-  //console.log("userbutton", buttonOutsideClick)
   return (
     <button className="inline-flex items-center p-2 hover:bg-gray-100 focus:bg-gray-100 rounded-lg relative" onClick={userMenuhandle} ref={buttonRef}>
       <span className="sr-only">User Menu</span>

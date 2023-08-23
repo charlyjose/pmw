@@ -147,8 +147,6 @@ export function ApplicationsDisplay(props) {
     );
 
     const updateCompleteVisitStatus = async (status, placement_id) => {
-      console.log("Updating visit status to: " + status);
-
       const API_URI = "http://localhost:8000";
       axios
         .put(

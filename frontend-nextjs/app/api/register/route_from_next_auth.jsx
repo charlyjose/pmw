@@ -17,8 +17,6 @@ export const authOptions = {
             async authorize(credentials) {
 
 
-                console.log(credentials)
-
                 // check to see if email and password is there
                 if (!credentials.email || !credentials.password) {
                     throw new Error('Please enter an email and password')
@@ -44,12 +42,6 @@ export const authOptions = {
                     throw new Error('Incorrect password')
                 }
 
-
-                // console.log("SERVER SIDE")
-                console.log(user);
-
-
-
                 return user;
             },
         }),
@@ -62,7 +54,6 @@ export const authOptions = {
         session: async (session) => {
             if (!session) return;
 
-              console.log("SESSION: ", session)
 
             const userData = await prisma.user.findUnique({
                 where: {
@@ -71,21 +62,8 @@ export const authOptions = {
             });
 
             const userAccount = await prisma.account.findMany()
-            console.log("USER ACCOUNT: ", userAccount)
 
 
-            // const getToken = await prisma.account.findUnique({
-            //     where: {
-            //       userId: userData.id,
-            //     },
-            //   });
-        
-            //   let accessToken: string | null = null;
-            //   if (getToken) {
-            //     accessToken = getToken.access_token!;
-            //     console.log("ACCESS TOKEN: ", accessToken);
-            //   }
-        
             return {
                 user: {
                     name: userData.name,

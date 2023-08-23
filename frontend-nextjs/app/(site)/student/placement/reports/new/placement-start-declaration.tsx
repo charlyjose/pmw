@@ -153,7 +153,6 @@ export function PlacementStartDeclaration() {
         .get(`${API_URI}/api/student/placement/declaration`, config)
         .then((e) => {
           const applications = e.data.data.placement_declaration;
-          console.log(applications);
           if (applications.length > 0) {
             const application = applications[0];
 
@@ -208,8 +207,6 @@ export function PlacementStartDeclaration() {
       latitude: organisationLocationGoogleMapsLat,
       longitude: organisationLocationGoogleMapsLng,
     };
-
-    console.log(placementStartDeclarationData);
 
     const API_URI = "http://localhost:8000";
     var token = session?.token;

@@ -91,7 +91,6 @@ export function UserAuthForm() {
         }, 1000);
       })
       .catch((e) => {
-        console.log(e.response.data);
         toast.error(e.response.data.action_status);
       });
 

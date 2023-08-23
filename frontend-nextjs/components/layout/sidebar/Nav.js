@@ -43,7 +43,6 @@ const Nav = ({ sidebarOutsideClick }) => {
       setSidebarStatus(false);
     }
   }, [sidebarOutsideClick]);
-  //console.log("sidebar Nav", sidebarOutsideClick)
   return (
     <>
       <nav className="flex flex-col mx-4 my-6 space-y-4">

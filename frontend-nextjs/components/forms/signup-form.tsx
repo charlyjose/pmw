@@ -49,10 +49,6 @@ export function SignUpForm() {
   })
 
   function onSubmit(data: Inputs) {
-
-    console.log(data)
-
-
     if (!isLoaded) return
 
     startTransition(async () => {

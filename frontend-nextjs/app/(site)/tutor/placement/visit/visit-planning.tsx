@@ -149,7 +149,6 @@ export function VisitPlanning() {
   const [viewMapButton, setViewMapButton] = useState(false);
   const [viewMap, setViewMap] = useState(false);
 
-
   const [routePlan, setRoutePlan] = useState([]);
   const [routePlanSuggestion, setRoutePlanSuggestion] = useState([]);
   const [loadRoutePlan, setLoadRoutePlan] = useState(false);
@@ -166,8 +165,6 @@ export function VisitPlanning() {
     let filteredRegionData = regionData.filter((item) => {
       return form.getValues("locations").includes(item.id);
     });
-
-    console.log("filteredRegionData: ", filteredRegionData);
 
     // Set the markers
     setMarkers(filteredRegionData);
@@ -203,23 +200,6 @@ export function VisitPlanning() {
   const get_route_plan = async (unit: string, data, start_location) => {
     setRoutePlanIsLoading(true);
 
-    console.log(data);
-
-    // {
-    //   "placement_ids": [
-    //   "64c769fa9539ca98a6ece70c",
-    //   "64c76e789539ca98a6ece718",
-    //   "64d61cc9e742253cd316185f"
-    // ],
-    //   "start_location": {
-    //     "address": "Leicester, UK",
-    //     "coordinate": {
-    //       "longitude": -1.1330789,
-    //       "latitude": 52.6361398
-    //     }
-    //   }
-    // }
-
     const routeData = {
       placement_ids: data.locations,
       start_location: start_location,
@@ -240,9 +220,6 @@ export function VisitPlanning() {
         let data = e.data.data.route_plan;
         let route_plan = data.route_plan;
         let route_plan_suggestion = data.route_plan_suggestion;
-
-        console.log("route_plan: ", route_plan);
-        console.log("route_plan_suggestion: ", route_plan_suggestion);
 
         // Check if the route plan object is not NULL
         if (data != null) {
@@ -347,12 +324,7 @@ export function VisitPlanning() {
     }, 1000);
   };
 
-  function createItinerary(data: VisitScheduleFormValues) {
-    console.log("data: ", data);
-    console.log(data.date);
-    console.log(data.locations);
-    console.log(data.region);
-  }
+  function createItinerary(data: VisitScheduleFormValues) {}
 
   return (
     <div className="grid gap-4 grid-cols-12 md:grid-cols-2 lg:grid-cols-12">

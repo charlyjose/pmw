@@ -25,7 +25,6 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   });
 
   useEffect(() => {
-    console.log(session);
     if (session?.status === "authenticated") {
       router.push("/dashboard");
     }
@@ -34,8 +33,6 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   async function onSubmit(event: React.SyntheticEvent) {
     event.preventDefault();
     setIsLoading(true);
-
-    console.log(data)
 
     signIn("credentials", { ...data, redirect: false }).then((callback) => {
       if (callback?.error) {

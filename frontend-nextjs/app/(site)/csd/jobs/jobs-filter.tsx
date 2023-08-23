@@ -45,8 +45,6 @@ export function JobFilter(props: any) {
   });
 
   const updateFilter = async (status) => {
-    console.log("Filter status::::: ", status);
-
     let industryFilter = form.getValues().industry;
     let functionFilter = form.getValues().function;
 
@@ -61,8 +59,6 @@ export function JobFilter(props: any) {
       if (functionFilter != undefined) {
         newQuery = newQuery + `&function=${functionFilter}`;
       }
-
-      console.log("New query: ", newQuery);
 
       props.filterQuery(newQuery);
     }

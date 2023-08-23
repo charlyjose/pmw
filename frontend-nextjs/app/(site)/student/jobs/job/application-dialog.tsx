@@ -157,7 +157,6 @@ export function JobApplicationDialog({ job, axiosConfig }) {
         }, 1000);
       })
       .catch((error) => {
-        console.log(error);
         toast({
           variant: "destructive",
           title: error.response.data.message,

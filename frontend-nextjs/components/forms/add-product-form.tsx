@@ -64,8 +64,6 @@ export function AddProductForm({ storeId }: AddProductFormProps) {
   const subcategories = getSubcategories(form.watch("category"))
 
   function onSubmit(data: Inputs) {
-    console.log(data)
-
     startTransition(async () => {
       try {
         // Check if product already exists in the store

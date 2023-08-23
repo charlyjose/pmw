@@ -89,9 +89,6 @@ export function LocationSearch(props: any) {
     const latZoom = Math.ceil(Math.log2(360 / latDiff)) - 1;
     const lngZoom = Math.ceil(Math.log2(360 / lngDiff)) - 1;
 
-    console.log("latZoom: ", latZoom);
-    console.log("lngZoom: ", lngZoom);
-
     return Math.max(latZoom, lngZoom);
   }, [markers]);
 

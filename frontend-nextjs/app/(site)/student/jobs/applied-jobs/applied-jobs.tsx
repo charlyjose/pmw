@@ -163,7 +163,6 @@ export function ApplicationsDisplay(props) {
           });
         })
         .catch((e) => {
-          console.log(e);
           toast({
             variant: "destructive",
             title: "Placement reports",

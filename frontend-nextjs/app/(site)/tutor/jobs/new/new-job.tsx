@@ -105,7 +105,6 @@ export function NewJob() {
       link: data.link,
     };
 
-    console.log(jobData);
     const API_URI = "http://localhost:8000";
     var token = session?.token;
     const config = {
