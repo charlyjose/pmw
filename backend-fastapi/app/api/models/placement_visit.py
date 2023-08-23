@@ -4,6 +4,8 @@ from typing import List
 
 from pydantic import BaseModel
 
+from app.api.models.route_plan import Unit, City
+
 
 class StudentPlacementStatus(str, Enum):
     ON_PLACEMENT = "ON_PLACEMENT"
@@ -16,7 +18,7 @@ class PlacementVisitStatus(str, Enum):
     SCHEDULED = "SCHEDULED"
     CONFIRMED = "CONFIRMED"
     COMPLETED = "COMPLETED"
-    CANCLED = "CANCLED"
+    CANCELLED = "CANCELLED"
 
 
 class PlacementVisitRegion(str, Enum):
@@ -62,6 +64,10 @@ class PlacementVisitForUser(StudentDetails, PlacementDetails, PlacementDetailsWi
     id: str
 
 
+class PlacementVisitForStudent(PlacementDetails, PlacementDetailsWithStatus, PlacementLocationDetails):
+    id: str
+
+
 class PlacementVisitGeoLocationForUser(PlacementLocationDetails):
     studentId: str = None
 
@@ -80,3 +86,38 @@ class RoutePlanDetails(BaseModel):
 class PlacementVisitItineraryInDB(PlacementVisitItinerary, RoutePlanDetails):
     tutorId: str
     completed: bool = False
+    startAddress: List[str] = []
+
+
+class PlacementVisitWithVisitStatus(PlacementVisitForUser):
+    visitStatus: PlacementVisitStatus
+
+
+class PlacementVisitForStudentWithVisitStatus(PlacementVisitForStudent):
+    visitStatus: PlacementVisitStatus
+
+
+class RoutePlanForVisitInDB(City):
+    pass
+
+
+class PlacementVisitItineraryForTutor(BaseModel):
+    id: str
+    region: PlacementVisitRegion
+    visitDate: datetime
+    placements: List[PlacementVisitWithVisitStatus]
+    totalDistance: float
+    unit: Unit
+    startAddress: List[str]
+    completed: bool
+
+
+class PlacementVisitItineraryForStudent(BaseModel):
+    id: str
+    region: PlacementVisitRegion
+    visitDate: datetime
+    placements: List[PlacementVisitForStudentWithVisitStatus]
+    unit: Unit
+    startAddress: List[str]
+    completed: bool
+    tutorName: str

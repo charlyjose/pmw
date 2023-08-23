@@ -94,8 +94,6 @@ async def get_all_jobs_paginated(
             if function:
                 conditions["function"] = function
 
-            print(conditions)
-
             # Get paginated jobs from the database
             jobs = await job_db.get_all_jobs_paginated(skip=skip, take=take, conditions=conditions)
 
@@ -108,11 +106,8 @@ async def get_all_jobs_paginated(
             # Set hasMore to true if there are more jobs to be fetched
             hasMore = len(jobs) == 10
 
-            data = {"jobs": job_list, "hasMore": hasMore}
-
-            print(data)
-
             message = "Jobs fetched"
+            data = {"jobs": job_list, "hasMore": hasMore}
             response = json_response(
                 http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_FETCHED, message=message, data=data
             )
@@ -120,7 +115,7 @@ async def get_all_jobs_paginated(
         else:
             message = "Page number should be greater than 0"
             response = json_response(
-                http_status=http_status.HTTP_204_NO_CONTENT, action_status=action_status.DATA_NOT_FOUND, message=message
+                http_status=http_status.HTTP_404_NOT_FOUND, action_status=action_status.DATA_NOT_FOUND, message=message
             )
             return ClientResponse(**response)()
     else:

@@ -13,6 +13,10 @@ from app.api.models.placement_visit import (
     PlacementVisitItinerary,
     PlacementVisitRegion,
     PlacementVisitItineraryInDB,
+    PlacementVisitItineraryForTutor,
+    PlacementVisitWithVisitStatus,
+    RoutePlanForVisitInDB,
+    PlacementVisitItineraryForStudent,
 )
 from app.api.models.response import JSONResponseModel
 from app.api.models.route_plan import PlacementVisitLocations, Unit, Coordinate, StartLocation, VisitPlan
@@ -177,6 +181,12 @@ async def confirm_placement_visit(visit_plan: VisitPlan, tutor_id: str = Depends
 
     placement_ids = [city.placement_id for city in visit_plan.route_plan.cities[1:-1]]
 
+    startAddress = [
+        visit_plan.route_plan.cities[0].address,
+        visit_plan.route_plan.cities[0].coordinate.longitude,
+        visit_plan.route_plan.cities[0].coordinate.latitude,
+    ]
+
     # Get placement visit itenerary for a tutor
     placement_visit_itinerary = await placement_visit_itinerary_db.get_placement_visit_itinerary_exists_for_a_tutor_id(tutor_id=tutor_id)
     placement_ids_in_itenerary_list = [placement.placementId for placement in placement_visit_itinerary]
@@ -205,6 +215,7 @@ async def confirm_placement_visit(visit_plan: VisitPlan, tutor_id: str = Depends
         region=regions[0],
         visitDate=visit_plan.visit_date,
         tutorId=tutor_id,
+        startAddress=startAddress,
         totalDistance=visit_plan.route_plan.total_distance,
         unit=visit_plan.route_plan.unit,
     )
@@ -225,3 +236,194 @@ async def confirm_placement_visit(visit_plan: VisitPlan, tutor_id: str = Depends
 
     message = "Placement visit confirmed. Itinerary created"
     return default_response(http_status=http_status.HTTP_200_OK, action_status=action_status.NO_ERROR, message=message)
+
+
+# Get all the placement visit itineraries for a student
+@router.get("/student/placement/visit/itinerary", summary="Get all the placement visit itineraries for a student", tags=["placement_visit"])
+async def get_all_placement_visit_itineraries_for_a_student(user_id: str = Depends(pyJWTDecodedUserId())):
+    if not user_id:
+        return user_not_found_response()
+
+    # Check if the user is a tutor
+    roles = [UserRole.STUDENT]
+    if not await ValidateUserRole(user_id, roles)():
+        return no_access_to_content_response()
+
+    # Get placement student details for a student
+    placement_details = await placement_visit_db.get_placement_data_for_a_student(user_id)
+    if not placement_details:
+        message = "Placement details not found"
+        return default_response(http_status=http_status.HTTP_404_NOT_FOUND, action_status=action_status.DATA_NOT_FOUND, message=message)
+
+    placement_id = placement_details.id
+
+    tutor_id = placement_details.tutorId
+
+    # Get tutor details for a tutor
+    tutor_details = await user_db.get_user_by_id(tutor_id)
+    if not tutor_details:
+        message = "Tutor details not found"
+        return default_response(http_status=http_status.HTTP_404_NOT_FOUND, action_status=action_status.DATA_NOT_FOUND, message=message)
+
+    tutor_name = tutor_details.name
+
+    # Get placement visit itenerary for a tutor
+    placement_visit_itinerary = await placement_visit_itinerary_db.get_placement_visit_itinerary_exists_for_a_tutor_id(tutor_id=tutor_id)
+
+    student_placement_itinerary = next(
+        (placement for placement in placement_visit_itinerary if placement_id in placement.placementId), None
+    )
+
+    if not student_placement_itinerary:
+        message = "Placement visit itinerary not found"
+        data = {"placement_visit_itinerary": []}
+        return default_response(
+            http_status=http_status.HTTP_404_NOT_FOUND, action_status=action_status.DATA_NOT_FOUND, message=message, data=data
+        )
+
+    placement_visit_itinerary_for_student = PlacementVisitItineraryForStudent(
+        id=student_placement_itinerary.id,
+        region=student_placement_itinerary.region,
+        visitDate=student_placement_itinerary.visitDate,
+        startAddress=student_placement_itinerary.startAddress,
+        totalDistance=student_placement_itinerary.totalDistance,
+        unit=student_placement_itinerary.unit,
+        completed=student_placement_itinerary.completed,
+        placements=[placement_details],
+        tutorName=tutor_name,
+    ).dict()
+
+    json_compatiable_placement_visit_itinerary_for_student = jsonable_encoder(placement_visit_itinerary_for_student)
+    message = "Placement visit itinerary fetched"
+    data = {"placement_visit_itinerary": [json_compatiable_placement_visit_itinerary_for_student]}
+    return default_response(http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_FETCHED, message=message, data=data)
+
+
+# Get all the placement visit itineraries for a tutor page wise
+@router.get(
+    "/tutor/placement/visit/itinerary", summary="Get all the placement visit itineraries for a tutor page wise", tags=["placement_visit"]
+)
+async def get_all_placement_visit_itineraries_for_a_tutor_page_wise(tutor_id: str = Depends(pyJWTDecodedUserId()), page: int = 1):
+    if not tutor_id:
+        return user_not_found_response()
+
+    # Check if the user is a tutor
+    roles = [UserRole.TUTOR]
+    if not await ValidateUserRole(tutor_id, roles)():
+        return no_access_to_content_response()
+
+    # Page nmber should be greater than 0
+    if page > 0:
+        skip = (page - 1) * 10
+        take = 10
+
+        # Get all the placement visit itineraries for a tutor page wise
+        placement_visit_itineraries = await placement_visit_itinerary_db.get_all_placement_visit_itinerary_for_a_tutor_paginated(
+            tutor_id=tutor_id, skip=skip, take=take
+        )
+
+        # Check if the placement visit itineraries is empty
+        if not placement_visit_itineraries:
+            message = "No placement visit itineraries found"
+            data = {"placement_visit_itinerary": [], "hasMore": False}
+            return default_response(
+                http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_NOT_FOUND, message=message, data=data
+            )
+
+        # Combine the placement ids from all the placement visit itineraries
+        placement_ids = []
+        for placement_visit_itinerary in placement_visit_itineraries:
+            placement_ids.extend(placement_visit_itinerary.placementId)
+
+        # Get placement details for all the placement id in the placement visit itineraries
+        placement_details_list = await placement_visit_db.get_placement_applications_for_given_application_ids(placement_ids)
+
+        # Get student details for all the students of the placement ids
+        student_ids = [placement.userId for placement in placement_details_list]
+        student_details = await user_db.get_users_by_user_ids(student_ids)
+
+        # Create the placement visit itineraries for a tutor
+        placement_visit_itinerary_list = []
+        for placement_visit_itinerary in placement_visit_itineraries:
+            # For each placement itinerary create PlacementVisitItineraryForTutor based on the placement Ids
+
+            # Get the placement details from placement_details_list based on the current placementIds in placement_visit_itinerary
+            placement_ids = placement_visit_itinerary.placementId
+
+            # Get student details of the students in the placement_ids
+            students = [student for student in student_details if student.id in student_ids]
+
+            # Get all placements for the placement ids from the placement_details_list
+            placements = [placement for placement in placement_details_list if placement.id in placement_ids]
+
+            # Combine the placement details and student details for each placement to create PlacementVisitForUser
+            placement_visit_for_user: List[PlacementVisitWithVisitStatus] = []
+            for placement in placements:
+                student = next((student for student in students if student.id == placement.userId), None)
+                placement_visit_for_user.append(
+                    PlacementVisitWithVisitStatus(
+                        studentId=student.id, firstName=student.firstName, lastName=student.lastName, **placement.dict()
+                    ).dict()
+                )
+
+            # Create PlacementVisitItineraryForTutor
+            placement_visit_itinerary_for_tutor = PlacementVisitItineraryForTutor(
+                id=placement_visit_itinerary.id,
+                region=placement_visit_itinerary.region,
+                visitDate=placement_visit_itinerary.visitDate,
+                placements=placement_visit_for_user,
+                startAddress=placement_visit_itinerary.startAddress,
+                totalDistance=placement_visit_itinerary.totalDistance,
+                unit=placement_visit_itinerary.unit,
+                completed=placement_visit_itinerary.completed,
+            ).dict()
+
+            # Add the placement visit itinerary to the list
+            json_compatiable_placement_visit_itinerary_list_for_user = jsonable_encoder(placement_visit_itinerary_for_tutor)
+            placement_visit_itinerary_list.append(json_compatiable_placement_visit_itinerary_list_for_user)
+
+        # Set hasMore to true if there are more jobs to be fetched
+        hasMore = len(placement_visit_itineraries) == 10
+
+        message = "Placement visit itineraries fetched"
+        data = {"placement_visit_itinerary": placement_visit_itinerary_list, "hasMore": hasMore}
+        return default_response(http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_FETCHED, message=message, data=data)
+    else:
+        message = "Page number should be greater than 0"
+        return default_response(http_status=http_status.HTTP_404_NOT_FOUND, action_status=action_status.DATA_NOT_FOUND, message=message)
+
+
+# Change the status of the placement visit itinerary
+@router.put(
+    "/tutor/placement/visit/itinerary/status", summary="Change the status of the placement visit itinerary", tags=["placement_visit"]
+)
+async def change_the_status_of_the_placement_visit_itinerary(id: str, status: bool, tutor_id: str = Depends(pyJWTDecodedUserId())):
+    roles = [UserRole.TUTOR]
+    valid_user_role = await ValidateUserRole(tutor_id, roles)()
+    if not valid_user_role:
+        return no_access_to_content_response()
+
+    # Check if the placement visit itinerary exists
+    placement_visit_itinerary = await placement_visit_itinerary_db.get_placement_visit_itinerary_by_id(id=id)
+    if not placement_visit_itinerary:
+        message = "Placement visit itinerary not found"
+        return default_response(http_status=http_status.HTTP_404_NOT_FOUND, action_status=action_status.DATA_NOT_FOUND, message=message)
+
+    # Change the status of the placement visit itinerary
+    placement_visit_itinerary = await placement_visit_itinerary_db.change_placement_visit_itinerary_status(id=id, status=status)
+
+    # Get placement Ids from the placement visit itinerary
+    placement_ids = placement_visit_itinerary.placementId
+    print(placement_ids)
+
+    # Change the visit status of each placement student to COMPLETED
+    placement_student_visit_status_update = await placement_visit_db.change_visit_status_for_placement_applications(
+        placement_ids=placement_ids, visit_status="COMPLETED"
+    )
+    if not placement_student_visit_status_update:
+        message = "Failed to update placement visit status"
+        return default_response(http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.UNKNOWN_ERROR, message=message)
+
+    return default_response(
+        http_status=http_status.HTTP_200_OK, action_status=action_status.NO_ERROR, message="Placement visit itinerary status changed"
+    )

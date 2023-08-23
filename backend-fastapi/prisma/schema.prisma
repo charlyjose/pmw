@@ -450,6 +450,8 @@ model PlacementVisitItinerary {
   region        PlacementVisitRegion
   visitDate     DateTime
   completed     Boolean              @default(false)
+  routePlan     String[]
+  startAddress  String[]
   totalDistance Float
   unit          DistanceUnit
   createdAt     DateTime             @default(now())
