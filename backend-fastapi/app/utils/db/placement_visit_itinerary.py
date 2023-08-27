@@ -58,3 +58,13 @@ async def get_placement_visit_itinerary_by_id(id: str) -> Optional[PlacementVisi
     :return: PlacementVisitItinerary
     '''
     return await prisma.placementvisititinerary.find_unique(where={"id": id})
+
+
+# Get the count of scheduled placement visits for a tutor where status is false
+async def get_count_of_scheduled_placement_visits_for_a_tutor(tutor_id: str) -> int:
+    '''
+    Get the count of scheduled placement visits for a tutor where status is false
+    :param tutor_id: str
+    :return: int
+    '''
+    return await prisma.placementvisititinerary.count(where={"tutorId": tutor_id, "completed": False})

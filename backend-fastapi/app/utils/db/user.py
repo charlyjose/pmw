@@ -72,3 +72,23 @@ async def update_user_status(user_id: str, status: str) -> Optional[User]:
     :return user: User
     """
     return await prisma.user.update(where={"id": user_id}, data={"studentStatus": status})
+
+
+# Helper function to get the count of STUDENT roles under a DEPARTMENT
+async def get_number_of_students_under_tutor_department(tutor_department: str) -> int:
+    """
+    Helper function to get the count of STUDENT roles under a DEPARTMENT
+    :param tutor_department: str
+    :return number_of_students: int
+    """
+    return await prisma.user.count(where={"department": tutor_department, "role": "STUDENT"})
+
+
+# A helper function to get the count of STUDENT roles in a studentLevel
+async def get_number_of_students_in_a_student_level(student_level: str) -> int:
+    """
+    A helper function to get the count of STUDENT roles in a studentLevel
+    :param student_level: str
+    :return number_of_students: int
+    """
+    return await prisma.user.count(where={"studentLevel": student_level, "role": "STUDENT"})

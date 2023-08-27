@@ -90,14 +90,6 @@ async def get_all_my_future_appointments(user_id: str = Depends(pyJWTDecodedUser
     return user_not_found_response()
 
 
-# BUG: BUSINESS LOGIC NOT AS INTENDED.
-# An appointment created by a student for a
-# tutor will be visible to all tutors in the
-# current implementation. This is not as intended.
-# Expected behaviour: An appointment created by a student for a tutor
-# should only be visible to the intended tutor.
-
-
 # Get all future appointments for a team
 @router.get("/appointments/team/future", summary="Get all future appointments for a team", tags=["appointments"])
 async def get_all_future_appointments_for_team_csd(team: str, user_id: str = Depends(pyJWTDecodedUserId())) -> JSONResponseModel:
