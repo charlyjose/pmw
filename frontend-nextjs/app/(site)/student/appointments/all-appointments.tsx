@@ -41,7 +41,7 @@ export function AllAppointments() {
   const [appointments, setAppointments] = useState([]);
 
   useEffect(() => {
-    // // Validating client-side session
+    // Validating client-side session
     // if (!session && session?.user?.role != PAGE_TYPE) {
     //   router.push(UNAUTHORISED_REDIRECTION_LINK);
     // }

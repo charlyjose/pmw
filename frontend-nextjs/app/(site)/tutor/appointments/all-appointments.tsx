@@ -105,7 +105,7 @@ export function AllAppointments() {
   const [fetchError, setFetchError] = useState(false);
 
   useEffect(() => {
-    // // Validating client-side session
+    // Validating client-side session
     // if (!session && session?.user?.role != PAGE_TYPE) {
     //   router.push(UNAUTHORISED_REDIRECTION_LINK);
     // }
