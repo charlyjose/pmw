@@ -27,6 +27,10 @@ const sidebarNavItems = [
     title: "Appointments",
     href: "/csd/appointments",
   },
+  {
+    title: "Communications",
+    href: "/csd/communications",
+  },
 ];
 
 interface SettingsLayoutProps {

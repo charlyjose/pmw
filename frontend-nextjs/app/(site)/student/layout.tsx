@@ -43,6 +43,10 @@ const sidebarNavItems = [
     title: "Placement Visit",
     href: "/student/placement/visit",
   },
+  {
+    title: "Communications",
+    href: "/student/communications",
+  },
 ];
 
 interface SettingsLayoutProps {
