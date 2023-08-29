@@ -14,14 +14,13 @@ class ClientResponse:
     :param kwargs: Any other arguments
     :return: JSONResponseModel
 
-    Usage:
-    json_response = Response(
+    Example Usage:
+    ClientResponse(
         status_code=http_status.HTTP_200_OK,
         error=action_status.NO_ERROR,
         message="Appointment created",
         data=cleaned_appointment,
     )
-    return json_response()
 
     Note: The caller must forehandedly perform any JSON serialising
     '''

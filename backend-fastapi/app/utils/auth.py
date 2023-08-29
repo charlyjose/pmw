@@ -65,8 +65,8 @@ class JWTDecoder(BaseModel):
 
 
 def encodeJWT(sub: str) -> Token:
-    EXPIRES = datetime.now(tz=timezone.utc) + timedelta(seconds=ACCESS_TOKEN_EXPIRE_SECONDS)
-    payload = JWTPayload(sub=sub, exp=EXPIRES, iat=datetime.now(tz=timezone.utc), nbf=datetime.now(tz=timezone.utc), iss=JWT_ISSUER)
+    expires = datetime.now(tz=timezone.utc) + timedelta(seconds=ACCESS_TOKEN_EXPIRE_SECONDS)
+    payload = JWTPayload(sub=sub, exp=expires, iat=datetime.now(tz=timezone.utc), nbf=datetime.now(tz=timezone.utc), iss=JWT_ISSUER)
     token = Token(
         access_token=JWTEncoder(payload=payload, secret=JWT_SECRET, algorithm=JWT_ALGORITHM).encode(),
         token_type=TOKEN_TYPE,

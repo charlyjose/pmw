@@ -8,10 +8,9 @@ from app.api.models import action_status
 from app.api.models.auth import SignIn, SignUpForm, SignUpUserInDB
 from app.api.models.response import JSONResponseModel
 from app.api.models.user import CleanedUserData
-from app.pnp_helpers.client_response import json_response
+from app.pnp_helpers.json_response_wrapper import default_response
 from app.utils.auth import encodeJWT, encryptPassword, validatePassword
 from app.utils.db import user as user_db
-from app.utils.reponse import ClientResponse
 
 router = APIRouter()
 
@@ -38,20 +37,17 @@ async def signup(signupForm: SignUpForm) -> JSONResponseModel:
     try:
         user = await user_db.create_new_user(newUserData.dict())
         user = CleanedUserData(**user.__dict__).dict()
-        response = json_response(
+        return default_response(
             http_status=http_status.HTTP_201_CREATED, action_status=action_status.NO_ERROR, message="User created", data=user
         )
-        return ClientResponse(**response)()
 
     except PrismaErrors.UniqueViolationError:
         message = "Email already exists"
-        response = json_response(http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.DUPLICATE_KEY, message=message)
-        return ClientResponse(**response)()
+        return default_response(http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.DUPLICATE_KEY, message=message)
 
     except Exception:
         message = "Something went wrong"
-        response = json_response(http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.UNKNOWN_ERROR, message=message)
-        return ClientResponse(**response)()
+        return default_response(http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.UNKNOWN_ERROR, message=message)
 
 
 @router.post("/auth/token", summary="Create access token for user", tags=["auth"], response_model=JSONResponseModel)
@@ -60,11 +56,7 @@ async def signin(signIn: SignIn) -> JSONResponseModel:
     user = await user_db.get_user_by_email(signIn.email)
     if not user:
         message = "Incorrect email or password"
-        response = json_response(http_status=http_status.HTTP_401_UNAUTHORIZED, action_status=action_status.UNAUTHORIZED, message=message)
-        return ClientResponse(**response)()
-
-    # TODO: Check if user is active
-    # await check_user_is_active(signIn.email)
+        return default_response(http_status=http_status.HTTP_401_UNAUTHORIZED, action_status=action_status.UNAUTHORIZED, message=message)
 
     # Validate password
     validated = validatePassword(signIn.password, user.hashedPassword)
@@ -72,12 +64,10 @@ async def signin(signIn: SignIn) -> JSONResponseModel:
         # Create JWT token
         token = encodeJWT(sub=user.id)
         message = "User signed in"
-        response = json_response(
+        return default_response(
             http_status=http_status.HTTP_200_OK, action_status=action_status.NO_ERROR, message=message, data={"token": token}
         )
-        return ClientResponse(**response)()
 
     # Incorrect password
     message = "Incorrect email or password"
-    response = json_response(http_status=http_status.HTTP_401_UNAUTHORIZED, action_status=action_status.UNAUTHORIZED, message=message)
-    return ClientResponse(**response)()
+    return default_response(http_status=http_status.HTTP_401_UNAUTHORIZED, action_status=action_status.UNAUTHORIZED, message=message)

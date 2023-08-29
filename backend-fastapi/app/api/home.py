@@ -1,20 +1,18 @@
+from datetime import datetime, timedelta
+
 from fastapi import APIRouter, Depends
 from fastapi import status as http_status
-from fastapi.encoders import jsonable_encoder
 
 from app.api.models import action_status
-from app.api.models.appointment import CleanedAppointment
 from app.api.models.auth import Role as UserRole
 from app.pnp_helpers.json_response_wrapper import default_response
 from app.pnp_helpers.user import user_not_found_response
 from app.utils.auth import pyJWTDecodedUserId
 from app.utils.db import appointment as appointment_db
-from app.utils.db import user as user_db
 from app.utils.db import placement_application as placement_application_db
 from app.utils.db import placement_visit as placement_visit_db
 from app.utils.db import placement_visit_itinerary as placement_visit_itinerary_db
-
-from datetime import datetime, timedelta
+from app.utils.db import user as user_db
 
 router = APIRouter()
 

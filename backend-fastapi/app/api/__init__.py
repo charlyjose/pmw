@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from app.api.appointments import router as appointmentsRouter
 from app.api.auth import router as authRouter
+from app.api.communications import router as communicationsRouter
 from app.api.home import router as homeRouter
 from app.api.job_application import router as jobApplicationRouter
 from app.api.jobs import router as jobsRouter
@@ -24,6 +25,7 @@ api.include_router(placementVisitRouter)
 api.include_router(jobApplicationRouter)
 api.include_router(placementDeclarationRouter)
 api.include_router(notificationsRouter)
+api.include_router(communicationsRouter)
 
 
 __all__ = ["api"]

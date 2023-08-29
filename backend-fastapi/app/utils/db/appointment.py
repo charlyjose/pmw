@@ -117,6 +117,7 @@ async def update_appointment_status_by_id_from_db(id: str, status: AppointmentSt
     '''
     return await prisma.appointment.update(where={"id": id}, data={"status": status, "confirmed": confirmed})
 
+
 # Get count of all future appointments from the database by team
 async def get_number_of_future_appointments_by_team_from_db(team: str) -> int:
     '''
@@ -126,4 +127,3 @@ async def get_number_of_future_appointments_by_team_from_db(team: str) -> int:
     '''
     print(team)
     return await prisma.appointment.count(where={"team": team, "date": {"gte": datetime.today()}})
-
