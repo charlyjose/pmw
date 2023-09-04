@@ -92,3 +92,25 @@ async def get_number_of_students_in_a_student_level(student_level: str) -> int:
     :return number_of_students: int
     """
     return await prisma.user.count(where={"studentLevel": student_level, "role": "STUDENT"})
+
+
+# A helper function to get all user by their department
+async def get_all_users_by_department(department: str) -> Optional[User]:
+    """
+    A helper function to get a user by their department
+    :param department: str
+    :return user: User
+    """
+    user = await prisma.user.find_many(where={"department": department})
+    return user if user else None
+
+
+# A helper function to get all user by their department paginated
+async def get_all_users_by_department_paginated(department: str, page: int, take: int = 10) -> Optional[User]:
+    """
+    A helper function to get all user by their department paginated
+    :param department: str
+    :param page: int
+    :return user: User
+    """
+    return await prisma.user.find_many(where={"department": department}, skip=page, take=take)

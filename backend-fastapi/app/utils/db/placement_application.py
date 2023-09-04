@@ -97,6 +97,18 @@ async def get_all_by_reviewer_paginated(reviewerId: str, skip: int, take: int = 
     return await prisma.placementapplication.find_many(where={"reviewerId": reviewerId}, skip=skip, take=take)
 
 
+# A helper function to get all approved placement applications with pagination
+async def get_all_approved_paginated(skip: int, take: int = 10) -> List[PlacementApplication]:
+    '''
+    A helper function to get all approved placement applications with pagination
+    :param reviewerId: str
+    :param skip: int
+    :param take: int
+    :return: List[PlacementApplication]
+    '''
+    return await prisma.placementapplication.find_many(where={"status": "APPROVED"}, skip=skip, take=take)
+
+
 # A helper function to get count of placement applications by a reviewer not equal to a APPROVED status
 async def get_count_of_placement_applications_by_reviewer_not_equal_to_approved(reviewerId: str) -> int:
     '''

@@ -125,5 +125,4 @@ async def get_number_of_future_appointments_by_team_from_db(team: str) -> int:
     :param team: str
     :return: int
     '''
-    print(team)
     return await prisma.appointment.count(where={"team": team, "date": {"gte": datetime.today()}})

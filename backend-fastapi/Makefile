@@ -1,5 +1,3 @@
-
-
 .DEFAULT_GOAL := help
 .PHONY: format lint test e2e install init tidy all help ready_to_commit
 .EXPORT_ALL_VARIABLES:
@@ -13,16 +11,20 @@ lint:				## Run linters.
 	# mypy .
 
 test:				## Run tests in the development environment.
-	pytest . --ignore=tests/end_to_end
+	pytest . --ignore=tests/performance --ignore=tests/unit
 
-e2e:
-	pytest ./tests/end_to_end
+unit:				## Run unit tests.
+	pytest ./app/tests/unit
+
+# e2e:
+# 	pytest ./tests/end_to_end
 
 install:			## Install developement dependecies and local packages.
 	pip install --upgrade pip
 	pip install poetry
 	pip install -r requirements.txt
 	poetry install --no-root
+	# pip install --prefer-binary locust
 	# pre-commit install
 
 init: install test		## Initialize the project.
@@ -36,7 +38,3 @@ all: install tidy test		## Build everything.
 
 help:				## Show this help.
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
-
-
-
-

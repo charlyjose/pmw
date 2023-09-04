@@ -9,7 +9,7 @@ from app.api.models.auth import SignIn, SignUpForm, SignUpUserInDB
 from app.api.models.response import JSONResponseModel
 from app.api.models.user import CleanedUserData
 from app.pnp_helpers.json_response_wrapper import default_response
-from app.utils.auth import encodeJWT, encryptPassword, validatePassword
+from app.utils import auth as auth_util
 from app.utils.db import user as user_db
 
 router = APIRouter()
@@ -30,7 +30,7 @@ class ValidateUserRole:
 
 @router.post("/auth/signup", summary="Create new user", tags=["auth"], response_model=JSONResponseModel)
 async def signup(signupForm: SignUpForm) -> JSONResponseModel:
-    hashedPassword = encryptPassword(signupForm.password)
+    hashedPassword = auth_util.encryptPassword(signupForm.password)
     signupUser = {**signupForm.dict(), "hashedPassword": hashedPassword}
     newUserData = SignUpUserInDB(**signupUser)
 
@@ -59,10 +59,10 @@ async def signin(signIn: SignIn) -> JSONResponseModel:
         return default_response(http_status=http_status.HTTP_401_UNAUTHORIZED, action_status=action_status.UNAUTHORIZED, message=message)
 
     # Validate password
-    validated = validatePassword(signIn.password, user.hashedPassword)
+    validated = auth_util.validatePassword(signIn.password, user.hashedPassword)
     if validated:
         # Create JWT token
-        token = encodeJWT(sub=user.id)
+        token = auth_util.encodeJWT(sub=user.id)
         message = "User signed in"
         return default_response(
             http_status=http_status.HTTP_200_OK, action_status=action_status.NO_ERROR, message=message, data={"token": token}

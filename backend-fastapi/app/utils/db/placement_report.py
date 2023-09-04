@@ -21,3 +21,8 @@ async def get_all_reports_by_user_id(ownerId: str) -> List[PlacementReport]:
 # Get a report by its id
 async def get_report_by_id(reportId: str) -> Optional[PlacementReport]:
     return await prisma.placementreport.find_unique(where={"id": reportId})
+
+
+# A helper function to get all placement reports for a given list of owner ids
+async def get_all_reports_by_owner_ids(ownerIds: List[str]) -> List[PlacementReport]:
+    return await prisma.placementreport.find_many(where={"ownerId": {"in": ownerIds}})

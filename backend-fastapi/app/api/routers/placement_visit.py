@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends
 from fastapi import status as http_status
 from fastapi.encoders import jsonable_encoder
 
-from app.api.auth import ValidateUserRole
 from app.api.models import action_status
 from app.api.models.auth import Role as UserRole
 from app.api.models.placement_visit import (
@@ -18,6 +17,7 @@ from app.api.models.placement_visit import (
 )
 from app.api.models.response import JSONResponseModel
 from app.api.models.route_plan import Coordinate, PlacementVisitLocations, StartLocation, Unit, VisitPlan
+from app.api.routers.auth import ValidateUserRole
 from app.pnp_helpers.auth import no_access_to_content_response
 from app.pnp_helpers.json_response_wrapper import default_response
 from app.pnp_helpers.user import user_not_found_response
@@ -144,8 +144,8 @@ async def create_route_plan_for_placement_visit(
     recommendations: Optional[bool] = True,
     tutor_id: str = Depends(pyJWTDecodedUserId()),
 ):
-    if not tutor_id:
-        return user_not_found_response()
+    if not tutor_id and await ValidateUserRole(tutor_id, [UserRole.TUTOR])():
+        return no_access_to_content_response()
 
     # Fetch Placement Student Details from DB
     placement_students = await placement_visit_db.get_placement_applications_for_given_application_ids(placement_ids)

@@ -2,13 +2,13 @@ from fastapi import APIRouter, Depends
 from fastapi import status as http_status
 from fastapi.encoders import jsonable_encoder
 
-from app.api.auth import ValidateUserRole
 from app.api.models import action_status
 from app.api.models.auth import Role as UserRole
 from app.api.models.auth import StudentStatus as student_status
 from app.api.models.coordinate import Coordinate
 from app.api.models.placement_students import CleanedPlacementStudent, PlacementStudentForm, PlacementStudentInDB
 from app.api.models.placement_visit import PlacementVisitRegion as regions
+from app.api.routers.auth import ValidateUserRole
 from app.pnp_helpers.auth import no_access_to_content_response
 from app.pnp_helpers.json_response_wrapper import default_response
 from app.pnp_helpers.user import user_not_found_response
@@ -29,41 +29,40 @@ async def read_placement_application(placement_start_form: PlacementStudentForm)
 async def add_placement_declaration(
     user_id: str = Depends(pyJWTDecodedUserId()), placement_start_form: PlacementStudentForm = Depends(read_placement_application)
 ):
-    if user_id:
-        roles = [UserRole.STUDENT]
-        valid_user_role = await ValidateUserRole(user_id, roles)()
-        if not valid_user_role:
-            return no_access_to_content_response()
-
-        # Get user department
-        department = await user_db.get_user_department(user_id)
-        tutor_id = await placement_tutor_db.get_placement_tutor_id_by_department(department)
-        if not tutor_id:
-            return default_response(http_status.HTTP_404_NOT_FOUND, action_status.ERROR, "Placement tutor not found")
-
-        coordinate = Coordinate(longitude=placement_start_form.longitude, latitude=placement_start_form.latitude)
-        region = get_region(coordinate)
-
-        if not region:
-            region = regions.INTERNATIONAL
-
-        region = regions(region.upper())
-
-        placement_start_form = PlacementStudentInDB(**placement_start_form.dict(), userId=user_id, tutorId=tutor_id, region=region)
-        old_form = await placement_visit_db.get_placement_data_for_a_student(user_id)
-        if old_form:
-            form_id = old_form.id
-            await placement_visit_db.update_application(form_id, placement_start_form.dict())
-        else:
-            await placement_visit_db.create_new_application(placement_start_form.dict())
-
-        # Update student status in User table
-        status = student_status.ON_PLACEMENT
-        await user_db.update_user_status(user_id, status)
-        return default_response(http_status.HTTP_200_OK, action_status.DATA_UPDATED, "Placement declaration updated")
-
-    else:
+    if not user_id:
         return user_not_found_response()
+
+    roles = [UserRole.STUDENT]
+    valid_user_role = await ValidateUserRole(user_id, roles)()
+    if not valid_user_role:
+        return no_access_to_content_response()
+
+    # Get user department
+    department = await user_db.get_user_department(user_id)
+    tutor_id = await placement_tutor_db.get_placement_tutor_id_by_department(department)
+    if not tutor_id:
+        return default_response(http_status.HTTP_404_NOT_FOUND, action_status.ERROR, "Placement tutor not found")
+
+    coordinate = Coordinate(longitude=placement_start_form.longitude, latitude=placement_start_form.latitude)
+    region = get_region(coordinate)
+
+    if not region:
+        region = regions.INTERNATIONAL
+
+    region = regions(region.upper())
+
+    placement_start_form = PlacementStudentInDB(**placement_start_form.dict(), userId=user_id, tutorId=tutor_id, region=region)
+    old_form = await placement_visit_db.get_placement_data_for_a_student(user_id)
+    if old_form:
+        form_id = old_form.id
+        await placement_visit_db.update_application(form_id, placement_start_form.dict())
+    else:
+        await placement_visit_db.create_new_application(placement_start_form.dict())
+
+    # Update student status in User table
+    status = student_status.ON_PLACEMENT
+    await user_db.update_user_status(user_id, status)
+    return default_response(http_status.HTTP_200_OK, action_status.DATA_UPDATED, "Placement declaration updated")
 
 
 # Chaeck if the user has already submitted the placement declaration

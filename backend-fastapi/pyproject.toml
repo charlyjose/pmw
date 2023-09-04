@@ -8,7 +8,7 @@ authors = ["Charly Jose <charly@github.com>"]
 python = "^3.8"
 fastapi = "^0.92.0"
 uvicorn = "^0.20.0"
-prisma = "^0.8.1"
+prisma = "0.8.2"
 passlib = "1.7.4"
 bcrypt = "4.0.1"
 python-jose = "3.3.0"
@@ -23,6 +23,7 @@ pydantic = {extras = ["dotenv"], version = "^1.10.5"}
 flake8 = "^5.0.4"
 pre-commit = "^3.0.4"
 pyright = "^1.1.294"
+httpx = "0.24.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -5,7 +5,6 @@ from fastapi import status as http_status
 from fastapi.encoders import jsonable_encoder
 from prisma.models import PlacementApplication
 
-from app.api.auth import ValidateUserRole
 from app.api.models import action_status
 from app.api.models.auth import Role as UserRole
 from app.api.models.placement_application import (
@@ -18,6 +17,7 @@ from app.api.models.placement_application import (
 from app.api.models.placement_application import PlacementApplicationStatus as application_status
 from app.api.models.placement_application import ReviewCommentsForm, ReviewCommentsInDB
 from app.api.models.response import JSONResponseModel
+from app.api.routers.auth import ValidateUserRole
 from app.pnp_helpers.auth import no_access_to_content_response
 from app.pnp_helpers.client_response import json_response
 from app.pnp_helpers.json_response_wrapper import default_response
@@ -205,6 +205,63 @@ async def get_placement_applications_for_tutor_by_department(
         return user_not_found_response()
 
 
+# Get all approved placement applications paginated
+@router.get("/csd/placement/applications/approved", summary="Get all approved placement applications", tags=["placement_application"])
+async def get_placement_applications_for_csd_approved(user_id: str = Depends(pyJWTDecodedUserId()), page: int = 1) -> JSONResponseModel:
+    if not user_id:
+        return user_not_found_response()
+
+    # Only CSD can get all approved placement applications
+    roles = [UserRole.CSD]
+    valid_user_role = await ValidateUserRole(user_id, roles)()
+    if not valid_user_role:
+        return no_access_to_content_response(message="No valid previlages to get placement application")
+
+    # Page number should be greater than 0
+    if page > 0:
+        skip = (page - 1) * 10
+        take = 10
+        # Get paginated applications from the database
+        applications = await placement_application_db.get_all_approved_paginated(skip, take)
+
+        # Get ownerId list from applications
+        ownerIds = [application.ownerId for application in applications]
+        users = await user_db.get_users_by_user_ids(ownerIds)
+
+        # Get all application id
+        applicationIds = [application.id for application in applications]
+        # Get all review comments for the applications
+        review_comments = await placement_application_review_comments_db.get_placement_application_review_comments_by_application_ids(
+            applicationIds
+        )
+
+        application_list = []
+        for application in applications:
+            # From the list of users, get the user with the ownerId
+            studentLevel = next((user for user in users if user.id == application.ownerId), None).studentLevel
+            # From the list of review comments, get the review comments with the applicationId
+            comments = next((comment.comments for comment in review_comments if comment.applicationId == application.id), "")
+
+            cleaned_application_for_user = CleanedPlacementApplicationForTutor(
+                studentLevel=studentLevel, comments=comments, **application.dict()
+            ).dict()
+            json_compatible_cleaned_application = jsonable_encoder(cleaned_application_for_user)
+            # json_compatible_cleaned_application["review_comments"] = comments
+            application_list.append(json_compatible_cleaned_application)
+
+        # Set hasMore to true if there are more applications to be fetched
+        hasMore = len(applications) == 10
+
+        data = {"applications": application_list, "hasMore": hasMore}
+        message = "Applications fetched"
+        response = json_response(http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_FETCHED, message=message, data=data)
+        return ClientResponse(**response)()
+    else:
+        message = "Page number should be greater than 0"
+        response = json_response(http_status=http_status.HTTP_204_NO_CONTENT, action_status=action_status.DATA_NOT_FOUND, message=message)
+        return ClientResponse(**response)()
+
+
 # Change the status of a placement application
 @router.put("/tutor/placement/application/status", summary="Change the status of a placement application", tags=["placement_application"])
 async def change_placement_application_status(id: str, status: str, user_id: str = Depends(pyJWTDecodedUserId())) -> JSONResponseModel:
@@ -216,8 +273,6 @@ async def change_placement_application_status(id: str, status: str, user_id: str
             application = await placement_application_db.get_application_by_id(id)
             if application:
                 # Update existing application
-
-                # status = application_status.REVIEW if status else application_status.PENDING
                 valid_status = status.upper() in application_status.__members__.keys()
                 if not valid_status:
                     message = "Invalid status"

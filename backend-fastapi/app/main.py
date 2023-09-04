@@ -3,8 +3,8 @@ from fastapi import status as http_status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import api
 from app.api.models import action_status
+from app.api.routers import api
 from app.dependencies import use_logging
 from app.middleware import LoggingMiddleware
 from app.pnp_helpers.json_response_wrapper import default_response
@@ -23,7 +23,6 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     )
 
 
-# TODO: Need to have a more specific exception handler for JWTError
 # Global HTTP Exception Handler
 @app.exception_handler(PMWHTTPException)
 async def pmw_http_exception_handler(request: Request, exc: PMWHTTPException):
@@ -31,7 +30,8 @@ async def pmw_http_exception_handler(request: Request, exc: PMWHTTPException):
     return default_response(http_status=http_status.HTTP_403_FORBIDDEN, action_status=action_status.FORBIDDEN, message=message)
 
 
-origins = ["*", "localhost", "http://localhost:3000", "http://localhost:3001", "http://localhost:3002", "http://localhost:3003"]
+# CORS Middleware Configuration
+origins = ["*"]
 
 app.add_middleware(LoggingMiddleware, fastapi=app)
 app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True, allow_methods=["*"], allow_headers=["*"])

@@ -4,13 +4,14 @@ from fastapi import APIRouter, Depends
 from fastapi import status as http_status
 from fastapi.encoders import jsonable_encoder
 
-from app.api.auth import ValidateUserRole
 from app.api.models import action_status
 from app.api.models.appointment import AppointmentForm, AppointmentInDB, AppointmentStatus, CleanedAppointment
 from app.api.models.auth import Role as UserRole
 from app.api.models.response import JSONResponseModel
+from app.api.routers.auth import ValidateUserRole
 from app.pnp_helpers.auth import no_access_to_content_response
 from app.pnp_helpers.client_response import json_response
+from app.pnp_helpers.json_response_wrapper import default_response
 from app.pnp_helpers.user import user_not_found_response
 from app.utils.auth import pyJWTDecodedUserId
 from app.utils.db import appointment as appointment_db
@@ -18,6 +19,10 @@ from app.utils.db import user as user_db
 from app.utils.reponse import ClientResponse
 
 router = APIRouter()
+
+
+async def read_appointment(appointmentForm: AppointmentForm) -> AppointmentForm:
+    return appointmentForm
 
 
 # A helper function to prepare and add a new appointment to the database and return the cleaned appointment
@@ -30,64 +35,48 @@ async def add_new_appointment(ownerId: str, appointment: dict) -> Union[CleanedA
         return None
 
 
-# Read appointment from submitted json data
-# TODO: In the future, we will perform validation on the appointment form
-async def read_appointment(appointmentForm: AppointmentForm) -> AppointmentForm:
-    return appointmentForm
-
-
 # Create new appointment
 @router.post("/appointments", summary="Create new appointment", tags=["appointments"])
 async def create_new_appointment(
     user_id: str = Depends(pyJWTDecodedUserId()), appointmentForm: AppointmentForm = Depends(read_appointment)
 ) -> JSONResponseModel:
-    if user_id:
-        # Add appointment to database
-        cleaned_appointment = await add_new_appointment(user_id, appointmentForm)
-        if not cleaned_appointment:
-            message = "Something went wrong"
-            response = json_response(
-                http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.UNKNOWN_ERROR, message=message
-            )
-            return ClientResponse(**response)()
+    if not user_id:
+        return user_not_found_response()
 
-        message = "Appointment created"
-        response = json_response(http_status=http_status.HTTP_200_OK, action_status=action_status.NO_ERROR, message=message)
-        return ClientResponse(**response)()
+    # Add appointment to database
+    cleaned_appointment = await add_new_appointment(user_id, appointmentForm)
+    if not cleaned_appointment:
+        message = "Something went wrong"
+        return default_response(http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.UNKNOWN_ERROR, message=message)
 
-    # User not found
-    return user_not_found_response()
+    message = "Appointment created"
+    return default_response(http_status=http_status.HTTP_200_OK, action_status=action_status.NO_ERROR, message=message)
 
 
 # Get own all future appointments
 @router.get("/appointments/me/future", summary="Get own all appointments", tags=["appointments"])
 async def get_all_my_future_appointments(user_id: str = Depends(pyJWTDecodedUserId())) -> JSONResponseModel:
-    if user_id:
-        # Get all future appointments from the database
-        appointments = await appointment_db.get_all_future_appointments_by_ownerId_from_db(user_id)
-        if not appointments:
-            data = {"appointments": []}
-            message = "No appointment found"
-            response = json_response(
-                http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_NOT_FOUND, message=message, data=data
-            )
-            return ClientResponse(**response)()
+    if not user_id:
+        return user_not_found_response()
 
-        # Format the appointment data (convert date to string) for JSON response
-        future_appointments = {"appointments": []}
-        for appointment in appointments:
-            cleaned_appointments = CleanedAppointment(**appointment.dict()).dict()
-            json_compatible_cleaned_appointments = jsonable_encoder(cleaned_appointments)
-            future_appointments["appointments"].append(json_compatible_cleaned_appointments)
+    # Get all future appointments from the database
+    appointments = await appointment_db.get_all_future_appointments_by_ownerId_from_db(user_id)
+    if not appointments:
+        data = {"appointments": []}
+        message = "No appointment found"
+        return default_response(http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_NOT_FOUND, message=message, data=data)
 
-        message = "Appointments fetched"
-        response = json_response(
-            http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_FETCHED, message=message, data=future_appointments
-        )
-        return ClientResponse(**response)()
+    # Format the appointment data (convert date to string) for JSON response
+    future_appointments = {"appointments": []}
+    for appointment in appointments:
+        cleaned_appointments = CleanedAppointment(**appointment.dict()).dict()
+        json_compatible_cleaned_appointments = jsonable_encoder(cleaned_appointments)
+        future_appointments["appointments"].append(json_compatible_cleaned_appointments)
 
-    # User not found
-    return user_not_found_response()
+    message = "Appointments fetched"
+    return default_response(
+        http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_FETCHED, message=message, data=future_appointments
+    )
 
 
 # Get all future appointments for a team
@@ -167,8 +156,7 @@ async def save_response_for_a_specific_appointment(id: str, status: str, user_id
         appointment = await appointment_db.get_appointment_by_id_from_db(id)
         if not appointment:
             message = "No appointment found"
-            response = json_response(http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_NOT_FOUND, message=message)
-            return ClientResponse(**response)()
+            return default_response(http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_NOT_FOUND, message=message)
 
         # Check if the reposonding user is from a team that can respond to the appointment
         intended_team = appointment.team
@@ -188,21 +176,18 @@ async def save_response_for_a_specific_appointment(id: str, status: str, user_id
                     response = await appointment_db.update_appointment_status_by_id_from_db(id, status, confirmed=confirmed)
                     if not response:
                         message = "Something went wrong"
-                        response = json_response(
+                        return default_response(
                             http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.UNKNOWN_ERROR, message=message
                         )
-                        return ClientResponse(**response)()
                 else:
                     message = "Invalid status"
-                    response = json_response(
+                    return default_response(
                         http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.INVALID_INPUT, message=message
                     )
-                    return ClientResponse(**response)()
         else:
             return no_access_to_content_response(message="No valid previlages to respond to this appointment")
     else:
         return user_not_found_response()
 
     message = "Response saved"
-    response = json_response(http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_CREATED, message=message)
-    return ClientResponse(**response)()
+    return default_response(http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_CREATED, message=message)

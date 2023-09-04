@@ -5,6 +5,7 @@ from fastapi import status as http_status
 
 from app.api.models import action_status
 from app.api.models.auth import Role as UserRole
+from app.api.models.response import JSONResponseModel
 from app.pnp_helpers.json_response_wrapper import default_response
 from app.pnp_helpers.user import user_not_found_response
 from app.utils.auth import pyJWTDecodedUserId
@@ -188,8 +189,8 @@ async def get_csd_home_page_info(user_id: str):
 
 
 # Info for tutor home page
-@router.get("/home", summary="Get info for tutor home page", tags=["home"])
-async def get_info_for_tutor_home_page(user_id: str = Depends(pyJWTDecodedUserId())):
+@router.get("/home", summary="Get info for home page", tags=["home"])
+async def get_info_for_tutor_home_page(user_id: str = Depends(pyJWTDecodedUserId())) -> JSONResponseModel:
     if not user_id:
         return user_not_found_response()
 
@@ -203,3 +204,8 @@ async def get_info_for_tutor_home_page(user_id: str = Depends(pyJWTDecodedUserId
 
     if user_role == UserRole.CSD:
         return await get_csd_home_page_info(user_id)
+
+    # If the user is STUDENT
+    else:
+        message = "Student home page info fetched"
+        return default_response(http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_FETCHED, message=message)

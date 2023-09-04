@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends
 from fastapi import status as http_status
 
-from app.api.auth import ValidateUserRole
 from app.api.models import action_status
 from app.api.models.auth import Role as UserRole
 from app.api.models.response import JSONResponseModel
+from app.api.routers.auth import ValidateUserRole
 from app.pnp_helpers.auth import no_access_to_content_response
 from app.pnp_helpers.json_response_wrapper import default_response
 from app.pnp_helpers.user import user_not_found_response

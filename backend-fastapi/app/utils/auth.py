@@ -19,11 +19,6 @@ JWT_ALGORITHM = os.getenv("JWT_ALGORITHM")
 JWT_SECRET = os.getenv("JWT_SECRET")
 JWT_ISSUER = os.getenv("JWT_ISSUER")
 
-# ACCESS_TOKEN_EXPIRE_SECONDS = float(os.environ.get("ACCESS_TOKEN_EXPIRE_SECONDS"))
-# TOKEN_TYPE = os.environ.get("TOKEN_TYPE")
-# JWT_ALGORITHM = os.environ.get("JWT_ALGORITHM")
-# JWT_SECRET = os.environ.get("JWT_SECRET")
-# JWT_ISSUER = os.environ.get("JWT_ISSUER")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -129,5 +124,5 @@ def encryptPassword(password: str) -> str:
     return pwd_context.hash(password)
 
 
-def validatePassword(password: str, encrypted: str) -> str:
+def validatePassword(password: str, encrypted: str) -> bool:
     return pwd_context.verify(password, encrypted)

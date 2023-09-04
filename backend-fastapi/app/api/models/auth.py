@@ -87,3 +87,8 @@ class SignUpUserInDB(SignUpFormWithoutPassword):
 class SignIn(BaseModel):
     email: EmailStr
     password: str
+
+
+class UserInDB(SignUpUserInDB):
+    id: str
+    status: UserStatus

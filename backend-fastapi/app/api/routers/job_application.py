@@ -6,11 +6,11 @@ from fastapi import status as http_status
 from fastapi.encoders import jsonable_encoder
 from starlette.responses import FileResponse
 
-from app.api.auth import ValidateUserRole
 from app.api.models import action_status
 from app.api.models.auth import Role as UserRole
 from app.api.models.job_application import CleanedJobApplicationForUser, JobApplicationForm, JobApplicationInDB, JobFiles
 from app.api.models.response import JSONResponseModel
+from app.api.routers.auth import ValidateUserRole
 from app.pnp_helpers.auth import no_access_to_content_response
 from app.pnp_helpers.client_response import json_response
 from app.pnp_helpers.json_response_wrapper import default_response
@@ -184,6 +184,8 @@ async def download_placement_report(application_id: str, file: JobFiles, user_id
 
         roles = [UserRole.CSD, UserRole.TUTOR]
         valid_user_role = await ValidateUserRole(user_id, roles)()
+
+        # Also allow for the owner of the application to download the file (Student)
         valid_user = user_id == application.ownerId
 
         if valid_user or valid_user_role:
