@@ -1,10 +1,12 @@
-from unittest.mock import MagicMock
-from app.api.routers.auth import signin
-import pytest
 import asyncio
+from unittest.mock import MagicMock
+
+import pytest
+
 from app.api.models.auth import SignIn, UserInDB
-from app.utils.db import user as user_db
+from app.api.routers.auth import signin
 from app.utils import auth as auth_util
+from app.utils.db import user as user_db
 
 
 @pytest.mark.asyncio

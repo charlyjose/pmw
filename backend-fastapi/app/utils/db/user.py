@@ -10,6 +10,17 @@ async def get_user_by_email(email: str) -> Optional[User]:
     return user if user else None
 
 
+# A helper function to get user email by user id
+async def get_user_email_by_user_id(user_id: str) -> Optional[User]:
+    """
+    A helper function to get user email by user id
+    :param user_id: str
+    :return email: str
+    """
+    user = await prisma.user.find_unique(where={"id": user_id})
+    return user.email if user else None
+
+
 async def create_new_user(newUserData: dict) -> Optional[User]:
     return await prisma.user.create(newUserData)
 
@@ -114,3 +125,41 @@ async def get_all_users_by_department_paginated(department: str, page: int, take
     :return user: User
     """
     return await prisma.user.find_many(where={"department": department}, skip=page, take=take)
+
+
+# A helper function to check if a list of emails are valid
+async def check_if_emails_are_valid(emails: List[str]) -> bool:
+    """
+    A helper function to check if a list of emails are valid
+    :param emails: List[str]
+    :return bool: bool
+    """
+    users = await prisma.user.find_many(where={"email": {"in": emails}})
+    if len(users) == len(emails):
+        return True
+    return False
+
+
+# A helper function to get all tutors by department list
+async def get_all_tutors_by_department_list(departments: List[str]) -> Optional[User]:
+    """
+    A helper function to get all tutors by department list
+    :param departments: List[str]
+    :return tutors: User
+    """
+    tutors = await prisma.user.find_many(where={"department": {"in": departments}, "role": "TUTOR"})
+    return tutors if tutors else None
+
+
+# A helper function to check if a user with id and department is a valid tutor
+async def check_if_user_id_and_department_is_a_valid_tutor(user_id: str, department: str) -> bool:
+    """
+    A helper function to check if a user id and department is a valid tutor
+    :param user_id: str
+    :param department: str
+    :return bool: bool
+    """
+    tutor = await prisma.user.find_first(where={"id": user_id, "department": department, "role": "TUTOR"})
+    if tutor:
+        return True
+    return False

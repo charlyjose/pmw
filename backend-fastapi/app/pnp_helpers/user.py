@@ -6,7 +6,7 @@ from app.utils.reponse import ClientResponse
 
 
 def user_not_found_response(
-    http_status: int = http_status.HTTP_204_NO_CONTENT,
+    http_status: int = http_status.HTTP_400_BAD_REQUEST,  # HTTP_204_NO_CONTENT
     action_status: str = action_status.DATA_NOT_FOUND,
     message: str = "User not found",
     data: dict = None,

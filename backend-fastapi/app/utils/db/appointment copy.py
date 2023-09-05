@@ -67,18 +67,6 @@ async def get_all_future_appointments_by_ownerId_from_db(ownerId: str) -> list:
     return await prisma.appointment.find_many(where={"ownerId": ownerId, "date": {"gte": datetime.today()}})
 
 
-# A helper function to get all future appointments from the database by invitee email id
-async def get_all_future_appointments_by_invitee_from_db(invitee: str) -> list:
-    '''
-    A helper function to get all future appointments from the database by invitee email id
-    :param invitee: str
-    :return: list
-    '''
-
-    print("invitee", invitee)
-    return await prisma.appointment.find_many(where={"invitees": {"has": invitee}, "date": {"gte": datetime.today()}})
-
-
 # A helper function to get all past appointments from the database by ownerId
 async def get_all_past_appointments_by_ownerId_from_db(ownerId: str) -> list:
     '''

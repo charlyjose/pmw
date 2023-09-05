@@ -10,6 +10,7 @@ from app.api.routers.notifications import router as notificationsRouter
 from app.api.routers.placement_application import router as placementApplicationRouter
 from app.api.routers.placement_declaration import router as placementDeclarationRouter
 from app.api.routers.placement_reports import router as placementReportsRouter
+from app.api.routers.placement_tutor import router as placementTutorRouter
 from app.api.routers.placement_visit import router as placementVisitRouter
 from app.api.routers.users import router as usersRouter
 
@@ -26,6 +27,6 @@ api.include_router(jobApplicationRouter)
 api.include_router(placementDeclarationRouter)
 api.include_router(notificationsRouter)
 api.include_router(communicationsRouter)
-
+api.include_router(placementTutorRouter)
 
 __all__ = ["api"]

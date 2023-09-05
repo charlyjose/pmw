@@ -4,6 +4,7 @@ from locust import HttpUser, between, task
 
 from tests.helpers import TEAM_CSD, TEAM_TUTOR, TEST_CSD_TOKEN, TEST_STUDENT_TOKEN, TEST_TUTOR_TOKEN
 
+
 class PerformanceTests(HttpUser):
     wait_time = between(1, 3)
 

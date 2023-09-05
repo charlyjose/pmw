@@ -1,7 +1,8 @@
 from datetime import datetime
 from enum import Enum
+from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class AppointmentAgenda(str, Enum):
@@ -34,6 +35,7 @@ class AppointmentForm(BaseModel):
     agenda: AppointmentAgenda
     mode: AppointmentMode
     team: AppointmentTeam
+    invitees: Optional[List[EmailStr]] = []
     description: str
     date: datetime
     time: str
@@ -41,6 +43,8 @@ class AppointmentForm(BaseModel):
 
 class Appointment(AppointmentForm):
     confirmed: bool = False
+    invitee: bool = False
+    invitedBy: str = ""
     status: AppointmentStatus = AppointmentStatus.PENDING
 
 

@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional, Union
 
 from fastapi import APIRouter, Depends
 from fastapi import status as http_status
@@ -26,9 +26,9 @@ async def read_appointment(appointmentForm: AppointmentForm) -> AppointmentForm:
 
 
 # A helper function to prepare and add a new appointment to the database and return the cleaned appointment
-async def add_new_appointment(ownerId: str, appointment: dict) -> Union[CleanedAppointment, None]:
+async def add_new_appointment(ownerId: str, invitee: bool, invitedBy: Optional[str], appointment: dict) -> Union[CleanedAppointment, None]:
     try:
-        appointment = AppointmentInDB(ownerId=ownerId, **appointment.dict()).dict()
+        appointment = AppointmentInDB(ownerId=ownerId, invitee=invitee, invitedBy=invitedBy, **appointment.dict()).dict()
         appointment = await appointment_db.add_new_appointment_to_db(appointment)
         return CleanedAppointment(**appointment.dict()).dict()
     except Exception:
@@ -43,8 +43,24 @@ async def create_new_appointment(
     if not user_id:
         return user_not_found_response()
 
+    # Check if invitees are not empty
+    invitees = appointmentForm.invitees
+    invitee = invitees != []
+
+    if invitees:
+        # Check invitees email id are valid
+        valid_invitees = await user_db.check_if_emails_are_valid(invitees)
+        if not valid_invitees:
+            message = "Invalid invitees"
+            return default_response(
+                http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.INVALID_INPUT, message=message
+            )
+
+    # if invitee is true get the the invitee email id
+    invitedBy = await user_db.get_user_email_by_user_id(user_id)
+
     # Add appointment to database
-    cleaned_appointment = await add_new_appointment(user_id, appointmentForm)
+    cleaned_appointment = await add_new_appointment(user_id, invitee, invitedBy, appointmentForm)
     if not cleaned_appointment:
         message = "Something went wrong"
         return default_response(http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.UNKNOWN_ERROR, message=message)
@@ -59,16 +75,29 @@ async def get_all_my_future_appointments(user_id: str = Depends(pyJWTDecodedUser
     if not user_id:
         return user_not_found_response()
 
-    # Get all future appointments from the database
-    appointments = await appointment_db.get_all_future_appointments_by_ownerId_from_db(user_id)
-    if not appointments:
+    # Get user email id
+    user_email = await user_db.get_user_email_by_user_id(user_id)
+    if not user_email:
+        message = "Something went wrong"
+        return default_response(http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.UNKNOWN_ERROR, message=message)
+
+    # Get all invited future appointments from the database that are in invitee list
+    invited_appointments = await appointment_db.get_all_future_appointments_by_invitee_from_db(user_email)
+    # Get all self created future appointments from the database
+    self_appointments = await appointment_db.get_all_future_appointments_by_ownerId_from_db(user_id)
+
+    if not self_appointments and not invited_appointments:
         data = {"appointments": []}
         message = "No appointment found"
         return default_response(http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_NOT_FOUND, message=message, data=data)
 
-    # Format the appointment data (convert date to string) for JSON response
     future_appointments = {"appointments": []}
-    for appointment in appointments:
+    for appointment in invited_appointments:
+        cleaned_appointments = CleanedAppointment(**appointment.dict()).dict()
+        json_compatible_cleaned_appointments = jsonable_encoder(cleaned_appointments)
+        future_appointments["appointments"].append(json_compatible_cleaned_appointments)
+
+    for appointment in self_appointments:
         cleaned_appointments = CleanedAppointment(**appointment.dict()).dict()
         json_compatible_cleaned_appointments = jsonable_encoder(cleaned_appointments)
         future_appointments["appointments"].append(json_compatible_cleaned_appointments)
@@ -88,36 +117,40 @@ async def get_all_future_appointments_for_team_csd(team: str, user_id: str = Dep
         if user_id:
             valid_user_role = await ValidateUserRole(user_id, roles)()
             if valid_user_role:
+                # Get all self created future appointments from the database
+                self_appointments = await appointment_db.get_all_future_appointments_by_ownerId_from_db(user_id)
                 # Get all future appointments from the database
-                appointments = await appointment_db.get_all_future_appointments_by_team_from_db(team.upper())
-                if not appointments:
+                team_appointments = await appointment_db.get_all_future_appointments_by_team_from_db(team.upper())
+
+                if not team_appointments and not self_appointments:
                     data = {"appointments": []}
                     message = "No appointment found"
-                    response = json_response(
+                    return default_response(
                         http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_NOT_FOUND, message=message, data=data
                     )
-                    return ClientResponse(**response)()
 
-                # Format the appointment data (convert date to string) for JSON response
                 future_appointments = {"appointments": []}
-                for appointment in appointments:
+                for appointment in self_appointments:
+                    cleaned_appointments = CleanedAppointment(**appointment.dict()).dict()
+                    json_compatible_cleaned_appointments = jsonable_encoder(cleaned_appointments)
+                    future_appointments["appointments"].append(json_compatible_cleaned_appointments)
+
+                for appointment in team_appointments:
                     cleaned_appointments = CleanedAppointment(**appointment.dict()).dict()
                     json_compatible_cleaned_appointments = jsonable_encoder(cleaned_appointments)
                     future_appointments["appointments"].append(json_compatible_cleaned_appointments)
 
                 message = "Appointments fetched"
-                response = json_response(
+                return default_response(
                     http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_FETCHED, message=message, data=future_appointments
                 )
-                return ClientResponse(**response)()
             else:
                 return no_access_to_content_response(message="No valid previlages to access this content")
         else:
             return user_not_found_response()
     else:
         message = "Invalid team"
-        response = json_response(http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.INVALID_INPUT, message=message)
-        return ClientResponse(**response)()
+        return default_response(http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.INVALID_INPUT, message=message)
 
 
 # Get time slots for a specific date
@@ -157,6 +190,13 @@ async def save_response_for_a_specific_appointment(id: str, status: str, user_id
         if not appointment:
             message = "No appointment found"
             return default_response(http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_NOT_FOUND, message=message)
+
+        # If user is the owner of the appointment then he/she can't respond to the appointment
+        if appointment.ownerId == user_id:
+            message = "You can't respond to your own appointment"
+            return default_response(
+                http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.INVALID_INPUT, message=message
+            )
 
         # Check if the reposonding user is from a team that can respond to the appointment
         intended_team = appointment.team

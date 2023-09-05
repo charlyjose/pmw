@@ -93,6 +93,7 @@ enum AppointmentMode {
 enum AppointmentTeam {
   CSD
   TUTOR
+  STUDENT
 }
 
 enum AppointmentStatus {
@@ -112,6 +113,9 @@ model Appointment {
   agenda      AppointmentAgenda
   mode        AppointmentMode
   team        AppointmentTeam
+  invitee     Boolean           @default(false)
+  invitees    String[]
+  invitedBy   String
   description String
   date        DateTime
   time        String
