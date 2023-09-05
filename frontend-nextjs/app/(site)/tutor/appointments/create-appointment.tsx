@@ -53,7 +53,9 @@ import { meetingFormSchema } from "./utilities/validation";
 
 type MeetingFormValues = z.infer<typeof meetingFormSchema>;
 
-const defaultValues: Partial<MeetingFormValues> = {};
+const defaultValues: Partial<MeetingFormValues> = {
+  invitees: [{ value: "" }],
+};
 
 export function CreateAppointment() {
   const { data: session, status } = useSession();
@@ -134,8 +136,13 @@ export function CreateAppointment() {
           router.push("/tutor/appointments");
         }, 1000);
       })
-      .catch(() => {
-        toast({ variant: "destructive", title: "Something went wrong!" });
+      .catch((error) => {
+        toast({
+          variant: "destructive",
+          title: error?.response?.data?.message
+            ? error.response.data.message
+            : "Something went wrong!",
+        });
 
         setTimeout(() => {
           setIsLoading(false);
@@ -235,10 +242,10 @@ export function CreateAppointment() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="CSD">Career Services</SelectItem>
-                            <SelectItem value="TUTOR">
-                              Placement Tutor
-                            </SelectItem>
+                            {/* <SelectItem value="CSD">Career Services</SelectItem> */}
+                            {/* <SelectItem value="TUTOR"> */}
+                            {/* Placement Tutor */}
+                            {/* </SelectItem> */}
                             <SelectItem value="STUDENT">Student</SelectItem>
                           </SelectContent>
                         </Select>
@@ -258,7 +265,7 @@ export function CreateAppointment() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className={cn(index !== 0 && "sr-only")}>
-                          Specific Invitees
+                          Invitee Email
                         </FormLabel>
                         <FormControl>
                           <Input {...field} />
@@ -268,7 +275,7 @@ export function CreateAppointment() {
                     )}
                   />
                 ))}
-                <Button
+                {/* <Button
                   type="button"
                   variant="outline"
                   size="sm"
@@ -276,7 +283,7 @@ export function CreateAppointment() {
                   onClick={() => append({ value: "" })}
                 >
                   Add any specific invitee's email
-                </Button>
+                </Button> */}
               </div>
 
               <FormField

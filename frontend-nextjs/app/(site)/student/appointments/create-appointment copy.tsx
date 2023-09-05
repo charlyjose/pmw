@@ -1,6 +1,6 @@
 "use client";
 
-const PAGE_TYPE = "CSD";
+const PAGE_TYPE = "STUDENT";
 const UNAUTHORISED_REDIRECTION_LINK = "/signin?callbackUrl=/protected/server";
 
 import { useEffect, useState } from "react";
@@ -33,6 +33,8 @@ import {
   Select,
   SelectContent,
   SelectItem,
+  SelectLabel,
+  SelectGroup,
   SelectTrigger,
   SelectValue,
 } from "@/registry/new-york/ui/select";
@@ -40,29 +42,37 @@ import { Button } from "@/registry/new-york/ui/button";
 import { Calendar } from "@/registry/new-york/ui/calendar";
 import { Textarea } from "@/registry/new-york/ui/textarea";
 import { Separator } from "@/registry/new-york/ui/separator";
-import { Input } from "@/registry/new-york/ui/input";
-
 import { Icons } from "@/components/icons";
-import { CalendarIcon } from "lucide-react";
-import { CheckCircle2Icon } from "lucide-react";
-
 import { toast } from "@/registry/new-york/ui/use-toast";
 import { toast as hotToast } from "react-hot-toast";
+
+import { CalendarIcon } from "lucide-react";
+import { CheckCircle2Icon } from "lucide-react";
 
 import { meetingFormSchema } from "./utilities/validation";
 
 type MeetingFormValues = z.infer<typeof meetingFormSchema>;
 
-const defaultValues: Partial<MeetingFormValues> = {
-  invitees: [{ value: "" }],
-};
+const defaultValues: Partial<MeetingFormValues> = {};
 
 export function CreateAppointment() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [slots, setSlots] = useState([]);
 
   useEffect(() => {
+    // // Client side Auth check
+    // if (
+    //   !session &&
+    //   session?.status !== "authenticated" &&
+    //   session?.user?.role != PAGE_TYPE
+    // ) {
+    //   router.push(UNAUTHORISED_REDIRECTION_LINK);
+    // }
+
+
+
     // Auth check
     if (status === "loading") return; // Do nothing while loading
     if (!session) {
@@ -70,6 +80,8 @@ export function CreateAppointment() {
     } else if (session?.user?.role != PAGE_TYPE) {
       router.push(UNAUTHORISED_REDIRECTION_LINK);
     }
+
+
   }, []);
 
   const form = useForm<MeetingFormValues>({
@@ -78,10 +90,27 @@ export function CreateAppointment() {
     mode: "onChange",
   });
 
-  const { fields, append } = useFieldArray({
-    name: "invitees",
-    control: form.control,
-  });
+  // Fetch the available slots for a given date
+  function fetchSlots(date: Date) {
+    axios
+      .get(`${process.env.NEXT_PUBLIC_API_URL}/api/appointments/slots?date=${date}`, {
+        headers: {
+          "Content-Type": `application/json`,
+          Authorization: `Bearer ${session?.token}`,
+        },
+      })
+      .then((e) => {
+        toast({
+          variant: "default",
+          title: "Appointment",
+          description: `Time slots fetched for ${date.toDateString()}`,
+        });
+        setSlots(e.data.data.slots);
+      })
+      .catch(() => {
+        toast({ variant: "destructive", title: "Something went wrong!" });
+      });
+  }
 
   function onSubmit(data: MeetingFormValues) {
     setIsLoading(true);
@@ -90,11 +119,9 @@ export function CreateAppointment() {
       agenda: data.agenda,
       mode: data.mode,
       team: data.team,
-      invitees: data.invitees?.flatMap((invitee) => invitee.value),
       description: data.description,
       date: data.date,
       time: data.time,
-      duration: data.duration,
     };
 
     const API_URI = process.env.NEXT_PUBLIC_API_URL as string;
@@ -133,16 +160,11 @@ export function CreateAppointment() {
 
         setTimeout(() => {
           setIsLoading(false);
-          router.push("/tutor/appointments");
+          router.push("/student/appointments");
         }, 1000);
       })
-      .catch((error) => {
-        toast({
-          variant: "destructive",
-          title: error?.response?.data?.message
-            ? error.response.data.message
-            : "Something went wrong!",
-        });
+      .catch(() => {
+        toast({ variant: "destructive", title: "Something went wrong!" });
 
         setTimeout(() => {
           setIsLoading(false);
@@ -155,8 +177,8 @@ export function CreateAppointment() {
       <Card>
         <CardHeader>
           <CardTitle>
-            <span className="px-1 bg-purple-300 mr-2 "></span>
-            Create appointment
+            <span className="px-1 bg-lime-300 mr-2 "></span>
+            Create an appointment
             <Separator className="my-2" />
           </CardTitle>
         </CardHeader>
@@ -242,11 +264,10 @@ export function CreateAppointment() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {/* <SelectItem value="CSD">Career Services</SelectItem> */}
-                            {/* <SelectItem value="TUTOR"> */}
-                            {/* Placement Tutor */}
-                            {/* </SelectItem> */}
-                            <SelectItem value="STUDENT">Student</SelectItem>
+                            <SelectItem value="CSD">Career Services</SelectItem>
+                            <SelectItem value="TUTOR">
+                              Placement Tutor
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -254,36 +275,6 @@ export function CreateAppointment() {
                     )}
                   />
                 </div>
-              </div>
-
-              <div>
-                {fields.map((field, index) => (
-                  <FormField
-                    control={form.control}
-                    key={field.id}
-                    name={`invitees.${index}.value`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className={cn(index !== 0 && "sr-only")}>
-                          Invitee Email
-                        </FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                ))}
-                {/* <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="mt-2"
-                  onClick={() => append({ value: "" })}
-                >
-                  Add any specific invitee's email
-                </Button> */}
               </div>
 
               <FormField
@@ -295,7 +286,8 @@ export function CreateAppointment() {
                     <FormControl>
                       <Textarea
                         placeholder="Describe your reason for meeting"
-                        className="resize-none"
+                        // className="resize-none"
+                        className="min-h-[50px] flex-1 p-4 md:min-h-[100px] lg:min-h-[100px]"
                         {...field}
                       />
                     </FormControl>
@@ -311,14 +303,16 @@ export function CreateAppointment() {
                     name="date"
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
-                        <FormLabel>Meeting Date</FormLabel>
+                        <FormLabel className="pt-2 pb-0">
+                          Meeting Date
+                        </FormLabel>
                         <Popover>
                           <PopoverTrigger asChild>
                             <FormControl>
                               <Button
                                 variant={"outline"}
                                 className={cn(
-                                  "w-[240px] pl-3 text-left font-normal",
+                                  "w-[340px] pl-3 text-left font-normal",
                                   !field.value && "text-muted-foreground"
                                 )}
                               >
@@ -335,11 +329,16 @@ export function CreateAppointment() {
                             <Calendar
                               mode="single"
                               selected={field.value}
-                              onSelect={field.onChange}
+                              // onSelect={field.onChange}
                               disabled={(date) =>
                                 // Disable dates in the past
                                 date < new Date()
                               }
+                              // On a date is selected fetch the available slots for that date
+                              onSelect={(date) => {
+                                fetchSlots(date);
+                                field.onChange(date);
+                              }}
                               initialFocus
                             />
                           </PopoverContent>
@@ -351,68 +350,57 @@ export function CreateAppointment() {
                 </div>
 
                 <div className="grid gap-1">
-                  <FormField
-                    control={form.control}
-                    name="time"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Meeting Time</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a meeting time" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="09:00">09:00 AM</SelectItem>
-                            <SelectItem value="09:30">09:30 AM</SelectItem>
-                            <SelectItem value="10:00">10:00 AM</SelectItem>
-                            <SelectItem value="10:30">10:30 AM</SelectItem>
-                            <SelectItem value="11:00">11:00 AM</SelectItem>
-                            <SelectItem value="11:30">11:30 AM</SelectItem>
-                            <SelectItem value="01:00">01:00 PM</SelectItem>
-                            <SelectItem value="01:30">01:30 PM</SelectItem>
-                            <SelectItem value="02:00">02:00 PM</SelectItem>
-                            <SelectItem value="02:30">02:30 PM</SelectItem>
-                            <SelectItem value="03:00">03:00 PM</SelectItem>
-                            <SelectItem value="03:30">03:30 PM</SelectItem>
-                            <SelectItem value="04:00">04:00 PM</SelectItem>
-                            <SelectItem value="04:30">04:30 PM</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="duration"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Meeting Duration</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a meeting duration" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="15">15 mins</SelectItem>
-                            <SelectItem value="30">30 mins</SelectItem>
-                            <SelectItem value="45">45 mins</SelectItem>
-                            <SelectItem value="60">60 mins</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {/* Only show this compoenent when date is selected */}
+
+                  {form.watch("date") && (
+                    <FormField
+                      control={form.control}
+                      name="time"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Meeting Time</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a meeting time" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {
+                                // If a date is selected, show the slots for that date only. Fetch the available slots from the API
+                                form.watch("date") && (
+                                  <>
+                                    <SelectGroup>
+                                      <SelectLabel>
+                                        Available slots for{" "}
+                                        {format(form.watch("date"), "PPP")}
+                                      </SelectLabel>
+                                      <>
+                                        {slots.map((slot) => {
+                                          return (
+                                            <SelectItem
+                                              value={slot.start}
+                                              key={slot.start}
+                                            >
+                                              {slot.start} - {slot.end}
+                                            </SelectItem>
+                                          );
+                                        })}
+                                      </>
+                                    </SelectGroup>
+                                  </>
+                                )
+                              }
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
                 </div>
               </div>
               <div className="text-right text-xs font-medium hover:underline">

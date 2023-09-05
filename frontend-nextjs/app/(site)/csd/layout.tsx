@@ -28,6 +28,10 @@ const sidebarNavItems = [
     href: "/csd/appointments",
   },
   {
+    title: "Placement Applications",
+    href: "/csd/placement/applications",
+  },
+  {
     title: "Communications",
     href: "/csd/communications",
   },

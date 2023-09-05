@@ -1,6 +1,6 @@
 "use client";
 
-const PAGE_TYPE = "TUTOR";
+const PAGE_TYPE = "CSD";
 const UNAUTHORISED_REDIRECTION_LINK = "/signin?callbackUrl=/protected/server";
 
 import { useSession } from "next-auth/react";
@@ -58,7 +58,7 @@ async function fetchJobs(page = 1, token) {
   const API_URI = process.env.NEXT_PUBLIC_API_URL as string;
   const { data } = await (
     await axios.get(
-      `${API_URI}/api/tutor/placement/applications?page=${page + 1}`,
+      `${API_URI}/api/csd/placement/applications/approved?page=${page + 1}`,
       config
     )
   ).data;
@@ -99,7 +99,7 @@ function PlacementApplications() {
 
     if (!isPreviousData && data?.hasMore) {
       queryClient.prefetchQuery({
-        queryKey: ["applications", page + 1],
+        queryKey: ["jobs", page + 1],
         queryFn: () => fetchJobs(page + 1, token),
       });
     }
@@ -110,7 +110,7 @@ function PlacementApplications() {
       {status === "loading" ? (
         <div className="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed">
           <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
-            <Icons.spinner className="mr-2 w-20 h-20 text-red-600 animate-spin" />
+            <Icons.spinner className="mr-2 w-20 h-20 text-purple-600 animate-spin" />
             <h3 className="mt-4 text-lg font-semibold">
               Fetching applications
             </h3>
@@ -121,7 +121,7 @@ function PlacementApplications() {
           {/* <div>Error: {error.message}</div> */}
           <div className="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed">
             <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
-              <FrownIcon className="mr-2 w-20 h-20 text-red-600" />
+              <FrownIcon className="mr-2 w-20 h-20 text-purple-600" />
               <h3 className="mt-4 text-lg font-semibold">
                 Error fetching applications. Please try again later.
               </h3>

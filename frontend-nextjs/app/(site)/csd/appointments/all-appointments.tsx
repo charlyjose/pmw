@@ -10,7 +10,6 @@ import { useEffect } from "react";
 
 import axios from "axios";
 
-import { Dialog } from "@radix-ui/react-dialog";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -20,13 +19,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/registry/new-york/ui/alert-dialog";
-import {
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/registry/new-york/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,8 +31,6 @@ import { Badge } from "@/registry/new-york/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/registry/new-york/ui/button";
-import { Label } from "@/registry/new-york/ui/label";
-import { Switch } from "@/registry/new-york/ui/switch";
 
 import {
   HoverCard,
@@ -56,17 +46,10 @@ import {
   CheckCircledIcon,
   CrossCircledIcon,
   QuestionMarkCircledIcon,
-  CalendarIcon,
 } from "@radix-ui/react-icons";
 import { CalendarX2 } from "lucide-react";
-import {
-  Flag,
-  MoreHorizontal,
-  Trash,
-  CalendarOffIcon,
-  CalendarCheckIcon,
-  CalendarCheck2Icon,
-} from "lucide-react";
+import { CalendarOffIcon, CalendarCheck2Icon } from "lucide-react";
+import { FrownIcon } from "lucide-react";
 
 import { toast } from "@/registry/new-york/ui/use-toast";
 import { toast as hotToast } from "react-hot-toast";
@@ -74,7 +57,9 @@ import { toast as hotToast } from "react-hot-toast";
 function sendResponse(appointmentId: string, response: string, config: any) {
   axios
     .post(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/appointments/response?id=${appointmentId}&status=${response.toUpperCase()}`,
+      `${
+        process.env.NEXT_PUBLIC_API_URL
+      }/api/appointments/response?id=${appointmentId}&status=${response.toUpperCase()}`,
       {},
       config
     )
@@ -90,21 +75,34 @@ function sendResponse(appointmentId: string, response: string, config: any) {
         window.location.reload();
       }, 1000);
     })
-    .catch(() => {
-      toast({ variant: "destructive", title: "Something went wrong!" });
+    .catch((error) => {
+      toast({
+        variant: "destructive",
+        title: error?.response?.data?.message
+          ? error.response.data.message
+          : "Something went wrong!",
+      });
     });
 }
 
 export function AllAppointments() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [appointments, setAppointments] = useState([]);
   const [axiosConfig, setAxiosConfig] = useState({});
+  const [fetchError, setFetchError] = useState(false);
 
   useEffect(() => {
     // Validating client-side session
-    if (!session && session?.user?.role != PAGE_TYPE) {
+    // if (!session && session?.user?.role != PAGE_TYPE) {
+    //   router.push(UNAUTHORISED_REDIRECTION_LINK);
+    // }
+    // Auth check
+    if (status === "loading") return; // Do nothing while loading
+    if (!session) {
+      router.push(UNAUTHORISED_REDIRECTION_LINK);
+    } else if (session?.user?.role != PAGE_TYPE) {
       router.push(UNAUTHORISED_REDIRECTION_LINK);
     }
 
@@ -148,6 +146,7 @@ export function AllAppointments() {
           });
         })
         .catch((e) => {
+          setFetchError(true);
           toast_variant = "destructive";
           toast_title = "Appointments";
           toast_description = "Error fetching your appointments";
@@ -176,7 +175,6 @@ export function AllAppointments() {
         </CardTitle>
       </CardHeader>
       <CardContent className="grid gap-1">
-        {/* Put Item to the center */}
         {isLoading && (
           <>
             <div className="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed">
@@ -189,11 +187,22 @@ export function AllAppointments() {
             </div>
           </>
         )}
-        {!isLoading && (
+
+        {!isLoading && !fetchError && (
           <AppointmentsDisplay
             appointments={appointments}
             axiosConfig={axiosConfig}
           />
+        )}
+        {!isLoading && fetchError && (
+          <div className="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed">
+            <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
+              <FrownIcon className="mr-2 w-20 h-20 text-purple-600" />
+              <h3 className="mt-4 text-lg font-semibold">
+                Error fetching your appointments. Please try again later.
+              </h3>
+            </div>
+          </div>
         )}
       </CardContent>
     </Card>
@@ -217,7 +226,7 @@ export function AppointmentsDisplay(props) {
                   {appointment.status.toUpperCase() === "CONFIRMED" ? (
                     <CheckCircledIcon className="mt-px h-6 w-6 text-lime-700" />
                   ) : appointment.status.toUpperCase() === "CANCELLED" ? (
-                    <CrossCircledIcon className="mt-px h-6 w-6 text-red-700" />
+                    <CrossCircledIcon className="mt-px h-6 w-6 text-purple-700" />
                   ) : (
                     <QuestionMarkCircledIcon className="mt-px h-6 w-6 text-yellow-500" />
                   )}
@@ -325,6 +334,28 @@ export function AppointmentsDisplay(props) {
                       </DropdownMenu>
                     </div>
                   </div>
+
+                  {appointment.invitees.length != 0 && (
+                    <div className="grid grid-cols-5 gap-5 pt-2">
+                      <div className="col-span-4">
+                        <p className="text-md font-medium leading-none">
+                          <span className="text-md font-bold">Invitees:</span>{" "}
+                          <span>{appointment.invitees.join(", ")}</span>
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {appointment.invitedBy && (
+                    <div className="grid grid-cols-5 gap-5 pt-2">
+                      <div className="col-span-4">
+                        <p className="text-md font-medium leading-none">
+                          <span className="text-md font-bold">Created By:</span>{" "}
+                          <span>{appointment.invitedBy}</span>
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
                   <AlertDialog open={open} onOpenChange={setIsOpen}>
                     <AlertDialogContent>

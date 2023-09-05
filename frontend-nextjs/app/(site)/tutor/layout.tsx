@@ -32,6 +32,10 @@ const sidebarNavItems = [
     href: "/tutor/placement/applications",
   },
   {
+    title: "Placement Reports",
+    href: "/tutor/placement/reports",
+  },
+  {
     title: "Visit Planning",
     href: "/tutor/placement/visit",
   },

@@ -9,17 +9,10 @@ import { useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
-import Link from "next/link";
 
 import axios from "axios";
-import { saveAs } from "file-saver";
-import moment from "moment";
-
-import { Switch } from "@/registry/new-york/ui/switch";
-import { Label } from "@/registry/new-york/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/registry/new-york/ui/badge";
-import { Button } from "@/registry/new-york/ui/button";
 import {
   Accordion,
   AccordionContent,
@@ -28,17 +21,8 @@ import {
 } from "@/components/ui/accordion";
 
 import { FrownIcon } from "lucide-react";
-import { FileTextIcon } from "lucide-react";
-import { DoubleArrowDownIcon } from "@radix-ui/react-icons";
-import { DownloadIcon } from "lucide-react";
-import { ArrowDownToLineIcon } from "lucide-react";
 
 import { Icons } from "@/components/icons";
-import { FaFilePdf } from "react-icons/fa6";
-import { BsFiletypeDocx } from "react-icons/bs";
-import { BsFiletypeDoc } from "react-icons/bs";
-import { BsFileEarmarkPdf } from "react-icons/bs";
-import { ArrowUpRight } from "lucide-react";
 
 import { toast } from "@/registry/new-york/ui/use-toast";
 import { toast as hotToast } from "react-hot-toast";

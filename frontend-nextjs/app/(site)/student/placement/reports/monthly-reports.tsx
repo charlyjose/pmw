@@ -20,17 +20,15 @@ import axios from "axios";
 import Link from "next/link";
 
 import { FrownIcon } from "lucide-react";
-import { FileTextIcon } from "lucide-react";
 import { DownloadIcon } from "lucide-react";
 import { Icons } from "@/components/icons";
-import { FaFilePdf } from "react-icons/fa6";
 import { BsFiletypeDocx } from "react-icons/bs";
 import { BsFiletypeDoc } from "react-icons/bs";
 import { BsFileEarmarkPdf } from "react-icons/bs";
 
 import { toast } from "@/registry/new-york/ui/use-toast";
 
-import { ArrowUpRight, PlusSquare } from "lucide-react";
+import { PlusSquare } from "lucide-react";
 
 export function MonthlyReports() {
   const { data: session } = useSession();

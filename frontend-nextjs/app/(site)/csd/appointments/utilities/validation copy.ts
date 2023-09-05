@@ -15,11 +15,7 @@ export const meetingFormSchema = z.object({
             z.object({
                 value: z.string().email({ message: "Please enter a valid email" }),
             })
-        ).nonempty({
-            message: "At least one location is required"
-        }).min(1, {
-            message: "At least one location is required"
-        }),
+        ).optional(),
     description: z.string({
         required_error: "Description must be at least 4 characters",
     }).min(4).max(160),

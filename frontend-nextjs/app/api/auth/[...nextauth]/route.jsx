@@ -1,11 +1,11 @@
 import NextAuth from "next-auth/next";
-import prisma from '../../../libs/prismadb'
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
+// import prisma from '../../../libs/prismadb'
+// import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import CredentialsProvider from "next-auth/providers/credentials";
 import axios from "axios";
 
 export const authOptions = {
-    adapter: PrismaAdapter(prisma),
+    // adapter: PrismaAdapter(prisma),
     providers: [
         CredentialsProvider({
             name: "credentials",
@@ -15,7 +15,7 @@ export const authOptions = {
                 username: { label: "Username", type: "text", placeholder: "John Smith" },
             },
             async authorize(credentials) {
-                // check to see if email and password is there
+                // Check to see if email and password is present
                 if (!credentials.email || !credentials.password) {
                     throw new Error('Please enter an email and password')
                 }

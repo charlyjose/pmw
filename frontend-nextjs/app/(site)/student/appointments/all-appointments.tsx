@@ -28,24 +28,73 @@ import {
   CrossCircledIcon,
 } from "@radix-ui/react-icons";
 import { CalendarX2 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/registry/new-york/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/registry/new-york/ui/alert-dialog";
+
+import { CalendarOffIcon, CalendarCheck2Icon } from "lucide-react";
 
 import { MdOutlineCalendarMonth } from "react-icons/md";
 import { MdOutlineEditCalendar } from "react-icons/md";
 
 import { toast } from "@/registry/new-york/ui/use-toast";
+import { toast as hotToast } from "react-hot-toast";
 
+function sendResponse(appointmentId: string, response: string, config: any) {
+  axios
+    .post(
+      `${
+        process.env.NEXT_PUBLIC_API_URL
+      }/api/appointments/response?id=${appointmentId}&status=${response.toUpperCase()}`,
+      {},
+      config
+    )
+    .then((e) => {
+      hotToast.success(e.data.message, {
+        style: {
+          background: "#4B5563",
+          color: "#F3F4F6",
+        },
+      });
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    })
+    .catch((error) => {
+      toast({
+        variant: "destructive",
+        title: error?.response?.data?.message
+          ? error.response.data.message
+          : "Something went wrong!",
+      });
+    });
+}
 export function AllAppointments() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [appointments, setAppointments] = useState([]);
+  const [axiosConfig, setAxiosConfig] = useState({});
 
   useEffect(() => {
     // Validating client-side session
     // if (!session && session?.user?.role != PAGE_TYPE) {
     //   router.push(UNAUTHORISED_REDIRECTION_LINK);
     // }
-
 
     // Auth check
     if (status === "loading") return; // Do nothing while loading
@@ -54,7 +103,6 @@ export function AllAppointments() {
     } else if (session?.user?.role != PAGE_TYPE) {
       router.push(UNAUTHORISED_REDIRECTION_LINK);
     }
-
 
     const fetchData = async () => {
       setIsLoading(true);
@@ -70,6 +118,8 @@ export function AllAppointments() {
           Authorization: `Bearer ${token}`,
         },
       };
+
+      setAxiosConfig(config);
 
       await axios
         .get(`${API_URI}/api/appointments/me/future`, config)
@@ -134,7 +184,12 @@ export function AllAppointments() {
             </div>
           </>
         )}
-        {!isLoading && <AppointmentsDisplay appointments={appointments} />}
+        {!isLoading && (
+          <AppointmentsDisplay
+            appointments={appointments}
+            axiosConfig={axiosConfig}
+          />
+        )}
       </CardContent>
     </Card>
   );
@@ -145,7 +200,7 @@ export function AppointmentsDisplay(props) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const displayAppointments = (props) => {
-    const { appointments } = props;
+    const { appointments, axiosConfig } = props;
 
     if (appointments.length > 0) {
       return (
@@ -237,9 +292,113 @@ export function AppointmentsDisplay(props) {
                         )}
                       </p>
                     </div>
-                    <div className="col-span-1"></div>
+
+                    <div className="col-span-1">
+                      {appointment.invitee && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="link"
+                              className="text-right font-medium"
+                            >
+                              <span className="sr-only">Actions</span>
+                              Respond
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onSelect={() => setIsOpen(true)}>
+                              <CalendarCheck2Icon className="mr-2 h-4 w-4" />
+                              Confirm
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onSelect={() => setShowDeleteDialog(true)}
+                              className="text-red-600"
+                            >
+                              <CalendarOffIcon className="mr-2 h-4 w-4" />
+                              Cancel
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
+                    </div>
                   </div>
+                  {appointment.invitee && (
+                    <div className="grid grid-cols-5 gap-5 pt-2">
+                      <div className="col-span-4">
+                        <p className="text-md font-medium leading-none">
+                          <span className="text-md font-bold">Invited By:</span>{" "}
+                          {appointment.invitedBy}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
+
+                <AlertDialog open={open} onOpenChange={setIsOpen}>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        Confirm this appointment?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <Button
+                        variant="default"
+                        onClick={() => {
+                          setIsOpen(false);
+                          toast({
+                            title: "Appointment confirmed",
+                          });
+                          sendResponse(
+                            appointment.id,
+                            "CONFIRMED",
+                            axiosConfig
+                          );
+                        }}
+                      >
+                        Confirm this appointment
+                      </Button>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+                <AlertDialog
+                  open={showDeleteDialog}
+                  onOpenChange={setShowDeleteDialog}
+                >
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <Button
+                        variant="destructive"
+                        onClick={() => {
+                          setShowDeleteDialog(false);
+                          toast({
+                            variant: "destructive",
+                            title: "Appointment cancelled",
+                          });
+                          sendResponse(
+                            appointment.id,
+                            "CANCELLED",
+                            axiosConfig
+                          );
+                        }}
+                      >
+                        Cancel this appointment
+                      </Button>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             );
           })}

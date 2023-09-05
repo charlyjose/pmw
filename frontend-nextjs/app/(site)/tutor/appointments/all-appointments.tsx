@@ -10,7 +10,6 @@ import { useEffect } from "react";
 
 import axios from "axios";
 
-import { Dialog } from "@radix-ui/react-dialog";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -20,13 +19,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/registry/new-york/ui/alert-dialog";
-import {
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/registry/new-york/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,8 +31,6 @@ import { Badge } from "@/registry/new-york/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/registry/new-york/ui/button";
-import { Label } from "@/registry/new-york/ui/label";
-import { Switch } from "@/registry/new-york/ui/switch";
 
 import {
   HoverCard,
@@ -56,17 +46,9 @@ import {
   CheckCircledIcon,
   CrossCircledIcon,
   QuestionMarkCircledIcon,
-  CalendarIcon,
 } from "@radix-ui/react-icons";
 import { CalendarX2 } from "lucide-react";
-import {
-  Flag,
-  MoreHorizontal,
-  Trash,
-  CalendarOffIcon,
-  CalendarCheckIcon,
-  CalendarCheck2Icon,
-} from "lucide-react";
+import { CalendarOffIcon, CalendarCheck2Icon } from "lucide-react";
 import { FrownIcon } from "lucide-react";
 
 import { toast } from "@/registry/new-york/ui/use-toast";
@@ -75,7 +57,9 @@ import { toast as hotToast } from "react-hot-toast";
 function sendResponse(appointmentId: string, response: string, config: any) {
   axios
     .post(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/appointments/response?id=${appointmentId}&status=${response.toUpperCase()}`,
+      `${
+        process.env.NEXT_PUBLIC_API_URL
+      }/api/appointments/response?id=${appointmentId}&status=${response.toUpperCase()}`,
       {},
       config
     )
@@ -91,8 +75,13 @@ function sendResponse(appointmentId: string, response: string, config: any) {
         window.location.reload();
       }, 1000);
     })
-    .catch(() => {
-      toast({ variant: "destructive", title: "Something went wrong!" });
+    .catch((error) => {
+      toast({
+        variant: "destructive",
+        title: error?.response?.data?.message
+          ? error.response.data.message
+          : "Something went wrong!",
+      });
     });
 }
 
@@ -345,6 +334,28 @@ export function AppointmentsDisplay(props) {
                       </DropdownMenu>
                     </div>
                   </div>
+
+                  {appointment.invitees.length != 0 && (
+                    <div className="grid grid-cols-5 gap-5 pt-2">
+                      <div className="col-span-4">
+                        <p className="text-md font-medium leading-none">
+                          <span className="text-md font-bold">Invitees:</span>{" "}
+                          <span>{appointment.invitees.join(", ")}</span>
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {appointment.invitedBy && (
+                    <div className="grid grid-cols-5 gap-5 pt-2">
+                      <div className="col-span-4">
+                        <p className="text-md font-medium leading-none">
+                          <span className="text-md font-bold">Created By:</span>{" "}
+                          <span>{appointment.invitedBy}</span>
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
                   <AlertDialog open={open} onOpenChange={setIsOpen}>
                     <AlertDialogContent>

@@ -35,7 +35,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ApplicationDialog } from "./application-dialog";
+import { ApplicationDialog } from "./reports-dialog";
 
 const queryClient = new QueryClient();
 
@@ -58,7 +58,7 @@ async function fetchJobs(page = 1, token) {
   const API_URI = process.env.NEXT_PUBLIC_API_URL as string;
   const { data } = await (
     await axios.get(
-      `${API_URI}/api/tutor/placement/applications?page=${page + 1}`,
+      `${API_URI}/api/tutor/placement/reports?page=${page + 1}`,
       config
     )
   ).data;
@@ -82,7 +82,7 @@ function PlacementApplications() {
   };
 
   const { status, data, error, isFetching, isPreviousData } = useQuery({
-    queryKey: ["applications", page, token],
+    queryKey: ["students", page, token],
     queryFn: () => fetchJobs(page, token),
     keepPreviousData: true,
     staleTime: 5000,
@@ -99,7 +99,7 @@ function PlacementApplications() {
 
     if (!isPreviousData && data?.hasMore) {
       queryClient.prefetchQuery({
-        queryKey: ["applications", page + 1],
+        queryKey: ["students", page + 1],
         queryFn: () => fetchJobs(page + 1, token),
       });
     }
@@ -112,7 +112,7 @@ function PlacementApplications() {
           <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
             <Icons.spinner className="mr-2 w-20 h-20 text-red-600 animate-spin" />
             <h3 className="mt-4 text-lg font-semibold">
-              Fetching applications
+              Fetching reports...
             </h3>
           </div>
         </div>
@@ -123,7 +123,7 @@ function PlacementApplications() {
             <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
               <FrownIcon className="mr-2 w-20 h-20 text-red-600" />
               <h3 className="mt-4 text-lg font-semibold">
-                Error fetching applications. Please try again later.
+                Error fetching reports. Please try again later.
               </h3>
             </div>
           </div>
@@ -137,53 +137,19 @@ function PlacementApplications() {
             <TableHeader>
               <TableRow>
                 <TableHead className="font-medium">Student</TableHead>
-                <TableHead className="font-medium">Level</TableHead>
-                <TableHead className="font-medium">Placement</TableHead>
-                <TableHead className="font-medium">Student Visa</TableHead>
-                <TableHead className="font-medium">Role Start</TableHead>
-                <TableHead className="font-medium">Last Update</TableHead>
-                <TableHead className="font-medium">Status</TableHead>
+                <TableHead className="font-medium">Count</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.applications.map((application) => (
-                <TableRow key={application.id}>
+              {data.students.map((student) => (
+                <TableRow key={student.id}>
                   <TableCell className="font-medium">
-                    {application.declarationName}
+                    {student.studentName}
                   </TableCell>
-                  <TableCell className="font-light">
-                    {application.studentLevel
-                      .toUpperCase()
-                      .replace("_", " ")
-                      .charAt(0) +
-                      application.studentLevel.slice(1).toLowerCase()}
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    {application.placementOverseas ? "Overseas" : "Local"}
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    {application.studentVisa ? "Yes" : "No"}
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    {new Date(application.roleStartDate).toDateString()}
-                  </TableCell>
-                  <TableCell className="font-light">
-                    {new Date(application.updatedAt).toDateString()}
-                  </TableCell>
-                  <TableCell className="font-light">
-                    {application.status.toUpperCase() === "APPROVED" ? (
-                      <Badge variant="outline">APPROVED</Badge>
-                    ) : application.status.toUpperCase() === "REVIEW" ? (
-                      <Badge variant="secondary">REVIEW</Badge>
-                    ) : application.status.toUpperCase() === "REJECTED" ? (
-                      <Badge variant="destructive">REJECTED</Badge>
-                    ) : (
-                      <Badge variant="default">PENDING</Badge>
-                    )}
-                  </TableCell>
+                  <TableCell className="font-light">{student.count}</TableCell>
                   <TableCell className="font-light">
                     <ApplicationDialog
-                      application={application}
+                      student={student}
                       axiosConfig={axiosConfig}
                     />
                   </TableCell>
