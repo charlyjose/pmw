@@ -12,13 +12,11 @@ from app.api.models.job import CleanedJobForUser, CleanedJobWithCreaterName, Job
 from app.api.models.response import JSONResponseModel
 from app.api.routers.auth import ValidateUserRole
 from app.pnp_helpers.auth import no_access_to_content_response
-from app.pnp_helpers.client_response import json_response
 from app.pnp_helpers.json_response_wrapper import default_response
 from app.pnp_helpers.user import user_not_found_response
 from app.utils.auth import pyJWTDecodedUserId
 from app.utils.db import job as job_db
 from app.utils.db import user as user_db
-from app.utils.reponse import ClientResponse
 
 router = APIRouter()
 
@@ -47,10 +45,9 @@ async def create_new_job(user_id: str = Depends(pyJWTDecodedUserId()), jobForm: 
             new_job = await add_new_job(user_id, jobForm)
             if not new_job:
                 message = "Something went wrong. Could not create job."
-                response = json_response(
+                return default_response(
                     http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.UNKNOWN_ERROR, message=message
                 )
-                return ClientResponse(**response)()
 
             # Create a new cleaned job object with the owner's name and convert it to a JSON compatible object
             owner_name = await user_db.get_user_name_by_user_id(user_id)
@@ -58,13 +55,13 @@ async def create_new_job(user_id: str = Depends(pyJWTDecodedUserId()), jobForm: 
             json_compatible_cleaned_job = jsonable_encoder(cleaned_job)
 
             message = "Job created"
-            response = json_response(
+            return default_response(
                 http_status=http_status.HTTP_200_OK,
                 action_status=action_status.DATA_CREATED,
                 message=message,
                 data=json_compatible_cleaned_job,
             )
-            return ClientResponse(**response)()
+
         else:
             return no_access_to_content_response(message="No valid previlages to create job")
     else:
@@ -104,16 +101,14 @@ async def get_all_jobs_paginated(
 
             message = "Jobs fetched"
             data = {"jobs": job_list, "hasMore": hasMore}
-            response = json_response(
+            return default_response(
                 http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_FETCHED, message=message, data=data
             )
-            return ClientResponse(**response)()
+
         else:
             message = "Page number should be greater than 0"
-            response = json_response(
-                http_status=http_status.HTTP_404_NOT_FOUND, action_status=action_status.DATA_NOT_FOUND, message=message
-            )
-            return ClientResponse(**response)()
+            return default_response(http_status=http_status.HTTP_404_NOT_FOUND, action_status=action_status.DATA_NOT_FOUND, message=message)
+
     else:
         return user_not_found_response()
 

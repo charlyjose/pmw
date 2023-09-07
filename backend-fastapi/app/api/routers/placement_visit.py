@@ -14,6 +14,7 @@ from app.api.models.placement_visit import (
     PlacementVisitItineraryInDB,
     PlacementVisitRegion,
     PlacementVisitWithVisitStatus,
+    PlacementVisitStatus,
 )
 from app.api.models.response import JSONResponseModel
 from app.api.models.route_plan import Coordinate, PlacementVisitLocations, StartLocation, Unit, VisitPlan
@@ -116,23 +117,6 @@ async def get_region_data(tutor_id: str = Depends(pyJWTDecodedUserId()), region:
     message = "Geo locations fetched"
     data = {"placements": placement_list}
     return default_response(http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_FETCHED, message=message, data=data)
-
-
-# # Create a route plan for placement visit
-# # Takes: List[studentId], visitDate, location coordinates
-# @router.post("/tutor/placement/visit/route-plan", summary="Create a route plan for placement visit", tags=["placement_visit"])
-# async def create_route_plan_for_placement_visit(
-#     placement_visit_locations: List[PlacementVisitLocations], unit: str = Unit.KM, tutor_id: str = Depends(pyJWTDecodedUserId())
-# ):
-#     if not tutor_id:
-#         return user_not_found_response()
-
-#     # Get route plan
-#     route_plan = get_route_plan(placement_visit_locations, unit=unit, recommendations=True)
-#     json_compatiable_route_plan = jsonable_encoder(route_plan)
-#     message = "Route plan created"
-#     data = {"route_plan": json_compatiable_route_plan}
-#     return default_response(http_status=http_status.HTTP_200_OK, action_status=action_status.NO_ERROR, message=message, data=data)
 
 
 # Create a route plan for placement visit
@@ -411,9 +395,10 @@ async def change_the_status_of_the_placement_visit_itinerary(id: str, status: bo
     # Get placement Ids from the placement visit itinerary
     placement_ids = placement_visit_itinerary.placementId
 
-    # Change the visit status of each placement student to COMPLETED
+    # Change the visit status of each placement student
+    visit_status = PlacementVisitStatus.COMPLETED if status else PlacementVisitStatus.PENDING
     placement_student_visit_status_update = await placement_visit_db.change_visit_status_for_placement_applications(
-        placement_ids=placement_ids, visit_status="COMPLETED"
+        placement_ids=placement_ids, visit_status=visit_status
     )
     if not placement_student_visit_status_update:
         message = "Failed to update placement visit status"

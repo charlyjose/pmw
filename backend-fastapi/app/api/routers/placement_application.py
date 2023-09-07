@@ -7,6 +7,7 @@ from prisma.models import PlacementApplication
 
 from app.api.models import action_status
 from app.api.models.auth import Role as UserRole
+from app.api.models.auth import StudentStatus
 from app.api.models.placement_application import (
     CleanedPlacementApplicationForTutor,
     CleanedPlacementApplicationWithCreaterAndReviewerNameAndComments,
@@ -19,7 +20,6 @@ from app.api.models.placement_application import ReviewCommentsForm, ReviewComme
 from app.api.models.response import JSONResponseModel
 from app.api.routers.auth import ValidateUserRole
 from app.pnp_helpers.auth import no_access_to_content_response
-from app.pnp_helpers.client_response import json_response
 from app.pnp_helpers.json_response_wrapper import default_response
 from app.pnp_helpers.user import user_not_found_response
 from app.utils.auth import pyJWTDecodedUserId
@@ -27,7 +27,6 @@ from app.utils.db import placement_application as placement_application_db
 from app.utils.db import placement_application_review_comments as placement_application_review_comments_db
 from app.utils.db import placement_tutor as placement_tutor_db
 from app.utils.db import user as user_db
-from app.utils.reponse import ClientResponse
 
 router = APIRouter()
 
@@ -69,19 +68,25 @@ async def add_or_update_placement_application(
         if valid_user_role:
             application = await placement_application_db.get_by_owner_id(user_id)
             if application:
+                # Check if the student is already on placement
+                student_user = await user_db.get_user_by_id(user_id)
+                if student_user.studentStatus == StudentStatus.ON_PLACEMENT:
+                    message = "Student is already on placement"
+                    return default_response(
+                        http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.DATA_NOT_UPDATED, message=message
+                    )
+
                 # Update existing application
                 application_id = application.id
                 updated_application = await update_application_with_status_reset(application_id, application, placement_application)
                 if updated_application:
                     message = "Application updated"
-                    response = json_response(http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_UPDATED, message=message)
-                    return ClientResponse(**response)()
+                    return default_response(http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_UPDATED, message=message)
                 else:
                     message = "Application not updated"
-                    response = json_response(
+                    return default_response(
                         http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.DATA_NOT_UPDATED, message=message
                     )
-                    return ClientResponse(**response)()
             else:
                 owner_id = user_id
                 department = await user_db.get_user_department(user_id)
@@ -90,14 +95,13 @@ async def add_or_update_placement_application(
                 new_application = await add_new_application(owner_id, reviewer_id, placement_application)
                 if new_application:
                     message = "Application added"
-                    response = json_response(http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_CREATED, message=message)
-                    return ClientResponse(**response)()
+                    return default_response(http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_CREATED, message=message)
+
                 else:
                     message = "Application not added"
-                    response = json_response(
+                    return default_response(
                         http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.DATA_NOT_CREATED, message=message
                     )
-                    return ClientResponse(**response)()
         else:
             return no_access_to_content_response(message="No valid previlages to add placement application")
     else:
@@ -132,17 +136,17 @@ async def get_placement_application(user_id: str = Depends(pyJWTDecodedUserId())
 
                 message = "Application found"
                 data = {"applications": cleaned_applications}
-                response = json_response(
+                return default_response(
                     http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_FETCHED, message=message, data=data
                 )
-                return ClientResponse(**response)()
+
             else:
                 message = "Application not found"
                 data = {"applications": []}
-                response = json_response(
+                return default_response(
                     http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_NOT_FOUND, message=message, data=data
                 )
-                return ClientResponse(**response)()
+
         else:
             return no_access_to_content_response(message="No valid previlages to get placement application")
     else:
@@ -191,16 +195,16 @@ async def get_placement_applications_for_tutor_by_department(
 
             data = {"applications": application_list, "hasMore": hasMore}
             message = "Applications fetched"
-            response = json_response(
+            return default_response(
                 http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_FETCHED, message=message, data=data
             )
-            return ClientResponse(**response)()
+
         else:
             message = "Page number should be greater than 0"
-            response = json_response(
+            return default_response(
                 http_status=http_status.HTTP_204_NO_CONTENT, action_status=action_status.DATA_NOT_FOUND, message=message
             )
-            return ClientResponse(**response)()
+
     else:
         return user_not_found_response()
 
@@ -254,12 +258,11 @@ async def get_placement_applications_for_csd_approved(user_id: str = Depends(pyJ
 
         data = {"applications": application_list, "hasMore": hasMore}
         message = "Applications fetched"
-        response = json_response(http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_FETCHED, message=message, data=data)
-        return ClientResponse(**response)()
+        return default_response(http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_FETCHED, message=message, data=data)
+
     else:
         message = "Page number should be greater than 0"
-        response = json_response(http_status=http_status.HTTP_204_NO_CONTENT, action_status=action_status.DATA_NOT_FOUND, message=message)
-        return ClientResponse(**response)()
+        return default_response(http_status=http_status.HTTP_204_NO_CONTENT, action_status=action_status.DATA_NOT_FOUND, message=message)
 
 
 # Change the status of a placement application
@@ -272,35 +275,43 @@ async def change_placement_application_status(id: str, status: str, user_id: str
         if valid_user_role:
             application = await placement_application_db.get_application_by_id(id)
             if application:
+                # Check if the student is already on placement
+                student_user = await user_db.get_user_by_id(application.ownerId)
+                if student_user.studentStatus == StudentStatus.ON_PLACEMENT:
+                    message = "Student is already on placement"
+                    return default_response(
+                        http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.DATA_NOT_UPDATED, message=message
+                    )
+
                 # Update existing application
                 valid_status = status.upper() in application_status.__members__.keys()
                 if not valid_status:
                     message = "Invalid status"
-                    response = json_response(
+                    return default_response(
                         http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.DATA_NOT_UPDATED, message=message
                     )
-                    return ClientResponse(**response)()
+
                 else:
                     update = {"status": status.upper()}
                     updated_application = await placement_application_db.update_application(application.id, update)
                     if updated_application:
                         message = "Application status updated"
-                        response = json_response(
+                        return default_response(
                             http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_UPDATED, message=message
                         )
-                        return ClientResponse(**response)()
+
                     else:
                         message = "Application status not updated"
-                        response = json_response(
+                        return default_response(
                             http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.DATA_NOT_UPDATED, message=message
                         )
-                        return ClientResponse(**response)()
+
             else:
                 message = "Application not found"
-                response = json_response(
+                return default_response(
                     http_status=http_status.HTTP_400_BAD_REQUEST, action_status=action_status.DATA_NOT_FOUND, message=message
                 )
-                return ClientResponse(**response)()
+
         else:
             return no_access_to_content_response(message="No valid previlages to change placement application status")
     else:

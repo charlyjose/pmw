@@ -8,6 +8,7 @@ from app.api.models.auth import Role as UserRole
 from app.api.models.response import JSONResponseModel
 from app.pnp_helpers.json_response_wrapper import default_response
 from app.pnp_helpers.user import user_not_found_response
+from app.pnp_helpers.auth import no_access_to_content_response
 from app.utils.auth import pyJWTDecodedUserId
 from app.utils.db import appointment as appointment_db
 from app.utils.db import placement_application as placement_application_db
@@ -188,6 +189,23 @@ async def get_csd_home_page_info(user_id: str):
     return default_response(http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_FETCHED, message=message, data=data)
 
 
+# STUDENT home page info:
+# - Any Placement application submitted and if its status
+# - Any Placement visit scheduled and if its status
+async def get_student_home_page_info(user_id: str):
+    user_role = await user_db.get_user_role(user_id)
+    if user_role != UserRole.STUDENT:
+        return user_not_found_response()
+
+    # Get the placement application submitted and if its status
+    placement_application = await placement_application_db.get_by_owner_id(user_id)
+    placement_application_status = placement_application.status if placement_application else None
+
+    data = {"placement_application": placement_application_status}
+    message = "Student home page info fetched"
+    return default_response(http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_FETCHED, message=message, data=data)
+
+
 # Info for tutor home page
 @router.get("/home", summary="Get info for home page", tags=["home"])
 async def get_info_for_tutor_home_page(user_id: str = Depends(pyJWTDecodedUserId())) -> JSONResponseModel:
@@ -205,7 +223,7 @@ async def get_info_for_tutor_home_page(user_id: str = Depends(pyJWTDecodedUserId
     if user_role == UserRole.CSD:
         return await get_csd_home_page_info(user_id)
 
-    # If the user is STUDENT
-    else:
-        message = "Student home page info fetched"
-        return default_response(http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_FETCHED, message=message)
+    elif user_role == UserRole.STUDENT:
+        return await get_student_home_page_info(user_id)
+
+    return no_access_to_content_response()

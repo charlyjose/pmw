@@ -12,13 +12,11 @@ from app.api.models.job_application import CleanedJobApplicationForUser, JobAppl
 from app.api.models.response import JSONResponseModel
 from app.api.routers.auth import ValidateUserRole
 from app.pnp_helpers.auth import no_access_to_content_response
-from app.pnp_helpers.client_response import json_response
 from app.pnp_helpers.json_response_wrapper import default_response
 from app.pnp_helpers.user import user_not_found_response
 from app.utils.auth import pyJWTDecodedUserId
 from app.utils.db import job as job_db
 from app.utils.db import job_application as job_application_db
-from app.utils.reponse import ClientResponse
 
 router = APIRouter()
 
@@ -128,8 +126,8 @@ async def add_new_job_application(
             )
 
         message = "Application added"
-        response = json_response(http_status=http_status.HTTP_200_OK, action_status=action_status.NO_ERROR, message=message)
-        return ClientResponse(**response)()
+        return default_response(http_status=http_status.HTTP_200_OK, action_status=action_status.NO_ERROR, message=message)
+
     except Exception:
         message = "Something went wrong"
         return default_response(
@@ -193,10 +191,10 @@ async def download_placement_report(application_id: str, file: JobFiles, user_id
             # Check if user is owner of the report
             if report.ownerId != user_id:
                 message = "You are not authorized to access this report"
-                response = json_response(
+                return default_response(
                     http_status=http_status.HTTP_401_UNAUTHORIZED, action_status=action_status.UNAUTHORIZED, message=message
                 )
-                return ClientResponse(**response)()
+
             '''
 
             filename = application.cvName if file == JobFiles.CV else application.clName

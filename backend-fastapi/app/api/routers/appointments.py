@@ -10,13 +10,11 @@ from app.api.models.auth import Role as UserRole
 from app.api.models.response import JSONResponseModel
 from app.api.routers.auth import ValidateUserRole
 from app.pnp_helpers.auth import no_access_to_content_response
-from app.pnp_helpers.client_response import json_response
 from app.pnp_helpers.json_response_wrapper import default_response
 from app.pnp_helpers.user import user_not_found_response
 from app.utils.auth import pyJWTDecodedUserId
 from app.utils.db import appointment as appointment_db
 from app.utils.db import user as user_db
-from app.utils.reponse import ClientResponse
 
 router = APIRouter()
 
@@ -176,8 +174,7 @@ async def get_time_slots_for_a_specific_date(date: str) -> JSONResponseModel:
     data = {"slots": slots}
 
     message = "Time slots fetched"
-    response = json_response(http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_FETCHED, message=message, data=data)
-    return ClientResponse(**response)()
+    return default_response(http_status=http_status.HTTP_200_OK, action_status=action_status.DATA_FETCHED, message=message, data=data)
 
 
 # Save response for a specific appointment
