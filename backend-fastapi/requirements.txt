@@ -13,4 +13,5 @@ build
 bandit
 poetry
 isort
+pytest-asyncio
 # pre-commit

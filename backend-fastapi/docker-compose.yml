@@ -11,8 +11,12 @@ services:
     env_file:
       - ".env"
     ports:
-      - "8000:80"
+      # Get the port from the .env file
+      - "${PORT}:80"
     volumes:
-      # mount the source code as a volume, so we can use hot reloading
+      # Mount the source code as a volume, for hot reloading
       - "./app:/app/app:ro"
+      # Mount the prisma schema as a volume, for prisma migrations
       - "./prisma:/app/prisma:ro"
+      # Mount the uploads folder as a volume, for file uploads
+      - "./uploads:/app/uploads:rw"

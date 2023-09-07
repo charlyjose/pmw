@@ -28,6 +28,13 @@ class ValidateUserRole:
         return False
 
 
+async def validate_user_role(user_id: str, roles: List[str]):
+    user = await user_db.check_user_role(user_id, roles)
+    if user:
+        return True
+    return False
+
+
 @router.post("/auth/signup", summary="Create new user", tags=["auth"], response_model=JSONResponseModel)
 async def signup(signupForm: SignUpForm) -> JSONResponseModel:
     hashedPassword = auth_util.encryptPassword(signupForm.password)

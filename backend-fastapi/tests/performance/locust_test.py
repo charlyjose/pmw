@@ -2,7 +2,12 @@ import random
 
 from locust import HttpUser, between, task
 
-from tests.helpers import TEAM_CSD, TEAM_TUTOR, TEST_CSD_TOKEN, TEST_STUDENT_TOKEN, TEST_TUTOR_TOKEN
+from tests.helpers import TEAM_CSD, TEAM_TUTOR, get_token
+
+# Please change these user id value based on real user id on the database
+TEST_STUDENT_ID = "64aedadb714786d9fffd4d49"
+TEST_TUTOR_ID = "64aedbc70eb8f0cd783cc6a3"
+TEST_CSD_ID = "64aedc5dae551e7b667980f1"
 
 
 class PerformanceTests(HttpUser):
@@ -40,7 +45,7 @@ class PerformanceTests(HttpUser):
 
     @task(2)
     def test_get_own_user_data(self):
-        response = self.client.get(url="/api/users/me", headers={"authorization": "Bearer " + TEST_STUDENT_TOKEN})
+        response = self.client.get(url="/api/users/me", headers={"authorization": "Bearer " + get_token(TEST_STUDENT_ID)})
         # print(response.json())
 
     """
@@ -58,7 +63,9 @@ class PerformanceTests(HttpUser):
     @task(3)
     def test_check_email(self):
         response = self.client.get(
-            "/api/users/email/exists", params={"email": "charly@student.com"}, headers={"authorization": "Bearer " + TEST_TUTOR_TOKEN}
+            "/api/users/email/exists",
+            params={"email": "charly@student.com"},
+            headers={"authorization": "Bearer " + get_token(TEST_TUTOR_ID)},
         )
         # print(response.json())
 
@@ -76,7 +83,7 @@ class PerformanceTests(HttpUser):
 
     @task(4)
     def test_get_notifications(self):
-        response = self.client.get(url="/api/notifications", headers={"authorization": "Bearer " + TEST_TUTOR_TOKEN})
+        response = self.client.get(url="/api/notifications", headers={"authorization": "Bearer " + get_token(TEST_TUTOR_ID)})
         # print(response.json())
 
     """
@@ -94,7 +101,7 @@ class PerformanceTests(HttpUser):
     @task(5)
     def test_get_all_appointments(self):
         response = self.client.get(
-            url=f"/api/appointments/team/future?team={TEAM_CSD}", headers={"authorization": "Bearer " + TEST_CSD_TOKEN}
+            url=f"/api/appointments/team/future?team={TEAM_CSD}", headers={"authorization": "Bearer " + get_token(TEST_CSD_ID)}
         )
         # print(response.json())
 
@@ -112,7 +119,7 @@ class PerformanceTests(HttpUser):
 
     @task(6)
     def test_get_all_student_appointments(self):
-        response = self.client.get(url="/api/appointments/me/future", headers={"authorization": "Bearer " + TEST_STUDENT_TOKEN})
+        response = self.client.get(url="/api/appointments/me/future", headers={"authorization": "Bearer " + get_token(TEST_STUDENT_ID)})
         # print(response.json())
 
     """
@@ -130,7 +137,7 @@ class PerformanceTests(HttpUser):
     @task(7)
     def test_get_placement_tutor_email_id(self):
         response = self.client.get(
-            url="/api/communications/student/tutorEmailId", headers={"authorization": "Bearer " + TEST_STUDENT_TOKEN}
+            url="/api/communications/student/tutorEmailId", headers={"authorization": "Bearer " + get_token(TEST_STUDENT_ID)}
         )
         # print(response.json())
 
@@ -148,7 +155,7 @@ class PerformanceTests(HttpUser):
 
     @task(8)
     def test_get_home_page_data(self):
-        response = self.client.get(url="/api/home", headers={"authorization": "Bearer " + TEST_TUTOR_TOKEN})
+        response = self.client.get(url="/api/home", headers={"authorization": "Bearer " + get_token(TEST_TUTOR_ID)})
         # print(response.json())
 
     """
@@ -165,7 +172,7 @@ class PerformanceTests(HttpUser):
 
     @task(9)
     def test_get_all_job_applications(self):
-        response = self.client.get(url="/api/student/jobs/applications", headers={"authorization": "Bearer " + TEST_STUDENT_TOKEN})
+        response = self.client.get(url="/api/student/jobs/applications", headers={"authorization": "Bearer " + get_token(TEST_STUDENT_ID)})
         # print(response.json())
 
     """
@@ -182,7 +189,9 @@ class PerformanceTests(HttpUser):
 
     @task(10)
     def test_get_all_jobs(self):
-        response = self.client.get(url=f"/api/jobs?page={random.randint(1, 5)}", headers={"authorization": "Bearer " + TEST_STUDENT_TOKEN})
+        response = self.client.get(
+            url=f"/api/jobs?page={random.randint(1, 5)}", headers={"authorization": "Bearer " + get_token(TEST_STUDENT_ID)}
+        )
         # print(response.json())
 
     """
@@ -200,7 +209,8 @@ class PerformanceTests(HttpUser):
     @task(11)
     def test_get_all_placement_applications_for_tutor(self):
         response = self.client.get(
-            url=f"/api/tutor/placement/applications?page={random.randint(1, 3)}", headers={"authorization": "Bearer " + TEST_TUTOR_TOKEN}
+            url=f"/api/tutor/placement/applications?page={random.randint(1, 3)}",
+            headers={"authorization": "Bearer " + get_token(TEST_TUTOR_ID)},
         )
         # print(response.json())
 
@@ -220,7 +230,7 @@ class PerformanceTests(HttpUser):
     def test_get_all_placement_applications_for_csd(self):
         response = self.client.get(
             url=f"/api/csd/placement/applications/approved?page={random.randint(1, 3)}",
-            headers={"authorization": "Bearer " + TEST_CSD_TOKEN},
+            headers={"authorization": "Bearer " + get_token(TEST_CSD_ID)},
         )
         # print(response.json())
 
@@ -239,7 +249,7 @@ class PerformanceTests(HttpUser):
     @task(13)
     def get_all_palcement_reports_for_tutor(self):
         response = self.client.get(
-            url=f"/api/tutor/placement/reports?page={random.randint(1, 3)}", headers={"authorization": "Bearer " + TEST_TUTOR_TOKEN}
+            url=f"/api/tutor/placement/reports?page={random.randint(1, 3)}", headers={"authorization": "Bearer " + get_token(TEST_TUTOR_ID)}
         )
         # print(response.json())
 
@@ -258,6 +268,7 @@ class PerformanceTests(HttpUser):
     @task(14)
     def test_get_all_placement_visit_itineraries_for_tutor(self):
         response = self.client.get(
-            url=f"/api/tutor/placement/visit/itinerary?page={random.randint(1, 3)}", headers={"authorization": "Bearer " + TEST_TUTOR_TOKEN}
+            url=f"/api/tutor/placement/visit/itinerary?page={random.randint(1, 3)}",
+            headers={"authorization": "Bearer " + get_token(TEST_TUTOR_ID)},
         )
         # print(response.json())

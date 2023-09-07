@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: format lint test e2e install init tidy all help ready_to_commit
+.PHONY: format lint test install init tidy ready_to_commit all help run
 .EXPORT_ALL_VARIABLES:
 
 format:				## Format code.
@@ -10,21 +10,22 @@ lint:				## Run linters.
 	flake8 .
 	# mypy .
 
+run:				## Run the project.
+	poetry run uvicorn app:app --host 0.0.0.0 --port 8000
+
 test:				## Run tests in the development environment.
-	pytest . --ignore=tests/performance --ignore=tests/unit
+	pytest --cache-clear
 
-unit:				## Run unit tests.
-	pytest ./app/tests/unit
-
-# e2e:
-# 	pytest ./tests/end_to_end
+performance-test:		## Run performance tests in the development environment.
+	locust -f tests/performance/locust_test.py --host=http://localhost:8000
 
 install:			## Install developement dependecies and local packages.
 	pip install --upgrade pip
 	pip install poetry
 	pip install -r requirements.txt
 	poetry install --no-root
-	# pip install --prefer-binary locust
+	poetry run prisma generate
+	pip install --prefer-binary locust
 	# pre-commit install
 
 init: install test		## Initialize the project.

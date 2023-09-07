@@ -6,7 +6,7 @@ from app.api.models import action_status
 from app.api.models.auth import Role as UserRole
 from app.api.models.response import JSONResponseModel
 from app.api.models.user import CleanedUserData
-from app.api.routers.auth import ValidateUserRole
+from app.api.routers import auth as auth_router
 from app.pnp_helpers.auth import no_access_to_content_response
 from app.pnp_helpers.json_response_wrapper import default_response
 from app.pnp_helpers.user import user_not_found_response
@@ -35,7 +35,7 @@ async def get_all_user_data(user_id: str = Depends(pyJWTDecodedUserId())) -> JSO
     if user_id:
         # validate user is ADMIN
         roles = [UserRole.ADMIN]
-        valid_user_role = await ValidateUserRole(user_id, roles)()
+        valid_user_role = await auth_router.validate_user_role(user_id, roles)
         if valid_user_role:
             users = await user_db.get_all_users()
             user_list = {"users": []}
