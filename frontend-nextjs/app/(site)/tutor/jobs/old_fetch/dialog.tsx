@@ -55,7 +55,7 @@ export function DialogDemo({ job }) {
         <DialogFooter></DialogFooter>
 
         <div className="text-left text-lg font-bold">
-          <span className="px-1 bg-purple-300 mr-2 "></span>
+          <span className="px-1 bg-red-300 mr-2 "></span>
           More Details
           <Separator className="my-1" />
         </div>
@@ -63,7 +63,7 @@ export function DialogDemo({ job }) {
           {job.salary ? (
             <div className="grid gap-1">
               <div className="text-xs font-light">
-                <span className="px-1 bg-purple-300 mr-2"></span>
+                <span className="px-1 bg-red-300 mr-2"></span>
                 SALARY
               </div>
               <div className="text-sm font-normal">{job.salary}</div>
@@ -75,7 +75,7 @@ export function DialogDemo({ job }) {
           {job.deadline ? (
             <div className="grid gap-1">
               <div className="text-xs font-light">
-                <span className="px-1 bg-purple-300 mr-2"></span>
+                <span className="px-1 bg-red-300 mr-2"></span>
                 DEADLINE
               </div>
               <div className="text-sm font-normal">
@@ -89,7 +89,7 @@ export function DialogDemo({ job }) {
           {job.location ? (
             <div className="grid gap-1">
               <div className="text-xs font-light">
-                <span className="px-1 bg-purple-300 mr-2"></span>
+                <span className="px-1 bg-red-300 mr-2"></span>
                 LOCATIONS
               </div>
               <div className="text-sm font-normal">
@@ -103,7 +103,7 @@ export function DialogDemo({ job }) {
           {job.mode ? (
             <div className="grid gap-1">
               <div className="text-xs font-light">
-                <span className="px-1 bg-purple-300 mr-2"></span>
+                <span className="px-1 bg-red-300 mr-2"></span>
                 WORKING MODE
               </div>
               <div className="text-sm font-normal">
@@ -123,7 +123,7 @@ export function DialogDemo({ job }) {
                 <TooltipTrigger asChild>
                   <div className="text-right text-xs font-medium hover:underline">
                     <Button
-                      className="hover:bg-purple-300 hover:text-black"
+                      className="hover:bg-red-300 hover:text-black"
                       disabled
                     >
                       <ArrowUpRight className="mr-0 h-4 w-4" />

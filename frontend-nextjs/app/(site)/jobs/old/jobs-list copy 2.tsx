@@ -1,6 +1,6 @@
 "use client";
 
-const PAGE_TYPE = "TUTOR";
+const PAGE_TYPE = "CSD";
 const UNAUTHORISED_REDIRECTION_LINK = "/signin?callbackUrl=/protected/server";
 
 import { useSession } from "next-auth/react";
@@ -14,10 +14,8 @@ import {
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Icons } from "@/components/icons";
-import { FrownIcon } from "lucide-react";
 
 import {
   Table,
@@ -29,8 +27,26 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { DialogDemo } from "./dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { FontItalicIcon } from "@radix-ui/react-icons";
+import { CheckCircle2Icon } from "lucide-react";
 
-import { JobFilter } from "./jobs-filter";
+import { Toggle } from "@/registry/new-york/ui/toggle";
 
 const queryClient = new QueryClient();
 
@@ -50,15 +66,13 @@ async function fetchJobs(page = 1, token, filterQuery) {
     },
   };
 
-  const API_URI = process.env.NEXT_PUBLIC_API_URL as string;
+  console.log("Filter: ", filterQuery);
 
+  const API_URI = process.env.NEXT_PUBLIC_API_URL as string;
   let url = `${API_URI}/api/jobs?page=${page + 1}`;
   if (filterQuery != "") {
     url = url + filterQuery;
   }
-
-  console.log("filterQuery: ", filterQuery);
-
   const { data } = await (await axios.get(url, config)).data;
   return data;
 }
@@ -67,6 +81,8 @@ function Jobs() {
   const { data: session } = useSession();
   const router = useRouter();
 
+  const [industryFilter, setIndustryFilter] = React.useState("");
+  const [functionFilter, setFunctionFilter] = React.useState("");
   const [filterQuery, setFilterQuery] = React.useState("");
   const [filter, setFilter] = React.useState(false);
 
@@ -79,21 +95,6 @@ function Jobs() {
     queryFn: () => fetchJobs(page, token, filterQuery),
     keepPreviousData: true,
     staleTime: 5000,
-    // Refetch the data interval in milliseconds
-    // refetchInterval: 1500,
-    // Refetch the data every time the window regains focus
-    refetchOnWindowFocus: true,
-
-    // Add cacheTime to keep the data in the cache for longer
-    // cacheTime: 5000,
-
-    // Enable automatic refetching on stale queries by default
-    // refetchOnMount: "always",
-    // refetchOnReconnect: "always",
-    // refetchOnWindowFocus: "always",
-
-    // The query will not execute until the query mount window has been in focus for at least this long.
-    // refetchIntervalInBackground: 1000
   });
 
   // Prefetch the next page!
@@ -111,54 +112,147 @@ function Jobs() {
         queryFn: () => fetchJobs(page + 1, token, filterQuery),
       });
     }
+  }, [data, isPreviousData, page, queryClient]);
 
-    // On filter change -> reset page to 0 and refetch data
-    // if (filter == true) {
-    //   setPage(0);
-    //   queryClient.prefetchQuery({
-    //     queryKey: ["jobs", page],
-    //     queryFn: () => fetchJobs(page, token, filterQuery),
-    //   });
-    //   setFilter(false);
-    // }
+  const updateFilter = async (status) => {
+    console.log("Filter status: ", status);
 
-    // On filter is removed -> reset page to 0 and refetch data
-    // if (filterQuery == "" || filterQuery == undefined || filter == false) {
-    //   setPage(0);
-    //   queryClient.prefetchQuery({
-    //     queryKey: ["jobs", page],
-    //     queryFn: () => fetchJobs(page, token, filterQuery),
-    //   });
-    // }
-  }, [data, isPreviousData, page, queryClient, filterQuery, filter]);
+    let applyFilter =
+      industryFilter != "" || functionFilter != "" ? true : false;
+
+    if (status == true && applyFilter == true) {
+      let newQuery = "";
+      if (industryFilter != "") {
+        newQuery = `&industry=${industryFilter}`;
+      }
+      if (functionFilter != "") {
+        newQuery = newQuery + `&function=${functionFilter}`;
+      }
+
+      console.log("New query: ", newQuery);
+
+      setFilterQuery(newQuery);
+
+      setPage(0);
+      queryClient.prefetchQuery({
+        queryKey: ["jobs", page + 1],
+        queryFn: () =>
+          fetchJobs(page + 1, token, newQuery).then((res) => {
+            console.log("Filtered data: ", res);
+            return res;
+          }),
+      });
+    } else {
+      setFilterQuery("");
+    }
+  };
 
   return (
     <div className="space-y-4">
       {status === "loading" ? (
         <div className="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed">
           <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
-            <Icons.spinner className="mr-2 w-20 h-20 text-red-600 animate-spin" />
+            <Icons.spinner className="mr-2 w-20 h-20 text-purple-600 animate-spin" />
             <h3 className="mt-4 text-lg font-semibold">Fetching jobs</h3>
           </div>
         </div>
       ) : status === "error" ? (
-        <>
-          {/* <div>Error: {error.message}</div> */}
-          <div className="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed">
-            <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
-              <FrownIcon className="mr-2 w-20 h-20 text-red-600" />
-              <h3 className="mt-4 text-lg font-semibold">
-                Error fetching jobs. Please try again later.
-              </h3>
-            </div>
-          </div>
-        </>
+        <div>Error: {error.message}</div>
       ) : (
         // `data` will either resolve to the latest page's data
         // or if fetching a new page, the last successful page's data
 
         <>
-          <JobFilter filterQuery={setFilterQuery} filter={setFilter} />
+          <div className="flex items-center justify-items-start">
+            <span className="text-md font-normal">Filters</span>
+            <div className="pl-2">
+              <Select onValueChange={(value) => setIndustryFilter(value)}>
+                <SelectTrigger className="w-[250px]">
+                  <SelectValue placeholder="Job Industry" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="SOFTWARE_DEVELOPMENT">
+                      Software Development
+                    </SelectItem>
+                    <SelectItem value="FINANCE">Finance</SelectItem>
+                    <SelectItem value="CONSULTING">Consulting</SelectItem>
+                    <SelectItem value="HEALTHCARE">Healthcare</SelectItem>
+                    <SelectItem value="EDUCATION">Education</SelectItem>
+                    <SelectItem value="GOVERNMENT">Government</SelectItem>
+                    <SelectItem value="RETAIL">Retail</SelectItem>
+                    <SelectItem value="OTHER">Other</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="pl-2">
+              <Select onValueChange={(value) => setFunctionFilter(value)}>
+                <SelectTrigger className="w-[250px]">
+                  <SelectValue placeholder="Job Function" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="INFORMATION_TECHNOLOGY">
+                      Information Technology
+                    </SelectItem>
+                    <SelectItem value="ENGINEERING">Engineering</SelectItem>
+                    <SelectItem value="FINANCE">Finance</SelectItem>
+                    <SelectItem value="CONSULTING">Consulting</SelectItem>
+                    <SelectItem value="SALES">Sales</SelectItem>
+                    <SelectItem value="MARKETING">Marketing</SelectItem>
+                    <SelectItem value="BUSINESS_DEVELOPMENT">
+                      Business Development
+                    </SelectItem>
+                    <SelectItem value="ANALYST">Analyst</SelectItem>
+                    <SelectItem value="MANUFACTURING">Manufacturing</SelectItem>
+                    <SelectItem value="OTHER">Other</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="pl-2">
+              <Toggle
+                aria-label="Toggle filters"
+                size="sm"
+                disabled={
+                  industryFilter == "" && functionFilter == "" ? true : false
+                }
+                defaultPressed={false}
+                onPressedChange={(e) => {
+                  if (e) {
+                    updateFilter(
+                      industryFilter != "" || functionFilter != ""
+                        ? true
+                        : false
+                    );
+                    setFilter(
+                      industryFilter != "" || functionFilter != ""
+                        ? true
+                        : false
+                    );
+
+                    // updateFilter(true);
+                    // setFilter(true);
+                  } else {
+                    updateFilter(false);
+                    setFilter(false);
+                  }
+                }}
+                variant={filter == true ? "outline" : "default"}
+              >
+                <CheckCircle2Icon className="mr-2 h-4 w-4" />
+                {filter == true ? (
+                  <span>Reset Filters</span>
+                ) : (
+                  <span>Apply Filters</span>
+                )}
+              </Toggle>{" "}
+            </div>
+          </div>
+
           <div className="rounded-md border">
             <Table>
               <TableHeader>

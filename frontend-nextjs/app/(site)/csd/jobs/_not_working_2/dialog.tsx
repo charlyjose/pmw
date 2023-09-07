@@ -142,6 +142,56 @@ export function DialogDemo({ job }) {
           ) : (
             <></>
           )}
+
+          {job.industry ? (
+            <div className="grid gap-1">
+              <div className="text-xs font-light">
+                <span className="px-1 bg-purple-300 mr-2"></span>
+                INDUSTRY
+              </div>
+              <div className="text-sm font-normal">
+                <span>
+                  {job.industry
+                    .replace(/_/g, " ")
+                    .trim()
+                    .charAt(0)
+                    .toUpperCase() +
+                    job.industry
+                      .replace(/_/g, " ")
+                      .trim()
+                      .slice(1)
+                      .toLowerCase()}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div></div>
+          )}
+
+          {job.function ? (
+            <div className="grid gap-1">
+              <div className="text-xs font-light">
+                <span className="px-1 bg-purple-300 mr-2"></span>
+                JOB FUNCTION
+              </div>
+              <div className="text-sm font-normal">
+                <span>
+                  {job.function
+                    .replace(/_/g, " ")
+                    .trim()
+                    .charAt(0)
+                    .toUpperCase() +
+                    job.function
+                      .replace(/_/g, " ")
+                      .trim()
+                      .slice(1)
+                      .toLowerCase()}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div></div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

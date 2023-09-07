@@ -26,7 +26,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { DialogDemo } from "../_not_working_2/dialog";
+import { DialogDemo } from "./dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -48,7 +48,6 @@ import { CheckCircle2Icon } from "lucide-react";
 import { FrownIcon } from "lucide-react";
 
 import { Toggle } from "@/registry/new-york/ui/toggle";
-import { set } from "date-fns";
 
 const queryClient = new QueryClient();
 
@@ -112,12 +111,7 @@ function Jobs() {
     if (!isPreviousData && data?.hasMore) {
       queryClient.prefetchQuery({
         queryKey: ["jobs", page + 1],
-        queryFn: () =>
-          fetchJobs(page + 1, token, filterQuery).then((res) => {
-            console.log("Prefetched data: ", res);
-            setJobs(res.jobs);
-            return res;
-          }),
+        queryFn: () => fetchJobs(page + 1, token, filterQuery),
       });
     }
   }, [data, isPreviousData, page, queryClient]);
@@ -147,7 +141,6 @@ function Jobs() {
         queryFn: () =>
           fetchJobs(page + 1, token, newQuery).then((res) => {
             console.log("Filtered data: ", res);
-            setJobs(res.jobs);
             return res;
           }),
       });
@@ -260,7 +253,20 @@ function Jobs() {
           </div>
 
           <div className="rounded-md border">
-            <JobsDisplay jobs={jobs} />
+            {data.jobs.length == 0 ? (
+              <div className="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed">
+                <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
+                  <FrownIcon className="mr-2 w-20 h-20 text-purple-600" />
+                  <h3 className="mt-4 text-lg font-semibold">
+                    No jobs found. Try changing the filters.
+                  </h3>
+                </div>
+              </div>
+            ) : (
+              <>
+                <JobsDisplay jobs={data.jobs} />
+              </>
+            )}
 
             {/* <Table>
               <TableHeader>
@@ -336,90 +342,46 @@ function Jobs() {
 }
 
 export function JobsDisplay(props) {
+  const { jobs } = props;
 
-  const displayJobs = (props) => {
-    const { jobs } = props;
+  console.log("Jobs: ", jobs);
 
-    if (jobs.length > 0) {
-      return (
-        <>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="font-medium">Role</TableHead>
-                <TableHead className="font-medium">Company</TableHead>
-                <TableHead className="font-medium">Salary</TableHead>
-                <TableHead className="font-medium">Mode</TableHead>
-                <TableHead className="font-medium">Location</TableHead>
-                <TableHead className="font-medium">Deadline</TableHead>
-                <TableHead className="font-medium">Industry</TableHead>
-                <TableHead className="font-medium">Job Function</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {jobs.map((job) => (
-                <TableRow key={job.id}>
-                  <TableCell className="font-medium">{job.role}</TableCell>
-                  <TableCell className="font-light">{job.company}</TableCell>
-                  <TableCell className="font-light">{job.salary}</TableCell>
-                  <TableCell className="font-medium">
-                    {" "}
-                    {job.mode.charAt(0).toUpperCase() +
-                      job.mode.slice(1).toLowerCase()}
-                  </TableCell>
-                  <TableCell className="font-light">
-                    {job.location.join(", ")}
-                  </TableCell>
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead className="font-medium">Role</TableHead>
+          <TableHead className="font-medium">Company</TableHead>
+          <TableHead className="font-medium">Salary</TableHead>
+          <TableHead className="font-medium">Mode</TableHead>
+          <TableHead className="font-medium">Location</TableHead>
+          <TableHead className="font-medium">Deadline</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {jobs.map((job) => (
+          <TableRow key={job.id}>
+            <TableCell className="font-medium">{job.role}</TableCell>
+            <TableCell className="font-light">{job.company}</TableCell>
+            <TableCell className="font-light">{job.salary}</TableCell>
+            <TableCell className="font-medium">
+              {" "}
+              {job.mode.charAt(0).toUpperCase() +
+                job.mode.slice(1).toLowerCase()}
+            </TableCell>
+            <TableCell className="font-light">
+              {job.location.join(", ")}
+            </TableCell>
 
-                  <TableCell className="font-medium">
-                    {new Date(job.deadline).toDateString()}
-                  </TableCell>
-                  <TableCell className="font-light">
-                    {job.industry
-                      .replace(/_/g, " ")
-                      .trim()
-                      .charAt(0)
-                      .toUpperCase() +
-                      job.industry
-                        .replace(/_/g, " ")
-                        .trim()
-                        .slice(1)
-                        .toLowerCase()}
-                  </TableCell>
-                  <TableCell className="font-light">
-                    {job.function
-                      .replace(/_/g, " ")
-                      .trim()
-                      .charAt(0)
-                      .toUpperCase() +
-                      job.function
-                        .replace(/_/g, " ")
-                        .trim()
-                        .slice(1)
-                        .toLowerCase()}
-                  </TableCell>
-
-                  <TableCell className="font-light">
-                    <DialogDemo job={job} />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </>
-      );
-    } else {
-      return (
-        <div className="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed">
-          <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
-            <FrownIcon className="mr-2 w-20 h-20 text-purple-600" />
-            <h3 className="mt-4 text-lg font-semibold">
-              No jobs found. Try changing the filters.
-            </h3>
-          </div>
-        </div>
-      );
-    }
-  };
-  return <>{displayJobs(props)}</>;
+            <TableCell className="font-medium">
+              {new Date(job.deadline).toDateString()}
+            </TableCell>
+            <TableCell className="font-light">
+              <DialogDemo job={job} />
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
 }

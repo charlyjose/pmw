@@ -1,26 +1,37 @@
 "use client";
 
+const PAGE_TYPE = "TUTOR";
+const UNAUTHORISED_REDIRECTION_LINK = "/signin?callbackUrl=/protected/server";
+
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useEffect } from "react";
 
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import { Toggle } from "@/registry/new-york/ui/toggle";
 import { CheckCircle2Icon } from "lucide-react";
 
+import { App } from "./jobs";
+
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from "@/registry/new-york/ui/form";
 
@@ -32,7 +43,14 @@ type JobFilterFormValues = z.infer<typeof jobFilterFormSchema>;
 
 const defaultValues: Partial<JobFilterFormValues> = {};
 
-export function JobFilter(props: any) {
+export function JobsList() {
+  const { data: session } = useSession();
+  const router = useRouter();
+  const [token, setToken] = useState(session?.token);
+
+  const [industryFilter, setIndustryFilter] = useState("");
+  const [functionFilter, setFunctionFilter] = useState("");
+  const [filterQuery, setFilterQuery] = useState("");
   const [filter, setFilter] = useState(false);
 
   const form = useForm<JobFilterFormValues>({
@@ -41,32 +59,44 @@ export function JobFilter(props: any) {
     mode: "onChange",
   });
 
+  useEffect(() => {
+    // Validating client-side session
+    if (!session && session?.user?.role != PAGE_TYPE) {
+      router.push(UNAUTHORISED_REDIRECTION_LINK);
+    }
+
+    setToken(session?.token);
+  }, []);
+
   const updateFilter = async (status) => {
-    let industryFilter = form.getValues().industry;
-    let functionFilter = form.getValues().function;
+    console.log("Filter status::::: ", status);
 
     let applyFilter =
-      industryFilter != undefined || functionFilter != undefined ? true : false;
+      industryFilter != "" || functionFilter != "" ? true : false;
 
     if (status == true && applyFilter == true) {
       let newQuery = "";
-      if (industryFilter != undefined) {
+      if (industryFilter != "") {
         newQuery = `&industry=${industryFilter}`;
       }
-      if (functionFilter != undefined) {
+      if (functionFilter != "") {
         newQuery = newQuery + `&function=${functionFilter}`;
       }
 
-      props.filterQuery(newQuery);
-      props.filter(filter);
-    }
+      console.log("New query: ", newQuery);
 
-    if (status == false && applyFilter == true) {
-      let newQuery = "";
-
-      props.filterQuery(newQuery);
-      props.filter(filter);
+      setFilterQuery(newQuery);
+    } else {
+      setFilterQuery("");
     }
+  };
+
+  const setIndustryFilterFn = async (value) => {
+    setIndustryFilter(value);
+  };
+
+  const setFunctionFilterFn = async (value) => {
+    setFunctionFilter(value);
   };
 
   return (
@@ -74,7 +104,8 @@ export function JobFilter(props: any) {
       <Form {...form}>
         <form className="space-y-8">
           <div className="flex items-center justify-items-start">
-            <div className="pl-1">
+            <span className="text-md font-normal">Filters</span>
+            <div className="pl-2">
               <FormField
                 control={form.control}
                 name="industry"
@@ -85,7 +116,7 @@ export function JobFilter(props: any) {
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger className="w-[250px]">
+                        <SelectTrigger>
                           <SelectValue placeholder="Job Industry" />
                         </SelectTrigger>
                       </FormControl>
@@ -119,7 +150,7 @@ export function JobFilter(props: any) {
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger className="w-[250px]">
+                        <SelectTrigger>
                           <SelectValue placeholder="Job Function" />
                         </SelectTrigger>
                       </FormControl>
@@ -149,6 +180,8 @@ export function JobFilter(props: any) {
             </div>
 
             <div className="pl-2">
+              {form.getValues().industry}
+              {form.getValues().function}
               <Toggle
                 aria-label="Toggle filters"
                 size="sm"
@@ -158,9 +191,27 @@ export function JobFilter(props: any) {
                     ? true
                     : false
                 }
+                // disabled={false}
                 defaultPressed={false}
                 onPressedChange={(e) => {
+                  console.log(e);
+                  console.log(filter);
+                  console.log(form.getValues().industry);
+                  console.log(form.getValues().function);
                   if (e) {
+                    console.log("Filtering");
+                    console.log(e);
+                    console.log(filter);
+                    console.log(form.getValues().industry);
+                    console.log(form.getValues().function);
+                    console.log(
+                      form.getValues().industry != undefined ||
+                        form.getValues().function != undefined
+                        ? true
+                        : false
+                    );
+                    console.log("Filtering------");
+
                     updateFilter(
                       form.getValues().industry != undefined ||
                         form.getValues().function != undefined
@@ -188,9 +239,23 @@ export function JobFilter(props: any) {
                 )}
               </Toggle>
             </div>
+
+
+
+            
           </div>
         </form>
       </Form>
+
+      <JobsDisplay token={token} filterQuery={filterQuery} />
+    </>
+  );
+}
+
+export function JobsDisplay(props) {
+  return (
+    <>
+      <App props={props} />
     </>
   );
 }

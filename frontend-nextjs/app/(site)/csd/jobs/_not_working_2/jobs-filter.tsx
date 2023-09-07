@@ -5,7 +5,9 @@ import { useState } from "react";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -21,6 +23,7 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from "@/registry/new-york/ui/form";
 
@@ -58,14 +61,6 @@ export function JobFilter(props: any) {
       }
 
       props.filterQuery(newQuery);
-      props.filter(filter);
-    }
-
-    if (status == false && applyFilter == true) {
-      let newQuery = "";
-
-      props.filterQuery(newQuery);
-      props.filter(filter);
     }
   };
 

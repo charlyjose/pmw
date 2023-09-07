@@ -1,8 +1,3 @@
-import Link from "next/link";
-
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,7 +13,10 @@ import { ArrowUpRight } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+import Link from "next/link";
 
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export function DialogDemo({ job }) {
   return (

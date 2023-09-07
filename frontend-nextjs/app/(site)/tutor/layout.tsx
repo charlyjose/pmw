@@ -19,10 +19,10 @@ const sidebarNavItems = [
     title: "Jobs",
     href: "/tutor/jobs",
   },
-  {
-    title: "Add jobs",
-    href: "/tutor/jobs/new",
-  },
+  // {
+  //   title: "Add jobs",
+  //   href: "/tutor/jobs/new",
+  // },
   {
     title: "Appointments",
     href: "/tutor/appointments",

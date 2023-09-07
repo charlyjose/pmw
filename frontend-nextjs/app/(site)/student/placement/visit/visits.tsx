@@ -127,7 +127,7 @@ export function ApplicationsDisplay(props) {
     const { applications, axiosConfig } = props;
 
     const [visitCompleted, setVisitCompleted] = React.useState(
-      applications[0].completed
+      applications[0]?.completed
     );
 
     const updateCompleteVisitStatus = async (status, placement_id) => {

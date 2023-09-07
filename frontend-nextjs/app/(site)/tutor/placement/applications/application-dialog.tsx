@@ -316,6 +316,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                           <FormField
                             control={form.control}
                             name="firstName"
+                            disabled
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>First Name</FormLabel>
@@ -334,6 +335,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                           <FormField
                             control={form.control}
                             name="lastName"
+                            disabled
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Last Name</FormLabel>
@@ -353,6 +355,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                           <FormField
                             control={form.control}
                             name="studentNumber"
+                            disabled
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Student Number</FormLabel>
@@ -372,6 +375,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                           <FormField
                             control={form.control}
                             name="email"
+                            disabled
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Email</FormLabel>
@@ -395,6 +399,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                           <FormField
                             control={form.control}
                             name="contactNumber"
+                            disabled
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Contact Telephone Number</FormLabel>
@@ -414,6 +419,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                           <FormField
                             control={form.control}
                             name="programme"
+                            disabled
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Programme of Study</FormLabel>
@@ -433,6 +439,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                           <FormField
                             control={form.control}
                             name="department"
+                            disabled
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>School/Department</FormLabel>
@@ -501,6 +508,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                           <FormField
                             control={form.control}
                             name="organisationName"
+                            disabled
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Name of Organisation</FormLabel>
@@ -519,6 +527,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                           <FormField
                             control={form.control}
                             name="organisationAddress"
+                            disabled
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>
@@ -539,6 +548,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                           <FormField
                             control={form.control}
                             name="organisationPostcode"
+                            disabled
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Postcode</FormLabel>
@@ -557,6 +567,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                           <FormField
                             control={form.control}
                             name="organisationWebAddress"
+                            disabled
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Web Address</FormLabel>
@@ -580,6 +591,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                           <FormField
                             control={form.control}
                             name="organisationContactName"
+                            disabled
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Contact Name</FormLabel>
@@ -598,6 +610,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                           <FormField
                             control={form.control}
                             name="organisationContactJobTitle"
+                            disabled
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Contact Job Title</FormLabel>
@@ -617,6 +630,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                           <FormField
                             control={form.control}
                             name="organisationContactEmail"
+                            disabled
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Contact Email</FormLabel>
@@ -636,6 +650,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                           <FormField
                             control={form.control}
                             name="organisationContactNumber"
+                            disabled
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Contact Telephone Number</FormLabel>
@@ -688,6 +703,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                           <FormField
                             control={form.control}
                             name="roleTitle"
+                            disabled
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Role Title</FormLabel>
@@ -811,6 +827,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                           <FormField
                             control={form.control}
                             name="workingHours"
+                            disabled
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Working hours per week</FormLabel>
@@ -873,6 +890,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                           <FormField
                             control={form.control}
                             name="salary"
+                            disabled
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>
@@ -896,6 +914,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                           <FormField
                             control={form.control}
                             name="roleSource"
+                            disabled
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>
@@ -963,6 +982,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                           <FormField
                             control={form.control}
                             name="roleDescription"
+                            disabled
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>
@@ -993,6 +1013,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                             <FormField
                               control={form.control}
                               name="probationPeriodDetails"
+                              disabled
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>
@@ -1075,6 +1096,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                               <FormField
                                 control={form.control}
                                 name="remoteWorkingOverview"
+                                disabled
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormLabel>
@@ -1101,6 +1123,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                               <FormField
                                 control={form.control}
                                 name="remoteWorkingReason"
+                                disabled
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormLabel>
@@ -1203,6 +1226,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                             <FormField
                               control={form.control}
                               name="travelMethodDetails"
+                              disabled
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>Other travel methods</FormLabel>
@@ -1272,6 +1296,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                             <FormField
                               control={form.control}
                               name="travelDifferentLocationDetails"
+                              disabled
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>
@@ -1349,6 +1374,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                             <FormField
                               control={form.control}
                               name="locationRisksDetails"
+                              disabled
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>Location Risks Details</FormLabel>
@@ -1432,6 +1458,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                             <FormField
                               control={form.control}
                               name="accommodationArrangementsDetails"
+                              disabled
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>
@@ -1511,6 +1538,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                             <FormField
                               control={form.control}
                               name="precautionaryMeasuresDetails"
+                              disabled
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>
@@ -1589,6 +1617,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                             <FormField
                               control={form.control}
                               name="healthConditionsDetails"
+                              disabled
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>
@@ -1659,6 +1688,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                             <FormField
                               control={form.control}
                               name="disabilityDetails"
+                              disabled
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>Disability Details</FormLabel>
@@ -1742,6 +1772,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                           <FormField
                             control={form.control}
                             name="declarationName"
+                            disabled
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Full Name</FormLabel>
@@ -1760,6 +1791,7 @@ export function ApplicationDialog({ application, axiosConfig }) {
                           <FormField
                             control={form.control}
                             name="declarationSignature"
+                            disabled
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Signature</FormLabel>

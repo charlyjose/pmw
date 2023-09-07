@@ -1,3 +1,8 @@
+import Link from "next/link";
+
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,17 +18,7 @@ import { ArrowUpRight } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/registry/new-york/ui/tooltip";
 
-import Link from "next/link";
-
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 
 export function DialogDemo({ job }) {
   return (
@@ -55,7 +50,7 @@ export function DialogDemo({ job }) {
         <DialogFooter></DialogFooter>
 
         <div className="text-left text-lg font-bold">
-          <span className="px-1 bg-purple-300 mr-2 "></span>
+          <span className="px-1 bg-lime-300 mr-2 "></span>
           More Details
           <Separator className="my-1" />
         </div>
@@ -63,7 +58,7 @@ export function DialogDemo({ job }) {
           {job.salary ? (
             <div className="grid gap-1">
               <div className="text-xs font-light">
-                <span className="px-1 bg-purple-300 mr-2"></span>
+                <span className="px-1 bg-lime-300 mr-2"></span>
                 SALARY
               </div>
               <div className="text-sm font-normal">{job.salary}</div>
@@ -75,7 +70,7 @@ export function DialogDemo({ job }) {
           {job.deadline ? (
             <div className="grid gap-1">
               <div className="text-xs font-light">
-                <span className="px-1 bg-purple-300 mr-2"></span>
+                <span className="px-1 bg-lime-300 mr-2"></span>
                 DEADLINE
               </div>
               <div className="text-sm font-normal">
@@ -89,7 +84,7 @@ export function DialogDemo({ job }) {
           {job.location ? (
             <div className="grid gap-1">
               <div className="text-xs font-light">
-                <span className="px-1 bg-purple-300 mr-2"></span>
+                <span className="px-1 bg-lime-300 mr-2"></span>
                 LOCATIONS
               </div>
               <div className="text-sm font-normal">
@@ -103,7 +98,7 @@ export function DialogDemo({ job }) {
           {job.mode ? (
             <div className="grid gap-1">
               <div className="text-xs font-light">
-                <span className="px-1 bg-purple-300 mr-2"></span>
+                <span className="px-1 bg-lime-300 mr-2"></span>
                 WORKING MODE
               </div>
               <div className="text-sm font-normal">
@@ -118,27 +113,13 @@ export function DialogDemo({ job }) {
           )}
 
           {job.link ? (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="text-right text-xs font-medium hover:underline">
-                    <Button
-                      className="hover:bg-purple-300 hover:text-black"
-                      disabled
-                    >
-                      <ArrowUpRight className="mr-0 h-4 w-4" />
-                      <Link href={job.link} className="">
-                        Apply
-                      </Link>
-                    </Button>
-                  </div>
-                </TooltipTrigger>
-
-                <TooltipContent>
-                  <p>This feature is only available for students</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <div className="text-right text-xs font-medium hover:underline">
+              <Button className="hover:bg-lime-300 hover:text-black">
+                <ArrowUpRight className="mr-0 h-4 w-4" />
+                {/* <Link href={`jobs/job?id=${job.id}`} target="_blank"> */}
+                <Link href={`jobs/job?id=${job.id}`}>Apply</Link>
+              </Button>
+            </div>
           ) : (
             <></>
           )}

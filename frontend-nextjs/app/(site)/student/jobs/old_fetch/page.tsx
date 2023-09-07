@@ -10,7 +10,7 @@ export default function Jobs() {
           Jobs
         </h3>
         <p className="text-sm text-muted-foreground">
-          Curated jobs listing from career service.
+          Here you can view all the curated jobs from career service.
         </p>
       </div>
       <Separator />
